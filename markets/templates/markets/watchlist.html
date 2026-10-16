@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6" x-data="watchlistController()">
+    
+    <!-- ========================================== -->
+    <!-- 1. WATCHLIST HEADER & MULTI-LIST TABS      -->
+    <!-- (Yahoo Finance Multiple Watchlists)        -->
+    <!-- ========================================== -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                My Watchlists
+            </h1>
+            <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                Track favorite stocks, Kenyan blue chips, indices, and crypto assets.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button @click="addTickerModal = true" 
+                    class="px-4 py-2.5 rounded-2xl bg-pesa-600 hover:bg-pesa-500 text-white font-bold text-xs shadow-md shadow-pesa-500/20 transition-all flex items-center gap-2">
+                <i class="fas fa-plus"></i>
+                <span>Add Symbol</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Watchlist Tabs Selector -->
+    <div class="flex items-center justify-between border-b border-slate-200/80 dark:border-dark-750 pb-2">
+        <div class="flex items-center gap-2 overflow-x-auto ticker-scroll">
+            <a href="{% url 'watchlist' %}?tab=default" 
+               class="px-4 py-2 rounded-2xl text-xs font-bold transition-all {% if active_watchlist_id == 'default' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}text-slate-500 hover:text-slate-800 dark:hover:text-slate-200{% endif %}">
+                Primary Watchlist
+            </a>
+            <a href="{% url 'watchlist' %}?tab=kenya" 
+               class="px-4 py-2 rounded-2xl text-xs font-bold transition-all {% if active_watchlist_id == 'kenya' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}text-slate-500 hover:text-slate-800 dark:hover:text-slate-200{% endif %}">
+                <i class="fas fa-flag text-pesa-500 mr-1"></i> Kenya NSE Bluechips
+            </a>
+            <a href="{% url 'watchlist' %}?tab=tech" 
+               class="px-4 py-2 rounded-2xl text-xs font-bold transition-all {% if active_watchlist_id == 'tech' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}text-slate-500 hover:text-slate-800 dark:hover:text-slate-200{% endif %}">
+                Tech & AI Titans
+            </a>
+            <a href="{% url 'watchlist' %}?tab=crypto" 
+               class="px-4 py-2 rounded-2xl text-xs font-bold transition-all {% if active_watchlist_id == 'crypto' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}text-slate-500 hover:text-slate-800 dark:hover:text-slate-200{% endif %}">
+                Crypto Giants
+            </a>
+        </div>
+
+        <!-- Table / Cards View Switcher -->
+        <div class="hidden sm:flex bg-slate-100 dark:bg-dark-800 p-1 rounded-2xl border border-slate-200/60 dark:border-dark-750">
+            <button @click="viewMode = 'table'" :class="viewMode === 'table' ? 'bg-white dark:bg-dark-900 text-slate-900 dark:text-white font-bold shadow-2xs' : 'text-slate-400'" class="p-1.5 rounded-xl text-xs">
+                <i class="fas fa-list"></i>
+            </button>
+            <button @click="viewMode = 'cards'" :class="viewMode === 'cards' ? 'bg-white dark:bg-dark-900 text-slate-900 dark:text-white font-bold shadow-2xs' : 'text-slate-400'" class="p-1.5 rounded-xl text-xs">
+                <i class="fas fa-grid-2 fa-th-large"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. WATCHLIST STATS SUMMARY                 -->
+    <!-- ========================================== -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white dark:bg-dark-850 p-4.5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Tracked Assets</span>
+                <span class="block text-xl font-black text-slate-900 dark:text-white mt-0.5">{{ watchlist_assets|length }} Tickers</span>
+            </div>
+            <div class="w-10 h-10 rounded-2xl bg-pesa-50 dark:bg-pesa-950/40 text-pesa-600 dark:text-pesa-400 flex items-center justify-center font-bold text-sm">
+                <i class="far fa-star"></i>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-dark-850 p-4.5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Average Daily Momentum</span>
+                <span class="block text-xl font-black text-emerald-500 mt-0.5">+2.18%</span>
+            </div>
+            <div class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm">
+                <i class="fas fa-chart-line"></i>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-dark-850 p-4.5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Market Breadth</span>
+                <span class="block text-xl font-black text-slate-900 dark:text-white mt-0.5"><span class="text-emerald-500">5</span> Up &bull; <span class="text-rose-500">1</span> Down</span>
+            </div>
+            <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm">
+                <i class="fas fa-arrows-up-down"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. TABLE VIEW (Default)                    -->
+    <!-- (Yahoo Finance Dense Quotes Table)         -->
+    <!-- ========================================== -->
+    <div x-show="viewMode === 'table'" class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[700px] text-xs">
+                <thead>
+                    <tr class="bg-slate-50/70 dark:bg-dark-900/50 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-100 dark:border-dark-750 text-[10px]">
+                        <th class="px-6 py-3.5">Symbol</th>
+                        <th class="px-6 py-3.5">Price</th>
+                        <th class="px-6 py-3.5">Change</th>
+                        <th class="px-6 py-3.5">% Change</th>
+                        <th class="px-6 py-3.5">24h Chart</th>
+                        <th class="px-6 py-3.5">52W High</th>
+                        <th class="px-6 py-3.5 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-dark-800">
+                    {% for asset in watchlist_assets %}
+                    <tr class="hover:bg-slate-50 dark:hover:bg-dark-800/60 transition-colors group">
+                        <td class="px-6 py-4">
+                            <a href="{% url 'asset_detail' asset.symbol %}" class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-dark-800 flex items-center justify-center font-bold text-xs text-slate-800 dark:text-slate-200 group-hover:bg-pesa-500 group-hover:text-white transition-colors">
+                                    {{ asset.symbol }}
+                                </div>
+                                <div>
+                                    <span class="font-extrabold text-sm text-slate-900 dark:text-white group-hover:text-pesa-500 transition-colors block">{{ asset.symbol }}</span>
+                                    <span class="text-slate-400 text-[11px] block truncate max-w-[150px]">{{ asset.name }}</span>
+                                </div>
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 font-mono font-bold text-sm text-slate-900 dark:text-white" x-text="formatPrice({{ asset.price }})">
+                            {{ asset.currency }} {{ asset.price }}
+                        </td>
+                        <td class="px-6 py-4 font-mono font-semibold {% if asset.change_percent >= 0 %}text-emerald-500{% else %}text-rose-500{% endif %}">
+                            {% if asset.change_percent >= 0 %}+{% endif %}{{ asset.change }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold text-[11px] {% if asset.change_percent >= 0 %}bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400{% else %}bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400{% endif %}">
+                                {% if asset.change_percent >= 0 %}+{% endif %}{{ asset.change_percent }}%
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="w-20 h-7">
+                                <svg class="w-full h-full overflow-visible" viewBox="0 0 70 20">
+                                    <path d="M 0,14 Q 15,{% if asset.change_percent >= 0 %}9{% else %}4{% endif %} 35,{% if asset.change_percent >= 0 %}7{% else %}15{% endif %} T 70,{% if asset.change_percent >= 0 %}2{% else %}18{% endif %}" 
+                                          fill="none" 
+                                          stroke="{% if asset.change_percent >= 0 %}#10b981{% else %}#f43f5e{% endif %}" 
+                                          stroke-width="2" 
+                                          stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 font-mono text-slate-500">
+                            {{ asset.year_high }}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{% url 'trade' %}?symbol={{ asset.symbol }}" class="px-3 py-1.5 rounded-xl bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 hover:bg-pesa-500 hover:text-white font-bold text-xs transition-colors">
+                                    Trade
+                                </a>
+                                <button @click="removeSymbol('{{ asset.symbol }}')" class="p-1.5 text-slate-400 hover:text-rose-500 transition-colors" title="Remove from list">
+                                    <i class="far fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-12 text-slate-400">
+                            <i class="far fa-star text-2xl mb-2"></i>
+                            <p class="font-medium">This watchlist is currently empty.</p>
+                            <button @click="addTickerModal = true" class="mt-3 px-4 py-2 bg-pesa-600 text-white font-bold rounded-xl text-xs">Add First Asset</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 4. CARDS VIEW (Image 2 Neo-Banking Style)  -->
+    <!-- ========================================== -->
+    <div x-show="viewMode === 'cards'" x-cloak class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for asset in watchlist_assets %}
+        <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between">
+            <div>
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-dark-800 flex items-center justify-center font-bold text-xs text-slate-800 dark:text-slate-200 group-hover:bg-pesa-500 group-hover:text-white transition-colors">
+                            {{ asset.symbol }}
+                        </div>
+                        <div>
+                            <a href="{% url 'asset_detail' asset.symbol %}" class="font-bold text-sm text-slate-900 dark:text-white hover:text-pesa-500 transition-colors block">
+                                {{ asset.symbol }}
+                            </a>
+                            <span class="text-xs text-slate-400 block truncate max-w-[130px]">{{ asset.name }}</span>
+                        </div>
+                    </div>
+                    <button @click="removeSymbol('{{ asset.symbol }}')" class="text-amber-400 hover:text-rose-500 transition-colors p-1" title="Remove">
+                        <i class="fas fa-star"></i>
+                    </button>
+                </div>
+
+                <div class="my-4 flex items-center justify-between">
+                    <div>
+                        <span class="block font-mono font-extrabold text-xl text-slate-900 dark:text-white" x-text="formatPrice({{ asset.price }})"></span>
+                        <span class="inline-flex items-center gap-1 text-xs font-bold {% if asset.change_percent >= 0 %}text-emerald-500{% else %}text-rose-500{% endif %}">
+                            {% if asset.change_percent >= 0 %}+{% endif %}{{ asset.change_percent }}% Today
+                        </span>
+                    </div>
+
+                    <!-- Sparkline -->
+                    <div class="w-20 h-8">
+                        <svg class="w-full h-full overflow-visible" viewBox="0 0 70 20">
+                            <path d="M 0,14 Q 15,{% if asset.change_percent >= 0 %}9{% else %}4{% endif %} 35,{% if asset.change_percent >= 0 %}7{% else %}15{% endif %} T 70,{% if asset.change_percent >= 0 %}2{% else %}18{% endif %}" 
+                                  fill="none" 
+                                  stroke="{% if asset.change_percent >= 0 %}#10b981{% else %}#f43f5e{% endif %}" 
+                                  stroke-width="2" 
+                                  stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 dark:border-dark-800 flex items-center justify-between text-xs">
+                <span class="text-slate-400 font-mono">52W H: {{ asset.year_high }}</span>
+                <div class="flex gap-2">
+                    <a href="{% url 'asset_detail' asset.symbol %}" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-dark-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200">Quote</a>
+                    <a href="{% url 'trade' %}?symbol={{ asset.symbol }}" class="px-3 py-1.5 rounded-xl bg-pesa-600 text-white font-bold hover:bg-pesa-500">Trade</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 5. ADD TICKER MODAL                        -->
+    <!-- ========================================== -->
+    <div x-show="addTickerModal" x-cloak
+         class="fixed inset-0 z-50 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.outside="addTickerModal = false"
+             class="w-full max-w-md bg-white dark:bg-dark-850 rounded-3xl shadow-2xl border border-slate-200 dark:border-dark-750 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Add Asset to Watchlist</h3>
+                <button @click="addTickerModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Select an asset from the master catalog to track in {{ active_watchlist_id|title }}:</p>
+
+            <div class="space-y-2 max-h-72 overflow-y-auto pr-1">
+                {% for a in all_assets %}
+                <div class="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-dark-800 border border-slate-100 dark:border-dark-750">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-dark-800 flex items-center justify-center font-bold text-xs text-slate-800 dark:text-slate-200">
+                            {{ a.symbol }}
+                        </div>
+                        <div>
+                            <span class="font-bold text-xs text-slate-900 dark:text-white block">{{ a.symbol }}</span>
+                            <span class="text-[11px] text-slate-400 block truncate max-w-[140px]">{{ a.name }}</span>
+                        </div>
+                    </div>
+                    <button @click="addSymbol('{{ a.symbol }}')" class="px-3 py-1.5 rounded-xl bg-pesa-600 hover:bg-pesa-500 text-white font-bold text-xs">
+                        Add
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function watchlistController() {
+        return {
+            viewMode: 'table',
+            addTickerModal: false,
+            async addSymbol(sym) {
+                try {
+                    const res = await fetch('/api/watchlist/toggle/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ symbol: sym, watchlist: '{{ active_watchlist_id }}' })
+                    });
+                    const d = await res.json();
+                    if(d.success) {
+                        this.addTickerModal = false;
+                        window.location.reload();
+                    }
+                } catch(e) { console.error(e); }
+            },
+            async removeSymbol(sym) {
+                try {
+                    const res = await fetch('/api/watchlist/toggle/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ symbol: sym, watchlist: '{{ active_watchlist_id }}' })
+                    });
+                    const d = await res.json();
+                    if(d.success) {
+                        window.location.reload();
+                    }
+                } catch(e) { console.error(e); }
+            }
+        };
+    }
+</script>
+{% endblock %}

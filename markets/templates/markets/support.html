@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6" x-data="{ activeFaq: 1, messageSent: false }">
+    
+    <div>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Help Center & Market Support
+        </h1>
+        <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Trading knowledge base, simulated execution guidelines, and technical support.
+        </p>
+    </div>
+
+    <!-- Quick Help Tiles -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm text-center">
+            <div class="w-12 h-12 rounded-2xl bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 flex items-center justify-center text-xl mx-auto mb-3">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white">API Documentation</h3>
+            <p class="text-xs text-slate-400 mt-1">Endpoints for quotes, orders, and websockets.</p>
+        </div>
+
+        <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm text-center">
+            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl mx-auto mb-3">
+                <i class="fas fa-clock"></i>
+            </div>
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white">Market Hours</h3>
+            <p class="text-xs text-slate-400 mt-1">NSE: 09:00 - 15:00 EAT<br>NASDAQ: 09:30 - 16:00 EST</p>
+        </div>
+
+        <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm text-center">
+            <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xl mx-auto mb-3">
+                <i class="fas fa-headset"></i>
+            </div>
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white">Live Assistance</h3>
+            <p class="text-xs text-slate-400 mt-1">Simulated 24/7 financial support desk.</p>
+        </div>
+    </div>
+
+    <!-- FAQ Accordion -->
+    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 p-6 md:p-8 shadow-sm">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-6">Frequently Asked Questions</h3>
+
+        <div class="space-y-3">
+            <!-- FAQ 1 -->
+            <div class="border border-slate-200/80 dark:border-dark-750 rounded-2xl overflow-hidden">
+                <button @click="activeFaq = activeFaq === 1 ? null : 1" 
+                        class="w-full text-left p-4 bg-slate-50 dark:bg-dark-800/50 flex items-center justify-between font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
+                    <span>How does paper trading and order simulation work in PesaMarkets?</span>
+                    <i class="fas fa-chevron-down text-xs text-slate-400 transition-transform" :class="activeFaq === 1 ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="activeFaq === 1" x-cloak class="p-4 bg-white dark:bg-dark-850 text-xs text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-dark-750">
+                    Each account is provisioned with virtual capital (default $25,000 / KES 100,000 baseline). Trades placed via the Trade Terminal route directly to our local execution simulator without risking capital, while factoring in real-world live market quotes from the Nairobi Securities Exchange, NASDAQ, and digital asset venues.
+                </div>
+            </div>
+
+            <!-- FAQ 2 -->
+            <div class="border border-slate-200/80 dark:border-dark-750 rounded-2xl overflow-hidden">
+                <button @click="activeFaq = activeFaq === 2 ? null : 2" 
+                        class="w-full text-left p-4 bg-slate-50 dark:bg-dark-800/50 flex items-center justify-between font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
+                    <span>Can I toggle between USD, Kenyan Shillings (KES), and other currencies?</span>
+                    <i class="fas fa-chevron-down text-xs text-slate-400 transition-transform" :class="activeFaq === 2 ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="activeFaq === 2" x-cloak class="p-4 bg-white dark:bg-dark-850 text-xs text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-dark-750">
+                    Yes! Using the global Currency Selector in the top navigation bar or Preferences page, you can choose USD, KES, EUR, or GBP. All portfolio values, quotes, and order tickets update instantaneously with live exchange rates.
+                </div>
+            </div>
+
+            <!-- FAQ 3 -->
+            <div class="border border-slate-200/80 dark:border-dark-750 rounded-2xl overflow-hidden">
+                <button @click="activeFaq = activeFaq === 3 ? null : 3" 
+                        class="w-full text-left p-4 bg-slate-50 dark:bg-dark-800/50 flex items-center justify-between font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
+                    <span>How do I create and manage custom Watchlists like Yahoo Finance?</span>
+                    <i class="fas fa-chevron-down text-xs text-slate-400 transition-transform" :class="activeFaq === 3 ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="activeFaq === 3" x-cloak class="p-4 bg-white dark:bg-dark-850 text-xs text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-dark-750">
+                    Navigate to Watchlists to switch between your Primary Watchlist, Kenyan Blue Chips, Tech Titans, and Crypto Giants. You can also click the Star icon on any stock card or table row across the platform to add or remove it from your active list.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Support Box -->
+    <div class="bg-gradient-to-br from-pesa-500/10 via-blue-500/10 to-transparent p-6 rounded-3xl border border-pesa-500/20 text-center">
+        <h4 class="font-extrabold text-base text-slate-900 dark:text-white">Have a specific feature inquiry or question?</h4>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">Our developer and teaching staff team is available to assist.</p>
+        <button @click="showToast('Support ticket #T-8821 initiated')" class="px-5 py-2.5 rounded-2xl bg-pesa-600 hover:bg-pesa-500 text-white font-bold text-xs shadow-md transition-all">
+            <i class="far fa-envelope mr-1.5"></i> Open Help Ticket
+        </button>
+    </div>
+
+</div>
+{% endblock %}

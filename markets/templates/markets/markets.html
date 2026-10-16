@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6" x-data="marketsPageController()">
+    
+    <!-- ========================================== -->
+    <!-- 1. MARKETS HERO & TOP MOVERS CARDS         -->
+    <!-- (Yahoo Finance Top Movers)                 -->
+    <!-- ========================================== -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                Markets & Asset Screeners
+            </h1>
+            <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                Real-time quotes, movers, volume leaders, and global exchange indices.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- Search Inside Markets -->
+            <form method="GET" action="{% url 'markets' %}" class="flex items-center bg-white dark:bg-dark-850 border border-slate-200/80 dark:border-dark-750 rounded-2xl px-3 py-1.5 shadow-2xs">
+                <i class="fas fa-search text-slate-400 mr-2 text-xs"></i>
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Filter tickers..." class="bg-transparent border-none outline-none text-xs w-32 sm:w-48 text-slate-800 dark:text-slate-100 placeholder-slate-400">
+                {% if current_category != 'all' %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+            </form>
+
+            <!-- Table / Grid View Switcher -->
+            <div class="bg-slate-100 dark:bg-dark-800 p-1 rounded-2xl border border-slate-200/60 dark:border-dark-750 flex">
+                <button @click="viewMode = 'table'" :class="viewMode === 'table' ? 'bg-white dark:bg-dark-900 text-slate-900 dark:text-white font-bold shadow-2xs' : 'text-slate-400'" class="p-1.5 rounded-xl text-xs transition-colors" title="Table View">
+                    <i class="fas fa-list"></i>
+                </button>
+                <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-white dark:bg-dark-900 text-slate-900 dark:text-white font-bold shadow-2xs' : 'text-slate-400'" class="p-1.5 rounded-xl text-xs transition-colors" title="Card Grid View">
+                    <i class="fas fa-grid-2 fa-th-large"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Market Movers Mini-Tiles (Gainers / Losers / Active) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <!-- Top Gainer Snapshot -->
+        {% if top_gainers %}
+        <div class="bg-white dark:bg-dark-850 p-4.5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs">
+                    <i class="fas fa-arrow-trend-up"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Top Gainer</span>
+                    <a href="{% url 'asset_detail' top_gainers.0.symbol %}" class="block font-bold text-sm text-slate-900 dark:text-white hover:text-pesa-500 transition-colors">
+                        {{ top_gainers.0.symbol }} <span class="text-xs font-normal text-slate-400">({{ top_gainers.0.name }})</span>
+                    </a>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="font-mono font-bold text-xs text-slate-900 dark:text-white" x-text="formatPrice({{ top_gainers.0.price }})"></span>
+                <span class="block text-xs font-bold text-emerald-500">+{{ top_gainers.0.change_percent }}%</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Top Loser Snapshot -->
+        {% if top_losers %}
+        <div class="bg-white dark:bg-dark-850 p-4.5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold text-xs">
+                    <i class="fas fa-arrow-trend-down"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Top Dip / Opportunity</span>
+                    <a href="{% url 'asset_detail' top_losers.0.symbol %}" class="block font-bold text-sm text-slate-900 dark:text-white hover:text-rose-500 transition-colors">
+                        {{ top_losers.0.symbol }} <span class="text-xs font-normal text-slate-400">({{ top_losers.0.name }})</span>
+                    </a>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="font-mono font-bold text-xs text-slate-900 dark:text-white" x-text="formatPrice({{ top_losers.0.price }})"></span>
+                <span class="block text-xs font-bold text-rose-500">{{ top_losers.0.change_percent }}%</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- NSE Index Overview -->
+        <div class="bg-white dark:bg-dark-850 p-4.5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-pesa-50 dark:bg-pesa-950/50 text-pesa-600 dark:text-pesa-400 flex items-center justify-center font-bold text-xs">
+                    <i class="fas fa-landmark"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">NSE 20 Share Index</span>
+                    <span class="block font-bold text-sm text-slate-900 dark:text-white">1,542.30 Pts</span>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-xs font-mono font-semibold text-slate-500">+18.25</span>
+                <span class="block text-xs font-bold text-emerald-500">+1.20%</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. CATEGORY PILL FILTER NAVIGATION        -->
+    <!-- ========================================== -->
+    <div class="flex items-center gap-2 overflow-x-auto ticker-scroll pb-1">
+        <a href="{% url 'markets' %}" class="px-4 py-2 rounded-2xl text-xs font-bold transition-all flex-shrink-0 {% if current_category == 'all' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50 dark:hover:bg-dark-800{% endif %}">
+            All Markets
+        </a>
+        <a href="{% url 'markets' %}?category=nse" class="px-4 py-2 rounded-2xl text-xs font-bold transition-all flex-shrink-0 {% if current_category == 'nse' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50 dark:hover:bg-dark-800{% endif %}">
+            <i class="fas fa-flag text-pesa-500 mr-1.5"></i> Kenya Equities (NSE)
+        </a>
+        <a href="{% url 'markets' %}?category=equities" class="px-4 py-2 rounded-2xl text-xs font-bold transition-all flex-shrink-0 {% if current_category == 'equities' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50 dark:hover:bg-dark-800{% endif %}">
+            US & Global Equities
+        </a>
+        <a href="{% url 'markets' %}?category=crypto" class="px-4 py-2 rounded-2xl text-xs font-bold transition-all flex-shrink-0 {% if current_category == 'crypto' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50 dark:hover:bg-dark-800{% endif %}">
+            Cryptocurrencies
+        </a>
+        <a href="{% url 'markets' %}?category=commodities" class="px-4 py-2 rounded-2xl text-xs font-bold transition-all flex-shrink-0 {% if current_category == 'commodities' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50 dark:hover:bg-dark-800{% endif %}">
+            Commodities & Bullion
+        </a>
+        <a href="{% url 'markets' %}?category=gainers" class="px-4 py-2 rounded-2xl text-xs font-bold transition-all flex-shrink-0 {% if current_category == 'gainers' %}bg-emerald-600 text-white shadow-sm{% else %}bg-white dark:bg-dark-850 text-emerald-600 dark:text-emerald-400 border border-slate-200/80 dark:border-dark-750 hover:bg-emerald-50 dark:hover:bg-dark-800{% endif %}">
+            <i class="fas fa-fire mr-1"></i> Top Gainers
+        </a>
+        <a href="{% url 'markets' %}?category=losers" class="px-4 py-2 rounded-2xl text-xs font-bold transition-all flex-shrink-0 {% if current_category == 'losers' %}bg-rose-600 text-white shadow-sm{% else %}bg-white dark:bg-dark-850 text-rose-600 dark:text-rose-400 border border-slate-200/80 dark:border-dark-750 hover:bg-rose-50 dark:hover:bg-dark-800{% endif %}">
+            <i class="fas fa-arrow-down mr-1"></i> Top Losers
+        </a>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. ASSETS DATA TABLE (Default View)         -->
+    <!-- (Yahoo Finance Screener Table with Sparklines) -->
+    <!-- ========================================== -->
+    <div x-show="viewMode === 'table'" class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[750px] text-xs">
+                <thead>
+                    <tr class="bg-slate-50/70 dark:bg-dark-900/50 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-100 dark:border-dark-750 text-[10px]">
+                        <th class="px-6 py-3.5">Ticker & Company</th>
+                        <th class="px-6 py-3.5">Price</th>
+                        <th class="px-6 py-3.5">Change</th>
+                        <th class="px-6 py-3.5">% Change</th>
+                        <th class="px-6 py-3.5">24h Trend</th>
+                        <th class="px-6 py-3.5">Market Cap</th>
+                        <th class="px-6 py-3.5">Volume</th>
+                        <th class="px-6 py-3.5 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-dark-800">
+                    {% for asset in assets_list %}
+                    <tr class="hover:bg-slate-50 dark:hover:bg-dark-800/60 transition-colors group">
+                        
+                        <!-- Symbol & Name -->
+                        <td class="px-6 py-4">
+                            <a href="{% url 'asset_detail' asset.symbol %}" class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-dark-800 flex items-center justify-center font-bold text-xs text-slate-800 dark:text-slate-200 group-hover:bg-pesa-500 group-hover:text-white transition-colors">
+                                    {{ asset.symbol }}
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="font-extrabold text-sm text-slate-900 dark:text-white group-hover:text-pesa-500 transition-colors">{{ asset.symbol }}</span>
+                                        <span class="text-[9px] font-semibold uppercase px-1.5 py-0.2 rounded bg-slate-100 dark:bg-dark-700 text-slate-500">{{ asset.market }}</span>
+                                    </div>
+                                    <span class="text-slate-400 text-[11px] block truncate max-w-[150px]">{{ asset.name }}</span>
+                                </div>
+                            </a>
+                        </td>
+
+                        <!-- Price -->
+                        <td class="px-6 py-4 font-mono font-bold text-sm text-slate-900 dark:text-white" x-text="formatPrice({{ asset.price }})">
+                            {{ asset.currency }} {{ asset.price }}
+                        </td>
+
+                        <!-- Change Amount -->
+                        <td class="px-6 py-4 font-mono font-semibold {% if asset.change_percent >= 0 %}text-emerald-500{% else %}text-rose-500{% endif %}">
+                            {% if asset.change_percent >= 0 %}+{% endif %}{{ asset.change }}
+                        </td>
+
+                        <!-- % Change Badge -->
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold text-[11px] {% if asset.change_percent >= 0 %}bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400{% else %}bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400{% endif %}">
+                                {% if asset.change_percent >= 0 %}+{% endif %}{{ asset.change_percent }}%
+                            </span>
+                        </td>
+
+                        <!-- Mini SVG Sparkline! -->
+                        <td class="px-6 py-4">
+                            <div class="w-20 h-7">
+                                <svg class="w-full h-full overflow-visible" viewBox="0 0 70 20">
+                                    <path d="M 0,14 Q 15,{% if asset.change_percent >= 0 %}9{% else %}4{% endif %} 35,{% if asset.change_percent >= 0 %}7{% else %}15{% endif %} T 70,{% if asset.change_percent >= 0 %}2{% else %}18{% endif %}" 
+                                          fill="none" 
+                                          stroke="{% if asset.change_percent >= 0 %}#10b981{% else %}#f43f5e{% endif %}" 
+                                          stroke-width="2" 
+                                          stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                        </td>
+
+                        <!-- Market Cap -->
+                        <td class="px-6 py-4 font-mono text-slate-600 dark:text-slate-400">
+                            {{ asset.market_cap }}
+                        </td>
+
+                        <!-- Volume -->
+                        <td class="px-6 py-4 font-mono text-slate-600 dark:text-slate-400">
+                            {{ asset.volume }}
+                        </td>
+
+                        <!-- Quick Actions -->
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <button @click="toggleWatchlist('{{ asset.symbol }}')" class="p-1.5 text-slate-400 hover:text-amber-500 transition-colors" title="Toggle Watchlist">
+                                    <i class="far fa-star"></i>
+                                </button>
+                                <a href="{% url 'trade' %}?symbol={{ asset.symbol }}" class="px-3 py-1.5 rounded-xl bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 hover:bg-pesa-500 hover:text-white font-bold text-xs transition-colors">
+                                    Trade
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-12 text-slate-400">
+                            <i class="fas fa-search text-2xl mb-2"></i>
+                            <p class="font-medium">No assets matching your query "{{ search_query }}"</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 4. ASSETS GRID VIEW (Alternative)          -->
+    <!-- (Yahoo Finance Mobile Cards Style)         -->
+    <!-- ========================================== -->
+    <div x-show="viewMode === 'grid'" x-cloak class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for asset in assets_list %}
+        <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between">
+            <div>
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-dark-800 flex items-center justify-center font-bold text-xs text-slate-800 dark:text-slate-200 group-hover:bg-pesa-500 group-hover:text-white transition-colors">
+                            {{ asset.symbol }}
+                        </div>
+                        <div>
+                            <a href="{% url 'asset_detail' asset.symbol %}" class="font-bold text-sm text-slate-900 dark:text-white hover:text-pesa-500 transition-colors block">
+                                {{ asset.symbol }}
+                            </a>
+                            <span class="text-xs text-slate-400 block truncate max-w-[130px]">{{ asset.name }}</span>
+                        </div>
+                    </div>
+                    <button @click="toggleWatchlist('{{ asset.symbol }}')" class="text-slate-300 hover:text-amber-500 transition-colors p-1">
+                        <i class="far fa-star"></i>
+                    </button>
+                </div>
+
+                <div class="my-4 flex items-center justify-between">
+                    <div>
+                        <span class="block font-mono font-extrabold text-xl text-slate-900 dark:text-white" x-text="formatPrice({{ asset.price }})"></span>
+                        <span class="inline-flex items-center gap-1 text-xs font-bold {% if asset.change_percent >= 0 %}text-emerald-500{% else %}text-rose-500{% endif %}">
+                            {% if asset.change_percent >= 0 %}+{% endif %}{{ asset.change_percent }}% ({{ asset.change }})
+                        </span>
+                    </div>
+
+                    <!-- Sparkline -->
+                    <div class="w-20 h-8">
+                        <svg class="w-full h-full overflow-visible" viewBox="0 0 70 20">
+                            <path d="M 0,14 Q 15,{% if asset.change_percent >= 0 %}9{% else %}4{% endif %} 35,{% if asset.change_percent >= 0 %}7{% else %}15{% endif %} T 70,{% if asset.change_percent >= 0 %}2{% else %}18{% endif %}" 
+                                  fill="none" 
+                                  stroke="{% if asset.change_percent >= 0 %}#10b981{% else %}#f43f5e{% endif %}" 
+                                  stroke-width="2" 
+                                  stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 dark:border-dark-800 flex items-center justify-between text-xs">
+                <span class="text-slate-400 font-mono">Vol: {{ asset.volume }}</span>
+                <div class="flex gap-2">
+                    <a href="{% url 'asset_detail' asset.symbol %}" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-dark-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200">Details</a>
+                    <a href="{% url 'trade' %}?symbol={{ asset.symbol }}" class="px-3 py-1.5 rounded-xl bg-pesa-600 text-white font-bold hover:bg-pesa-500">Trade</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script>
+    function marketsPageController() {
+        return {
+            viewMode: 'table',
+            async toggleWatchlist(sym) {
+                try {
+                    const res = await fetch('/api/watchlist/toggle/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ symbol: sym })
+                    });
+                    const d = await res.json();
+                    if(d.success) {
+                        window.dispatchEvent(new CustomEvent('toast', { detail: d.in_watchlist ? 'Added ' + sym + ' to Watchlist' : 'Removed ' + sym }));
+                    }
+                } catch(e) { console.error(e); }
+            }
+        };
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,621 @@
+<!-- Financial Chart Engine Component (Canvas 2D, Zero Dependencies) -->
+<script>
+class FinancialChartEngine {
+    constructor(canvas, options = {}) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.data = options.data || [];
+        this.chartType = options.chartType || 'candlestick'; // candlestick, line, area, ohlc, baseline, hollow, stepline
+        this.showVolume = options.showVolume !== undefined ? options.showVolume : true;
+        this.showSMA = options.showSMA !== undefined ? options.showSMA : true;
+        this.showGrid = options.showGrid !== undefined ? options.showGrid : true;
+        this.currency = options.currency || '$';
+        this.onHover = options.onHover || null;
+        this.onLeave = options.onLeave || null;
+
+        this.hoverIndex = null;
+        this.mousePos = null;
+        this.dpr = window.devicePixelRatio || 1;
+
+        this.initEvents();
+        this.render();
+    }
+
+    initEvents() {
+        this.resizeObserver = new ResizeObserver(() => {
+            this.render();
+        });
+        this.resizeObserver.observe(this.canvas);
+
+        const handlePointerMove = (e) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
+            this.mousePos = { x, y };
+            this.updateHoverIndex(x);
+            this.render();
+        };
+
+        const handlePointerLeave = () => {
+            this.hoverIndex = null;
+            this.mousePos = null;
+            if (this.onLeave) this.onLeave();
+            this.render();
+        };
+
+        this.canvas.addEventListener('mousemove', handlePointerMove);
+        this.canvas.addEventListener('mouseleave', handlePointerLeave);
+        this.canvas.addEventListener('touchstart', handlePointerMove, { passive: true });
+        this.canvas.addEventListener('touchmove', handlePointerMove, { passive: true });
+        this.canvas.addEventListener('touchend', handlePointerLeave);
+    }
+
+    updateHoverIndex(mouseX) {
+        if (!this.data || this.data.length === 0) return;
+        const rect = this.canvas.getBoundingClientRect();
+        const padLeft = 10;
+        const padRight = 65;
+        const plotWidth = Math.max(10, rect.width - padLeft - padRight);
+        const slotWidth = plotWidth / this.data.length;
+
+        let idx = Math.floor((mouseX - padLeft) / slotWidth);
+        idx = Math.max(0, Math.min(this.data.length - 1, idx));
+        this.hoverIndex = idx;
+
+        if (this.onHover) {
+            const candle = this.data[idx];
+            const prevCandle = idx > 0 ? this.data[idx - 1] : null;
+            this.onHover(candle, idx, prevCandle);
+        }
+    }
+
+    setData(data) {
+        this.data = data || [];
+        this.hoverIndex = null;
+        this.render();
+    }
+
+    setChartType(type) {
+        this.chartType = type;
+        this.render();
+    }
+
+    toggleVolume(show) {
+        this.showVolume = show !== undefined ? show : !this.showVolume;
+        this.render();
+    }
+
+    toggleSMA(show) {
+        this.showSMA = show !== undefined ? show : !this.showSMA;
+        this.render();
+    }
+
+    toggleGrid(show) {
+        this.showGrid = show !== undefined ? show : !this.showGrid;
+        this.render();
+    }
+
+    render() {
+        if (!this.canvas || !this.ctx) return;
+        const rect = this.canvas.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+
+        const dpr = window.devicePixelRatio || 1;
+        this.dpr = dpr;
+
+        // Match resolution
+        if (this.canvas.width !== Math.round(rect.width * dpr) || this.canvas.height !== Math.round(rect.height * dpr)) {
+            this.canvas.width = Math.round(rect.width * dpr);
+            this.canvas.height = Math.round(rect.height * dpr);
+        }
+
+        const ctx = this.ctx;
+        ctx.save();
+        ctx.scale(dpr, dpr);
+
+        const width = rect.width;
+        const height = rect.height;
+
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+
+        if (!this.data || this.data.length === 0) {
+            ctx.restore();
+            return;
+        }
+
+        const isDark = document.documentElement.classList.contains('dark');
+        const colors = {
+            bullish: '#10b981',       // Emerald 500
+            bullishFill: 'rgba(16, 185, 129, 0.24)',
+            bearish: '#f43f5e',       // Rose 500
+            bearishFill: 'rgba(244, 63, 94, 0.24)',
+            sma: '#f59e0b',           // Amber 500
+            grid: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+            text: isDark ? '#94a3b8' : '#64748b',
+            textMuted: isDark ? '#475569' : '#94a3b8',
+            crosshair: isDark ? 'rgba(148, 163, 184, 0.45)' : 'rgba(100, 116, 139, 0.45)',
+            badgeBg: isDark ? '#0f172a' : '#1e293b',
+            badgeText: '#ffffff'
+        };
+
+        const padTop = 18;
+        const padBottom = 26;
+        const padLeft = 10;
+        const padRight = 65;
+
+        const plotWidth = Math.max(10, width - padLeft - padRight);
+        const totalPlotHeight = Math.max(10, height - padTop - padBottom);
+
+        const hasVolume = this.showVolume;
+        const volHeight = hasVolume ? Math.floor(totalPlotHeight * 0.22) : 0;
+        const pricePlotHeight = hasVolume ? totalPlotHeight - volHeight - 12 : totalPlotHeight;
+        const volTop = padTop + pricePlotHeight + 12;
+
+        const n = this.data.length;
+        const slotWidth = plotWidth / n;
+
+        // Determine price range
+        let minPrice = Infinity;
+        let maxPrice = -Infinity;
+        let maxVolume = 0;
+
+        for (let i = 0; i < n; i++) {
+            const d = this.data[i];
+            if (this.chartType === 'candlestick' || this.chartType === 'ohlc' || this.chartType === 'hollow') {
+                if (d.low < minPrice) minPrice = d.low;
+                if (d.high > maxPrice) maxPrice = d.high;
+            } else {
+                if (d.close < minPrice) minPrice = d.close;
+                if (d.close > maxPrice) maxPrice = d.close;
+            }
+            if (this.showSMA && d.sma !== undefined) {
+                if (d.sma < minPrice) minPrice = d.sma;
+                if (d.sma > maxPrice) maxPrice = d.sma;
+            }
+            if (d.volume > maxVolume) maxVolume = d.volume;
+        }
+
+        if (minPrice === Infinity) minPrice = 0;
+        if (maxPrice === -Infinity) maxPrice = 1;
+        if (minPrice === maxPrice) {
+            minPrice *= 0.95;
+            maxPrice *= 1.05;
+        }
+
+        // Add 5% padding
+        const priceRange = maxPrice - minPrice;
+        const paddedMin = minPrice - priceRange * 0.05;
+        const paddedMax = maxPrice + priceRange * 0.05;
+        const paddedRange = paddedMax - paddedMin || 1;
+
+        const priceToY = (price) => {
+            return padTop + pricePlotHeight - ((price - paddedMin) / paddedRange) * pricePlotHeight;
+        };
+
+        const indexToX = (index) => {
+            return padLeft + (index + 0.5) * slotWidth;
+        };
+
+        // 1. Draw Grid Lines & Y-Axis Labels
+        const numPriceSteps = 4;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.font = '10px "JetBrains Mono", monospace';
+
+        for (let i = 0; i <= numPriceSteps; i++) {
+            const ratio = i / numPriceSteps;
+            const priceVal = paddedMin + ratio * paddedRange;
+            const y = padTop + pricePlotHeight - ratio * pricePlotHeight;
+
+            if (this.showGrid) {
+                ctx.strokeStyle = colors.grid;
+                ctx.lineWidth = 1;
+                ctx.setLineDash([3, 4]);
+                ctx.beginPath();
+                ctx.moveTo(padLeft, y);
+                ctx.lineTo(padLeft + plotWidth, y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Price label
+            ctx.fillStyle = colors.text;
+            ctx.fillText(priceVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }), width - 8, y);
+        }
+
+        // Baseline reference line (if baseline chart)
+        const baselinePrice = this.data[0].open || this.data[0].close;
+        const baselineY = priceToY(baselinePrice);
+        if (this.chartType === 'baseline') {
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 1.2;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(padLeft, baselineY);
+            ctx.lineTo(padLeft + plotWidth, baselineY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#64748b';
+            ctx.fillText('BASE', width - 8, baselineY - 8);
+        }
+
+        // 2. Draw Volume Histogram (if enabled)
+        if (hasVolume && maxVolume > 0) {
+            for (let i = 0; i < n; i++) {
+                const d = this.data[i];
+                const x = indexToX(i);
+                const barW = Math.max(2, slotWidth * 0.65);
+                const barH = (d.volume / maxVolume) * volHeight;
+                const y = volTop + volHeight - barH;
+
+                ctx.fillStyle = d.is_bullish ? 'rgba(16, 185, 129, 0.35)' : 'rgba(244, 63, 94, 0.35)';
+                ctx.fillRect(x - barW / 2, y, barW, barH);
+            }
+        }
+
+        // 3. Render Chart Main Layer
+        const candleWidth = Math.max(3, Math.min(slotWidth * 0.72, 18));
+
+        switch (this.chartType) {
+            case 'candlestick': {
+                for (let i = 0; i < n; i++) {
+                    const d = this.data[i];
+                    const x = indexToX(i);
+                    const openY = priceToY(d.open);
+                    const closeY = priceToY(d.close);
+                    const highY = priceToY(d.high);
+                    const lowY = priceToY(d.low);
+
+                    const color = d.is_bullish ? colors.bullish : colors.bearish;
+
+                    // Wick
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 1.4;
+                    ctx.beginPath();
+                    ctx.moveTo(x, highY);
+                    ctx.lineTo(x, lowY);
+                    ctx.stroke();
+
+                    // Body
+                    const bodyTop = Math.min(openY, closeY);
+                    const bodyHeight = Math.max(2, Math.abs(openY - closeY));
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
+                }
+                break;
+            }
+
+            case 'hollow': {
+                for (let i = 0; i < n; i++) {
+                    const d = this.data[i];
+                    const x = indexToX(i);
+                    const openY = priceToY(d.open);
+                    const closeY = priceToY(d.close);
+                    const highY = priceToY(d.high);
+                    const lowY = priceToY(d.low);
+
+                    const color = d.is_bullish ? colors.bullish : colors.bearish;
+
+                    // Wick
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 1.4;
+                    ctx.beginPath();
+                    ctx.moveTo(x, highY);
+                    ctx.lineTo(x, lowY);
+                    ctx.stroke();
+
+                    // Body
+                    const bodyTop = Math.min(openY, closeY);
+                    const bodyHeight = Math.max(2, Math.abs(openY - closeY));
+
+                    if (d.is_bullish) {
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = 1.5;
+                        ctx.fillStyle = isDark ? '#101626' : '#ffffff';
+                        ctx.fillRect(x - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
+                        ctx.strokeRect(x - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
+                    } else {
+                        ctx.fillStyle = color;
+                        ctx.fillRect(x - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
+                    }
+                }
+                break;
+            }
+
+            case 'ohlc': {
+                for (let i = 0; i < n; i++) {
+                    const d = this.data[i];
+                    const x = indexToX(i);
+                    const openY = priceToY(d.open);
+                    const closeY = priceToY(d.close);
+                    const highY = priceToY(d.high);
+                    const lowY = priceToY(d.low);
+
+                    const color = d.is_bullish ? colors.bullish : colors.bearish;
+                    const tickW = candleWidth * 0.5;
+
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 1.6;
+
+                    // Vertical Spine
+                    ctx.beginPath();
+                    ctx.moveTo(x, highY);
+                    ctx.lineTo(x, lowY);
+                    ctx.stroke();
+
+                    // Open tick (left)
+                    ctx.beginPath();
+                    ctx.moveTo(x - tickW, openY);
+                    ctx.lineTo(x, openY);
+                    ctx.stroke();
+
+                    // Close tick (right)
+                    ctx.beginPath();
+                    ctx.moveTo(x, closeY);
+                    ctx.lineTo(x + tickW, closeY);
+                    ctx.stroke();
+                }
+                break;
+            }
+
+            case 'area': {
+                const isOverallBullish = this.data[n - 1].close >= this.data[0].open;
+                const lineColor = isOverallBullish ? colors.bullish : colors.bearish;
+
+                // Gradient fill
+                const gradient = ctx.createLinearGradient(0, padTop, 0, padTop + pricePlotHeight);
+                gradient.addColorStop(0, isOverallBullish ? 'rgba(16, 185, 129, 0.32)' : 'rgba(244, 63, 94, 0.32)');
+                gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+                ctx.beginPath();
+                ctx.moveTo(indexToX(0), priceToY(this.data[0].close));
+                for (let i = 1; i < n; i++) {
+                    ctx.lineTo(indexToX(i), priceToY(this.data[i].close));
+                }
+                ctx.lineTo(indexToX(n - 1), padTop + pricePlotHeight);
+                ctx.lineTo(indexToX(0), padTop + pricePlotHeight);
+                ctx.closePath();
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Stroke line
+                ctx.beginPath();
+                ctx.moveTo(indexToX(0), priceToY(this.data[0].close));
+                for (let i = 1; i < n; i++) {
+                    ctx.lineTo(indexToX(i), priceToY(this.data[i].close));
+                }
+                ctx.strokeStyle = lineColor;
+                ctx.lineWidth = 2.6;
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+                break;
+            }
+
+            case 'baseline': {
+                // Line above baseline gets green fill, line below gets red fill
+                const isOverallBullish = this.data[n - 1].close >= baselinePrice;
+                const lineColor = isOverallBullish ? colors.bullish : colors.bearish;
+
+                // Top polygon fill (above baseline)
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(padLeft, padTop, plotWidth, Math.max(0, baselineY - padTop));
+                ctx.clip();
+
+                ctx.beginPath();
+                ctx.moveTo(indexToX(0), baselineY);
+                for (let i = 0; i < n; i++) {
+                    ctx.lineTo(indexToX(i), priceToY(this.data[i].close));
+                }
+                ctx.lineTo(indexToX(n - 1), baselineY);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.22)';
+                ctx.fill();
+                ctx.restore();
+
+                // Bottom polygon fill (below baseline)
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(padLeft, baselineY, plotWidth, Math.max(0, padTop + pricePlotHeight - baselineY));
+                ctx.clip();
+
+                ctx.beginPath();
+                ctx.moveTo(indexToX(0), baselineY);
+                for (let i = 0; i < n; i++) {
+                    ctx.lineTo(indexToX(i), priceToY(this.data[i].close));
+                }
+                ctx.lineTo(indexToX(n - 1), baselineY);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(244, 63, 94, 0.22)';
+                ctx.fill();
+                ctx.restore();
+
+                // Price line
+                ctx.beginPath();
+                ctx.moveTo(indexToX(0), priceToY(this.data[0].close));
+                for (let i = 1; i < n; i++) {
+                    ctx.lineTo(indexToX(i), priceToY(this.data[i].close));
+                }
+                ctx.strokeStyle = lineColor;
+                ctx.lineWidth = 2.4;
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+                break;
+            }
+
+            case 'stepline': {
+                const isOverallBullish = this.data[n - 1].close >= this.data[0].open;
+                const lineColor = isOverallBullish ? colors.bullish : colors.bearish;
+
+                ctx.beginPath();
+                ctx.moveTo(indexToX(0), priceToY(this.data[0].close));
+                for (let i = 1; i < n; i++) {
+                    const prevX = indexToX(i - 1);
+                    const prevY = priceToY(this.data[i - 1].close);
+                    const currX = indexToX(i);
+                    const currY = priceToY(this.data[i].close);
+
+                    // Step across then down/up
+                    ctx.lineTo(currX, prevY);
+                    ctx.lineTo(currX, currY);
+                }
+                ctx.strokeStyle = lineColor;
+                ctx.lineWidth = 2.4;
+                ctx.stroke();
+                break;
+            }
+
+            case 'line':
+            default: {
+                const isOverallBullish = this.data[n - 1].close >= this.data[0].open;
+                const lineColor = isOverallBullish ? colors.bullish : colors.bearish;
+
+                ctx.beginPath();
+                ctx.moveTo(indexToX(0), priceToY(this.data[0].close));
+                for (let i = 1; i < n; i++) {
+                    ctx.lineTo(indexToX(i), priceToY(this.data[i].close));
+                }
+                ctx.strokeStyle = lineColor;
+                ctx.lineWidth = 2.6;
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+
+                // End pulse dot
+                const lastX = indexToX(n - 1);
+                const lastY = priceToY(this.data[n - 1].close);
+                ctx.fillStyle = lineColor;
+                ctx.beginPath();
+                ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+            }
+        }
+
+        // 4. SMA (Simple Moving Average) Overlay
+        if (this.showSMA) {
+            ctx.strokeStyle = colors.sma;
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            let started = false;
+            for (let i = 0; i < n; i++) {
+                if (this.data[i].sma !== undefined) {
+                    const x = indexToX(i);
+                    const y = priceToY(this.data[i].sma);
+                    if (!started) {
+                        ctx.moveTo(x, y);
+                        started = true;
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+            }
+            if (started) ctx.stroke();
+        }
+
+        // 5. Draw Time Axis Labels (Bottom)
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = colors.textMuted;
+        ctx.font = '10px "Inter", sans-serif';
+
+        const labelStep = Math.max(1, Math.floor(n / 6));
+        for (let i = 0; i < n; i += labelStep) {
+            const x = indexToX(i);
+            const timeLabel = this.data[i].time;
+            ctx.fillText(timeLabel, x, height - padBottom + 8);
+        }
+
+        // 6. Interactive Crosshair & Tooltip Badges
+        if (this.hoverIndex !== null && this.hoverIndex >= 0 && this.hoverIndex < n) {
+            const activeCandle = this.data[this.hoverIndex];
+            const activeX = indexToX(this.hoverIndex);
+            const activeY = priceToY(activeCandle.close);
+
+            // Vertical Crosshair Line
+            ctx.strokeStyle = colors.crosshair;
+            ctx.lineWidth = 1.2;
+            ctx.setLineDash([4, 4]);
+
+            ctx.beginPath();
+            ctx.moveTo(activeX, padTop);
+            ctx.lineTo(activeX, padTop + totalPlotHeight);
+            ctx.stroke();
+
+            // Horizontal Crosshair Line
+            ctx.beginPath();
+            ctx.moveTo(padLeft, activeY);
+            ctx.lineTo(padLeft + plotWidth, activeY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Marker Dot on price point
+            ctx.fillStyle = activeCandle.is_bullish ? colors.bullish : colors.bearish;
+            ctx.beginPath();
+            ctx.arc(activeX, activeY, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Price Badge on Right Y-Axis
+            const priceText = activeCandle.close.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const badgeW = 60;
+            const badgeH = 20;
+            const badgeX = width - badgeW - 4;
+            const badgeY = Math.max(padTop, Math.min(height - padBottom - badgeH, activeY - badgeH / 2));
+
+            ctx.fillStyle = colors.badgeBg;
+            this.roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 6);
+            ctx.fill();
+
+            ctx.fillStyle = colors.badgeText;
+            ctx.font = 'bold 10px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(priceText, badgeX + badgeW / 2, badgeY + badgeH / 2);
+
+            // Time Badge on Bottom Axis
+            const timeText = activeCandle.time;
+            const timeBadgeW = Math.max(46, ctx.measureText(timeText).width + 16);
+            const timeBadgeH = 18;
+            const timeBadgeX = Math.max(padLeft, Math.min(width - padRight - timeBadgeW, activeX - timeBadgeW / 2));
+            const timeBadgeY = height - padBottom + 4;
+
+            ctx.fillStyle = colors.badgeBg;
+            this.roundRect(ctx, timeBadgeX, timeBadgeY, timeBadgeW, timeBadgeH, 5);
+            ctx.fill();
+
+            ctx.fillStyle = colors.badgeText;
+            ctx.font = 'bold 9px "Inter", sans-serif';
+            ctx.fillText(timeText, timeBadgeX + timeBadgeW / 2, timeBadgeY + timeBadgeH / 2);
+        }
+
+        ctx.restore();
+    }
+
+    roundRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+    }
+
+    destroy() {
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+        }
+    }
+}
+</script>
