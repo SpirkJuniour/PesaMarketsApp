@@ -6,25 +6,36 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                Trade Terminal
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary/10 text-primary">
+                    <i class="fas fa-bolt mr-1"></i> Instant Execution
+                </span>
+                <span class="text-xs text-slate-400">&bull; Zero Commission</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight mt-1">
+                Order Desk & Execution
             </h1>
             <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                Simulated market & limit order execution with zero-commission routing.
+                Execute live simulated market & limit orders with institutional real-time routing.
             </p>
         </div>
 
         <!-- Asset Quick Selector Dropdown -->
         <div class="flex items-center gap-3">
-            <span class="text-xs font-semibold text-slate-400">Select Asset:</span>
-            <select @change="changeAsset($event.target.value)" 
-                    class="bg-white dark:bg-dark-850 border border-slate-200/80 dark:border-dark-750 text-slate-900 dark:text-white rounded-2xl px-4 py-2 text-xs font-bold shadow-2xs outline-none focus:ring-2 focus:ring-pesa-500">
-                {% for a in all_assets %}
-                <option value="{{ a.symbol }}" {% if a.symbol == asset.symbol %}selected{% endif %}>
-                    {{ a.symbol }} - {{ a.name }} ({{ a.currency }} {{ a.price }})
-                </option>
-                {% endfor %}
-            </select>
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Select Asset:</span>
+            <div class="relative">
+                <select @change="changeAsset($event.target.value)" 
+                        class="appearance-none bg-white dark:bg-dark-850 border border-slate-200 dark:border-dark-750 text-slate-900 dark:text-white rounded-full pl-4 pr-10 py-2.5 text-xs font-bold shadow-xs outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                    {% for a in all_assets %}
+                    <option value="{{ a.symbol }}" {% if a.symbol == asset.symbol %}selected{% endif %}>
+                        {{ a.symbol }} &bull; {{ a.name }} ({{ a.currency }} {{ a.price }})
+                    </option>
+                    {% endfor %}
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-400">
+                    <i class="fas fa-chevron-down text-[10px]"></i>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -32,20 +43,29 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <!-- Left: Asset Overview & Chart (7 Cols) -->
-        <div class="lg:col-span-7 bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm flex flex-col justify-between">
+        <div class="lg:col-span-7 bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-xs flex flex-col justify-between">
             <div>
                 <!-- Asset Quote Summary Bar -->
                 <div class="flex items-start justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-dark-800 flex items-center justify-center font-bold text-sm text-slate-800 dark:text-slate-200">
-                            {{ asset.symbol }}
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-14 h-14 rounded-2xl bg-white dark:bg-dark-800 p-2.5 border border-slate-200/80 dark:border-dark-750 flex items-center justify-center shadow-xs flex-shrink-0">
+                            {% if asset.logo %}
+                            <img src="{{ asset.logo }}" alt="{{ asset.name }}" class="w-full h-full object-contain">
+                            {% else %}
+                            <span class="font-black text-sm text-slate-800 dark:text-slate-200">{{ asset.symbol|slice:":3" }}</span>
+                            {% endif %}
                         </div>
                         <div>
                             <div class="flex items-center gap-2">
                                 <h2 class="text-xl font-black text-slate-900 dark:text-white">{{ asset.name }}</h2>
-                                <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-dark-750 text-slate-600 dark:text-slate-300">{{ asset.symbol }}</span>
+                                <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-dark-750 text-slate-600 dark:text-slate-300">{{ asset.symbol }}</span>
                             </div>
-                            <span class="text-xs text-slate-400">{{ asset.market }} &bull; {{ asset.sector }}</span>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <span class="text-xs font-semibold text-slate-400">{{ asset.market }} &bull; {{ asset.sector }}</span>
+                                <span class="text-xs font-bold text-amber-500 flex items-center gap-0.5">
+                                    <i class="fas fa-star text-[10px]"></i> 4.9
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -53,43 +73,44 @@
                         <span class="text-2xl font-black font-mono text-slate-900 dark:text-white block" x-text="formatPrice({{ asset.price }})">
                             {{ asset.currency }} {{ asset.price }}
                         </span>
-                        <span class="inline-block text-xs font-bold {% if asset.change_percent >= 0 %}text-emerald-500{% else %}text-rose-500{% endif %}">
+                        <span class="inline-flex items-center gap-1 text-xs font-extrabold px-2 py-0.5 rounded-full mt-1 {% if asset.change_percent >= 0 %}bg-emerald-500/10 text-emerald-600 dark:text-emerald-400{% else %}bg-rose-500/10 text-rose-600 dark:text-rose-400{% endif %}">
+                            <i class="fas {% if asset.change_percent >= 0 %}fa-arrow-trend-up{% else %}fa-arrow-trend-down{% endif %} text-[10px]"></i>
                             {% if asset.change_percent >= 0 %}+{% endif %}{{ asset.change }} ({% if asset.change_percent >= 0 %}+{% endif %}{{ asset.change_percent }}%)
                         </span>
                     </div>
                 </div>
 
                 <!-- Chart Toolbar & Options -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3 pt-1 border-t border-slate-100 dark:border-dark-800">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3 pt-3 border-t border-slate-100 dark:border-dark-800">
                     <!-- Graph Type Selector -->
-                    <div class="flex items-center gap-1 flex-wrap">
+                    <div class="flex items-center gap-1.5 flex-wrap">
                         <button type="button" @click="setChartType('candlestick')"
-                                :class="chartType === 'candlestick' ? 'bg-pesa-600 text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
-                                class="px-2 py-1 rounded-xl text-[11px] transition-all flex items-center gap-1" title="Candlestick">
+                                :class="chartType === 'candlestick' ? 'bg-primary text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
+                                class="px-3 py-1 rounded-full text-[11px] transition-all flex items-center gap-1" title="Candlestick">
                             <i class="fas fa-chart-column text-[10px]"></i>
                             <span>Candles</span>
                         </button>
                         <button type="button" @click="setChartType('line')"
-                                :class="chartType === 'line' ? 'bg-pesa-600 text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
-                                class="px-2 py-1 rounded-xl text-[11px] transition-all flex items-center gap-1" title="Linear Line">
+                                :class="chartType === 'line' ? 'bg-primary text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
+                                class="px-3 py-1 rounded-full text-[11px] transition-all flex items-center gap-1" title="Linear Line">
                             <i class="fas fa-chart-line text-[10px]"></i>
                             <span>Linear</span>
                         </button>
                         <button type="button" @click="setChartType('area')"
-                                :class="chartType === 'area' ? 'bg-pesa-600 text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
-                                class="px-2 py-1 rounded-xl text-[11px] transition-all flex items-center gap-1" title="Area">
+                                :class="chartType === 'area' ? 'bg-primary text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
+                                class="px-3 py-1 rounded-full text-[11px] transition-all flex items-center gap-1" title="Area">
                             <i class="fas fa-chart-area text-[10px]"></i>
                             <span>Area</span>
                         </button>
                         <button type="button" @click="setChartType('ohlc')"
-                                :class="chartType === 'ohlc' ? 'bg-pesa-600 text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
-                                class="px-2 py-1 rounded-xl text-[11px] transition-all flex items-center gap-1" title="OHLC Bar">
+                                :class="chartType === 'ohlc' ? 'bg-primary text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
+                                class="px-3 py-1 rounded-full text-[11px] transition-all flex items-center gap-1" title="OHLC Bar">
                             <i class="fas fa-bars-staggered text-[10px]"></i>
                             <span>OHLC</span>
                         </button>
                         <button type="button" @click="setChartType('baseline')"
-                                :class="chartType === 'baseline' ? 'bg-pesa-600 text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
-                                class="px-2 py-1 rounded-xl text-[11px] transition-all flex items-center gap-1" title="Baseline">
+                                :class="chartType === 'baseline' ? 'bg-primary text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
+                                class="px-3 py-1 rounded-full text-[11px] transition-all flex items-center gap-1" title="Baseline">
                             <i class="fas fa-balance-scale text-[10px]"></i>
                             <span>Baseline</span>
                         </button>
@@ -97,19 +118,19 @@
 
                     <!-- Right Controls: Indicators & Timeframe -->
                     <div class="flex items-center gap-2">
-                        <div class="flex items-center gap-1 bg-slate-100 dark:bg-dark-800 p-0.5 rounded-xl border border-slate-200/60 dark:border-dark-750 text-[10px]">
+                        <div class="flex items-center gap-1 bg-slate-100 dark:bg-dark-800 p-0.5 rounded-full border border-slate-200/60 dark:border-dark-750 text-[10px]">
                             <button type="button" @click="toggleVolume()"
-                                    :class="showVolume ? 'bg-white dark:bg-dark-900 text-pesa-600 dark:text-pesa-400 font-bold' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'"
-                                    class="px-2 py-0.5 rounded-lg transition-all">Vol</button>
+                                    :class="showVolume ? 'bg-white dark:bg-dark-900 text-primary font-bold shadow-xs' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'"
+                                    class="px-2.5 py-0.5 rounded-full transition-all">Vol</button>
                             <button type="button" @click="toggleSMA()"
-                                    :class="showSMA ? 'bg-white dark:bg-dark-900 text-amber-500 font-bold' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'"
-                                    class="px-2 py-0.5 rounded-lg transition-all">SMA</button>
+                                    :class="showSMA ? 'bg-white dark:bg-dark-900 text-amber-500 font-bold shadow-xs' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'"
+                                    class="px-2.5 py-0.5 rounded-full transition-all">SMA</button>
                         </div>
-                        <div class="flex bg-slate-100 dark:bg-dark-800 p-0.5 rounded-xl border border-slate-200/60 dark:border-dark-750 text-[10px]">
+                        <div class="flex bg-slate-100 dark:bg-dark-800 p-0.5 rounded-full border border-slate-200/60 dark:border-dark-750 text-[10px]">
                             <template x-for="tf in ['1D', '1W', '1M', '1Y', 'ALL']" :key="tf">
                                 <button type="button" @click="setTimeframe(tf)" 
-                                        :class="activeTimeframe === tf ? 'bg-white dark:bg-dark-900 text-slate-900 dark:text-white font-bold shadow-2xs' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
-                                        class="px-2 py-0.5 rounded-lg transition-all"
+                                        :class="activeTimeframe === tf ? 'bg-white dark:bg-dark-900 text-slate-900 dark:text-white font-black shadow-xs' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-semibold'"
+                                        class="px-2.5 py-0.5 rounded-full transition-all"
                                         x-text="tf"></button>
                             </template>
                         </div>
@@ -117,9 +138,9 @@
                 </div>
 
                 <!-- HUD Bar -->
-                <div class="bg-slate-50 dark:bg-dark-900/60 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-dark-750/70 mb-3 flex items-center justify-between text-[11px] font-mono">
+                <div class="bg-slate-50 dark:bg-dark-900/60 px-3.5 py-2 rounded-2xl border border-slate-200/60 dark:border-dark-750/70 mb-3 flex items-center justify-between text-[11px] font-mono">
                     <div class="flex items-center gap-2.5 flex-wrap">
-                        <span class="text-slate-400 font-sans" x-text="hudData.time">--</span>
+                        <span class="text-slate-400 font-sans font-medium" x-text="hudData.time">--</span>
                         <span><span class="text-slate-400">O:</span> <span class="font-bold text-slate-800 dark:text-slate-200" x-text="hudData.open">--</span></span>
                         <span><span class="text-slate-400">H:</span> <span class="font-bold text-slate-800 dark:text-slate-200" x-text="hudData.high">--</span></span>
                         <span><span class="text-slate-400">L:</span> <span class="font-bold text-slate-800 dark:text-slate-200" x-text="hudData.low">--</span></span>
@@ -136,57 +157,63 @@
 
                 <!-- Stats Summary -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-100 dark:border-dark-800 text-xs">
-                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-dark-800">
-                        <span class="text-[10px] text-slate-400 uppercase font-semibold block">Day Low</span>
-                        <span class="font-mono font-bold text-slate-800 dark:text-slate-200">{{ asset.day_low }}</span>
+                    <div class="p-3 rounded-2xl bg-slate-50 dark:bg-dark-800 border border-slate-100 dark:border-dark-750">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Day Low</span>
+                        <span class="font-mono font-black text-slate-800 dark:text-slate-200 mt-0.5 block">{{ asset.day_low }}</span>
                     </div>
-                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-dark-800">
-                        <span class="text-[10px] text-slate-400 uppercase font-semibold block">Day High</span>
-                        <span class="font-mono font-bold text-slate-800 dark:text-slate-200">{{ asset.day_high }}</span>
+                    <div class="p-3 rounded-2xl bg-slate-50 dark:bg-dark-800 border border-slate-100 dark:border-dark-750">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Day High</span>
+                        <span class="font-mono font-black text-slate-800 dark:text-slate-200 mt-0.5 block">{{ asset.day_high }}</span>
                     </div>
-                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-dark-800">
-                        <span class="text-[10px] text-slate-400 uppercase font-semibold block">Volume</span>
-                        <span class="font-mono font-bold text-slate-800 dark:text-slate-200">{{ asset.volume }}</span>
+                    <div class="p-3 rounded-2xl bg-slate-50 dark:bg-dark-800 border border-slate-100 dark:border-dark-750">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Volume</span>
+                        <span class="font-mono font-black text-slate-800 dark:text-slate-200 mt-0.5 block">{{ asset.volume }}</span>
                     </div>
-                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-dark-800">
-                        <span class="text-[10px] text-slate-400 uppercase font-semibold block">Market Cap</span>
-                        <span class="font-mono font-bold text-slate-800 dark:text-slate-200">{{ asset.market_cap }}</span>
+                    <div class="p-3 rounded-2xl bg-slate-50 dark:bg-dark-800 border border-slate-100 dark:border-dark-750">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Market Cap</span>
+                        <span class="font-mono font-black text-slate-800 dark:text-slate-200 mt-0.5 block">{{ asset.market_cap }}</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Deep Link to Asset Page -->
-            <div class="mt-4 pt-4 border-t border-slate-100 dark:border-dark-800 text-xs flex justify-between items-center text-slate-400">
-                <span>View historical earnings, filings & analyst ratings</span>
-                <a href="{% url 'asset_detail' asset.symbol %}" class="font-bold text-pesa-600 dark:text-pesa-400 hover:underline">
-                    Full Profile &rarr;
-                </a>
+            <!-- Deep Link to Asset Page & Terminal -->
+            <div class="mt-4 pt-4 border-t border-slate-100 dark:border-dark-800 text-xs flex justify-between items-center text-slate-400 flex-wrap gap-2">
+                <span>View Level 2 depth & valuation metrics:</span>
+                <div class="flex items-center gap-3">
+                    <a href="{% url 'terminal' %}?symbol={{ asset.symbol }}" class="font-bold text-amber-500 hover:underline flex items-center gap-1">
+                        <i class="fas fa-terminal text-[10px]"></i> Terminal Pro &rarr;
+                    </a>
+                    <a href="{% url 'asset_detail' asset.symbol %}" class="font-bold text-primary hover:underline">
+                        Profile &rarr;
+                    </a>
+                </div>
             </div>
         </div>
 
-        <!-- Right: Order Ticket & Interactive Numpad (5 Cols) -->
-        <!-- (Inspired by Image 1 Screen 3 & Yahoo Finance Trade) -->
-        <div class="lg:col-span-5 bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm flex flex-col justify-between">
+        <!-- Right: Order Ticket & Interactive Execution (5 Cols) -->
+        <div class="lg:col-span-5 bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-xs flex flex-col justify-between">
             <div>
-                <!-- Buy / Sell Order Toggle Switch -->
-                <div class="grid grid-cols-2 p-1 rounded-2xl bg-slate-100 dark:bg-dark-800 mb-5 border border-slate-200/60 dark:border-dark-750">
+                <!-- Buy / Sell Order Toggle Switch (Pill Style) -->
+                <div class="grid grid-cols-2 p-1.5 rounded-full bg-slate-100 dark:bg-dark-800 mb-5 border border-slate-200/60 dark:border-dark-750">
                     <button @click="side = 'BUY'" 
-                            :class="side === 'BUY' ? 'bg-emerald-600 text-white font-black shadow-md' : 'text-slate-500 font-bold hover:text-slate-800 dark:hover:text-white'"
-                            class="py-2.5 text-xs rounded-xl transition-all">
-                        BUY {{ asset.symbol }}
+                            :class="side === 'BUY' ? 'bg-primary text-white font-black shadow-md' : 'text-slate-500 font-bold hover:text-slate-800 dark:hover:text-white'"
+                            class="py-2.5 text-xs rounded-full transition-all flex items-center justify-center gap-1.5">
+                        <i class="fas fa-plus text-[10px]" x-show="side === 'BUY'"></i>
+                        <span>BUY {{ asset.symbol }}</span>
                     </button>
                     <button @click="side = 'SELL'" 
-                            :class="side === 'SELL' ? 'bg-rose-600 text-white font-black shadow-md' : 'text-slate-500 font-bold hover:text-slate-800 dark:hover:text-white'"
-                            class="py-2.5 text-xs rounded-xl transition-all">
-                        SELL {{ asset.symbol }}
+                            :class="side === 'SELL' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black shadow-md' : 'text-slate-500 font-bold hover:text-slate-800 dark:hover:text-white'"
+                            class="py-2.5 text-xs rounded-full transition-all flex items-center justify-center gap-1.5">
+                        <i class="fas fa-minus text-[10px]" x-show="side === 'SELL'"></i>
+                        <span>SELL {{ asset.symbol }}</span>
                     </button>
                 </div>
 
                 <!-- Order Type & Buying Power Notice -->
                 <div class="flex items-center justify-between text-xs mb-4">
                     <div class="flex items-center gap-2">
-                        <span class="text-slate-400">Order:</span>
-                        <select x-model="orderType" class="bg-slate-100 dark:bg-dark-800 text-slate-900 dark:text-white rounded-xl px-2.5 py-1 font-bold text-xs outline-none">
+                        <span class="text-slate-400 font-medium">Order Type:</span>
+                        <select x-model="orderType" class="bg-slate-100 dark:bg-dark-800 text-slate-900 dark:text-white rounded-full px-3 py-1 font-bold text-xs outline-none border border-slate-200 dark:border-dark-700">
                             <option value="MARKET">Market Order</option>
                             <option value="LIMIT">Limit Order</option>
                         </select>
@@ -196,11 +223,32 @@
                     </div>
                 </div>
 
-                <!-- Quantity & Amount Inputs (Image 1 style) -->
-                <div class="bg-slate-50 dark:bg-dark-800/80 p-4 rounded-2xl border border-slate-200/60 dark:border-dark-750 mb-4">
-                    <div class="flex justify-between items-center mb-1 text-xs">
-                        <span class="font-semibold text-slate-400">Order Quantity</span>
-                        <span class="font-semibold text-pesa-600 dark:text-pesa-400" x-text="'Price: ' + currentPrice + ' ' + assetCurrency"></span>
+                {% if is_bond %}
+                <!-- Special Government Securities Banner -->
+                <div class="mb-4 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between gap-3 text-xs">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white dark:bg-dark-800 p-1.5 border border-emerald-500/30 flex-shrink-0 flex items-center justify-center">
+                            <img src="/static/logos/cbk.svg" alt="CBK" class="w-full h-full object-contain">
+                        </div>
+                        <div>
+                            <span class="font-black text-slate-900 dark:text-white block">Government Security &bull; YTM {{ asset.yield_to_maturity }}%</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">Coupon: {{ asset.coupon_rate }}% &bull; Maturity: {{ asset.maturity_date }}</span>
+                        </div>
+                    </div>
+                    <a href="{% url 'bonds' %}?symbol={{ asset.symbol }}" 
+                       class="px-3.5 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 transition-colors flex-shrink-0 shadow-xs">
+                        <span>CBK Desk</span>
+                        <i class="fas fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Quantity & Amount Inputs -->
+                <div class="bg-slate-50 dark:bg-dark-800/80 p-5 rounded-3xl border border-slate-200/60 dark:border-dark-750 mb-5">
+                    <div class="flex justify-between items-center mb-2 text-xs">
+                        <span class="font-bold text-slate-400 uppercase tracking-wider text-[10px]" x-text="isBond ? 'Order Units (Lots)' : 'Order Quantity'">Order Quantity</span>
+                        <span class="font-bold text-primary" 
+                              x-text="isBond ? ('Price: ' + currentPrice + '% of Par') : ('Price: ' + currentPrice + ' ' + assetCurrency)"></span>
                     </div>
 
                     <div class="flex items-center justify-between">
@@ -210,47 +258,57 @@
                                step="1"
                                class="bg-transparent border-none outline-none font-mono text-3xl font-black text-slate-900 dark:text-white w-2/3" 
                                placeholder="0">
-                        <span class="text-xs font-bold font-mono uppercase text-slate-400 bg-white dark:bg-dark-750 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-dark-700">
+                        <span class="text-xs font-bold font-mono uppercase text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-750 px-3.5 py-1.5 rounded-full border border-slate-200/80 dark:border-dark-700 shadow-2xs"
+                              x-text="isBond ? 'Units / Lots' : 'Shares'">
                             Shares
                         </span>
                     </div>
 
+                    <template x-if="isBond">
+                        <div class="mt-3 text-[11px] font-mono text-slate-500 flex justify-between pt-2 border-t border-slate-200/60 dark:border-dark-700">
+                            <span>Face Value per Lot: KES <strong x-text="unitFaceValue.toLocaleString()"></strong></span>
+                            <span>Total Face Value: KES <strong class="text-emerald-500" x-text="(quantity * unitFaceValue).toLocaleString()"></strong></span>
+                        </div>
+                    </template>
+
                     <!-- Shortcut Percentage Buttons -->
                     <div class="grid grid-cols-4 gap-2 mt-4 pt-3 border-t border-slate-200/60 dark:border-dark-700 text-xs">
-                        <button @click="setQuantityPercent(0.25)" class="py-1 rounded-lg bg-white dark:bg-dark-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-pesa-500 hover:text-white transition-colors">25%</button>
-                        <button @click="setQuantityPercent(0.50)" class="py-1 rounded-lg bg-white dark:bg-dark-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-pesa-500 hover:text-white transition-colors">50%</button>
-                        <button @click="setQuantityPercent(0.75)" class="py-1 rounded-lg bg-white dark:bg-dark-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-pesa-500 hover:text-white transition-colors">75%</button>
-                        <button @click="setQuantityPercent(1.00)" class="py-1 rounded-lg bg-white dark:bg-dark-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-pesa-500 hover:text-white transition-colors">MAX</button>
+                        <button @click="setQuantityPercent(0.25)" class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-primary hover:text-white border border-slate-200/60 dark:border-dark-600 transition-all text-xs">25%</button>
+                        <button @click="setQuantityPercent(0.50)" class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-primary hover:text-white border border-slate-200/60 dark:border-dark-600 transition-all text-xs">50%</button>
+                        <button @click="setQuantityPercent(0.75)" class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-primary hover:text-white border border-slate-200/60 dark:border-dark-600 transition-all text-xs">75%</button>
+                        <button @click="setQuantityPercent(1.00)" class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-primary hover:text-white border border-slate-200/60 dark:border-dark-600 transition-all text-xs">MAX</button>
                     </div>
                 </div>
 
                 <!-- Order Calculation Summary -->
-                <div class="space-y-2 text-xs mb-6 px-1">
-                    <div class="flex justify-between text-slate-400">
-                        <span>Estimated Value:</span>
-                        <span class="font-mono font-bold text-slate-800 dark:text-slate-200" x-text="assetCurrency + ' ' + (quantity * currentPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})">KES 0.00</span>
+                <div class="space-y-2.5 text-xs mb-6 px-1">
+                    <div class="flex justify-between text-slate-500 dark:text-slate-400">
+                        <span x-text="isBond ? 'Nominal Face Value:' : 'Estimated Value:'">Estimated Value:</span>
+                        <span class="font-mono font-bold text-slate-800 dark:text-slate-200" 
+                              x-text="isBond ? ('KES ' + (quantity * unitFaceValue).toLocaleString()) : (assetCurrency + ' ' + (quantity * currentPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}))">KES 0.00</span>
                     </div>
-                    <div class="flex justify-between text-slate-400">
+                    <div class="flex justify-between text-slate-500 dark:text-slate-400">
                         <span>Trading Commission:</span>
                         <span class="font-bold text-emerald-500">FREE ($0.00)</span>
                     </div>
-                    <div class="flex justify-between text-slate-400">
+                    <div class="flex justify-between text-slate-500 dark:text-slate-400">
                         <span>Estimated Execution:</span>
-                        <span class="font-bold text-slate-700 dark:text-slate-300">Instant (Fill or Kill)</span>
+                        <span class="font-bold text-slate-700 dark:text-slate-300" x-text="isBond ? 'Primary / OTC Settlement' : 'Instant (Fill or Kill)'">Instant (Fill or Kill)</span>
                     </div>
-                    <div class="pt-2 border-t border-slate-100 dark:border-dark-800 flex justify-between text-sm font-bold text-slate-900 dark:text-white">
+                    <div class="pt-3 border-t border-slate-100 dark:border-dark-800 flex justify-between text-sm font-bold text-slate-900 dark:text-white">
                         <span>Total Estimated Cost:</span>
-                        <span class="font-mono text-base font-black text-pesa-600 dark:text-pesa-400" x-text="assetCurrency + ' ' + (quantity * currentPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})">KES 0.00</span>
+                        <span class="font-mono text-base font-black text-primary" 
+                              x-text="isBond ? ('KES ' + (quantity * unitFaceValue * (currentPrice / 100.0)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})) : (assetCurrency + ' ' + (quantity * currentPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}))">KES 0.00</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Execution Action Button (Image 1 Swift to send style) -->
+            <!-- Execution Action Button (Pill style CTA) -->
             <div>
                 <button @click="executeTrade()" 
                         :disabled="quantity <= 0 || isExecuting"
-                        :class="side === 'BUY' ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-rose-600 hover:bg-rose-500'"
-                        class="w-full py-4 rounded-2xl text-white font-extrabold text-sm shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
+                        :class="side === 'BUY' ? 'bg-primary hover:bg-[#E00B41] shadow-primary/25' : 'bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 shadow-slate-900/25'"
+                        class="w-full py-4 rounded-full text-white font-extrabold text-sm shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
                     <template x-if="!isExecuting">
                         <span class="flex items-center gap-2">
                             <span x-text="side === 'BUY' ? 'Execute Buy Order' : 'Execute Sell Order'"></span>
@@ -263,7 +321,7 @@
                         </span>
                     </template>
                 </button>
-                <p class="text-[11px] text-center text-slate-400 mt-2">Zero-slippage simulated execution via PesaMarkets Engine.</p>
+                <p class="text-[11px] text-center text-slate-400 mt-2.5">Zero-slippage simulated execution via PesaMarkets Engine.</p>
             </div>
         </div>
 
@@ -279,10 +337,14 @@
             <h3 class="text-lg font-black text-slate-900 dark:text-white">Order Filled Successfully!</h3>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" x-text="receiptMessage">Order filled.</p>
 
-            <div class="my-5 p-4 rounded-2xl bg-slate-50 dark:bg-dark-800 text-left text-xs space-y-2">
+            <div class="my-5 p-4 rounded-2xl bg-slate-50 dark:bg-dark-800 text-left text-xs space-y-2 border border-slate-100 dark:border-dark-750">
                 <div class="flex justify-between">
                     <span class="text-slate-400">Order ID:</span>
                     <span class="font-mono font-bold text-slate-800 dark:text-slate-200" x-text="receiptId">TX-9025</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Asset:</span>
+                    <span class="font-bold text-slate-800 dark:text-slate-200">{{ asset.symbol }} ({{ asset.name }})</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-slate-400">Status:</span>
@@ -291,10 +353,10 @@
             </div>
 
             <div class="flex gap-3">
-                <button @click="orderReceiptModal = false" class="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-dark-800 font-bold text-xs text-slate-700 dark:text-slate-300">
+                <button @click="orderReceiptModal = false" class="flex-1 py-3 rounded-full bg-slate-100 dark:bg-dark-800 font-bold text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750 transition-colors">
                     Done
                 </button>
-                <a href="{% url 'portfolio' %}" class="flex-1 py-2.5 rounded-xl bg-pesa-600 text-white font-bold text-xs hover:bg-pesa-500">
+                <a href="{% url 'portfolio' %}" class="flex-1 py-3 rounded-full bg-primary text-white font-bold text-xs hover:bg-[#E00B41] transition-colors shadow-xs">
                     View Portfolio
                 </a>
             </div>
@@ -312,9 +374,11 @@
             symbol: '{{ asset.symbol }}',
             currentPrice: {{ asset.price }},
             assetCurrency: '{{ asset.currency }}',
+            isBond: '{{ asset.category }}' === 'bonds',
+            unitFaceValue: {{ asset.face_value|default:100000 }},
             side: 'BUY',
             orderType: 'MARKET',
-            quantity: 10,
+            quantity: ('{{ asset.category }}' === 'bonds' ? 2 : 10),
             isExecuting: false,
             orderReceiptModal: false,
             receiptMessage: '',
@@ -466,15 +530,20 @@
                 this.isExecuting = true;
 
                 try {
+                    const payload = {
+                        symbol: this.symbol,
+                        action: this.side,
+                        quantity: this.quantity,
+                        order_type: this.orderType
+                    };
+                    if (this.isBond) {
+                        payload.face_value = this.quantity * this.unitFaceValue;
+                    }
+
                     const res = await fetch('/api/trade/execute/', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            symbol: this.symbol,
-                            action: this.side,
-                            quantity: this.quantity,
-                            order_type: this.orderType
-                        })
+                        body: JSON.stringify(payload)
                     });
                     const d = await res.json();
                     if(d.success) {

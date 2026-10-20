@@ -8,7 +8,14 @@ from .data import (
     FINANCIAL_NEWS,
     USER_PORTFOLIO,
     WATCHLISTS,
-    EXCHANGE_RATES
+    EXCHANGE_RATES,
+    get_terminal_data,
+    get_bonds_data,
+    BONDS_CATALOG,
+    BOND_PORTFOLIO,
+    execute_bond_purchase,
+    CBK_AUCTION_CALENDAR,
+    CBK_RECENT_AUCTIONS
 )
 
 def get_market_movers():
@@ -53,6 +60,10 @@ def markets_list(request):
     
     if category == 'equities':
         filtered = [a for a in all_assets if a['category'] == 'equities']
+    elif category == 'bonds':
+        filtered = [a for a in all_assets if a.get('category') == 'bonds']
+    elif category == 'tbills':
+        filtered = [a for a in all_assets if a.get('subcategory') == 'tbill']
     elif category == 'crypto':
         filtered = [a for a in all_assets if a['category'] == 'crypto']
     elif category == 'commodities':
@@ -124,12 +135,17 @@ def portfolio(request):
         "percent": round((cash_val / total_val) * 100, 1)
     })
     
+    bonds_data = get_bonds_data()
+    bond_portfolio = bonds_data["bond_portfolio"]
+
     context = {
         "indices": MARKET_INDICES,
         "portfolio": USER_PORTFOLIO,
+        "bond_portfolio": bond_portfolio,
         "allocation": allocation,
         "allocation_json": json.dumps(allocation),
-        "page_title": "Portfolio",
+        "recent_transactions": USER_PORTFOLIO.get("transactions", []),
+        "page_title": "Portfolio Holdings & Fixed Income",
         "active_tab": "portfolio"
     }
     return render(request, 'markets/portfolio.html', context)
@@ -159,6 +175,8 @@ def trade(request):
         "asset": asset,
         "asset_json": json.dumps(asset),
         "all_assets": list(ASSETS.values()),
+        "bonds_catalog": list(BONDS_CATALOG.values()),
+        "is_bond": asset.get('category') == 'bonds',
         "portfolio": USER_PORTFOLIO,
         "page_title": f"Trade {asset['symbol']}",
         "active_tab": "trade"
@@ -205,7 +223,63 @@ def profile(request):
     }
     return render(request, 'markets/profile.html', context)
 
+def terminal(request):
+    symbol = request.GET.get('symbol', 'SCOM').upper()
+    asset = ASSETS.get(symbol, ASSETS.get('SCOM'))
+    terminal_data = get_terminal_data(asset['symbol'])
+    
+    context = {
+        "indices": MARKET_INDICES,
+        "asset": asset,
+        "symbol": asset['symbol'],
+        "terminal_data": terminal_data,
+        "terminal_json": json.dumps(terminal_data),
+        "all_assets": list(ASSETS.values()),
+        "portfolio": USER_PORTFOLIO,
+        "page_title": f"Terminal Pro | {asset['symbol']} - {asset['name']}",
+        "active_tab": "terminal"
+    }
+    return render(request, 'markets/terminal.html', context)
+
+def bonds_page(request):
+    selected_symbol = request.GET.get('symbol', '').upper()
+    bonds_data = get_bonds_data()
+
+    # If a specific bond is selected, provide it for the order ticket
+    selected_bond = None
+    if selected_symbol and selected_symbol in BONDS_CATALOG:
+        selected_bond = BONDS_CATALOG[selected_symbol]
+
+    context = {
+        "indices": MARKET_INDICES,
+        "bonds_data": bonds_data,
+        "bonds_json": json.dumps(bonds_data, default=str),
+        "all_bonds": bonds_data["all_bonds"],
+        "all_bonds_json": json.dumps(bonds_data["all_bonds"], default=str),
+        "tbills": bonds_data["tbills"],
+        "govt_bonds": bonds_data["govt_bonds"],
+        "yield_ladder": bonds_data["yield_ladder"],
+        "auction_calendar": bonds_data["auction_calendar"],
+        "recent_auctions": bonds_data["recent_auctions"],
+        "bond_portfolio": bonds_data["bond_portfolio"],
+        "bond_portfolio_json": json.dumps(bonds_data["bond_portfolio"], default=str),
+        "yield_curves": bonds_data["yield_curves"],
+        "selected_bond": selected_bond,
+        "selected_bond_json": json.dumps(selected_bond, default=str) if selected_bond else "null",
+        "portfolio": USER_PORTFOLIO,
+        "page_title": "Bonds & Treasury Bills",
+        "active_tab": "bonds"
+    }
+    return render(request, 'markets/bonds.html', context)
+
 # --- AJAX / JSON REST APIs ---
+
+def api_terminal_data(request, symbol):
+    symbol_upper = symbol.upper()
+    if symbol_upper not in ASSETS:
+        return JsonResponse({"error": "Symbol not found"}, status=404)
+    data = get_terminal_data(symbol_upper)
+    return JsonResponse(data)
 
 def api_search(request):
     query = request.GET.get('q', '').strip().lower()
@@ -223,7 +297,9 @@ def api_search(request):
                 "change": asset["change"],
                 "change_percent": asset["change_percent"],
                 "category": asset["category"],
-                "market": asset["market"]
+                "market": asset["market"],
+                "logo": asset.get("logo", ""),
+                "image": asset.get("image", "")
             })
     return JsonResponse({"results": matches[:8]})
 
@@ -243,19 +319,48 @@ def api_trade_execute(request):
         action = data.get('action', 'BUY').upper()
         quantity = float(data.get('quantity', 0))
         order_type = data.get('order_type', 'MARKET')
+        face_value = data.get('face_value')
+        bid_yield = data.get('bid_yield')
+        channel = data.get('channel', 'CBK_DHOWCSD')
         
         asset = ASSETS.get(symbol)
         if not asset or quantity <= 0:
             return JsonResponse({"error": "Invalid asset or quantity"}, status=400)
             
+        # Route to Bond execution if the asset is a fixed income security
+        if asset.get('category') == 'bonds':
+            ok, msg, receipt = execute_bond_purchase(
+                symbol=symbol,
+                face_value=face_value,
+                units=quantity,
+                order_type=order_type,
+                bid_yield=bid_yield,
+                channel=channel
+            )
+            if not ok:
+                return JsonResponse({"error": msg}, status=400)
+            return JsonResponse({
+                "success": True,
+                "message": msg,
+                "transaction": receipt.get("transaction"),
+                "receipt": receipt
+            })
+
         unit_price = asset['price']
         total_amount = round(unit_price * quantity, 2)
+        cost_usd = round(total_amount / 130.0, 2) if asset['currency'] == 'KES' else total_amount
+
+        # Deduct simulated cash if BUY
+        if action == 'BUY' and USER_PORTFOLIO.get('cash_balance_usd', 0) > 0:
+            USER_PORTFOLIO['cash_balance_usd'] = max(0.0, round(USER_PORTFOLIO['cash_balance_usd'] - cost_usd, 2))
         
         # Simulated execution
         new_tx = {
             "id": f"TX-{len(USER_PORTFOLIO['transactions']) + 9022}",
             "asset_symbol": symbol,
             "asset_name": asset['name'],
+            "logo": asset.get('logo', ''),
+            "image": asset.get('image', ''),
             "type": action,
             "shares": f"{quantity:g} {'Shares' if asset['category'] == 'equities' else symbol}",
             "price": f"{asset['currency']} {unit_price:,.2f}",
@@ -269,6 +374,43 @@ def api_trade_execute(request):
             "success": True,
             "message": f"Successfully executed {action} order for {quantity:g} {symbol} at {asset['currency']} {unit_price:,.2f}",
             "transaction": new_tx
+        })
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@csrf_exempt
+def api_bonds_buy(request):
+    """
+    Dedicated endpoint for purchasing Kenya Government Bonds & Treasury Bills
+    via CBK DhowCSD Primary Auction or NSE Secondary Market.
+    """
+    if request.method != 'POST':
+        return JsonResponse({"error": "POST method required"}, status=405)
+    try:
+        data = json.loads(request.body)
+        symbol = data.get('symbol', '').upper()
+        face_value = data.get('face_value')
+        units = data.get('units') or data.get('quantity')
+        order_type = data.get('order_type', 'AUCTION_NON_COMPETITIVE')
+        bid_yield = data.get('bid_yield')
+        channel = data.get('channel', 'CBK_DHOWCSD')
+        
+        ok, msg, receipt = execute_bond_purchase(
+            symbol=symbol,
+            face_value=face_value,
+            units=units,
+            order_type=order_type,
+            bid_yield=bid_yield,
+            channel=channel
+        )
+        if not ok:
+            return JsonResponse({"error": msg}, status=400)
+            
+        return JsonResponse({
+            "success": True,
+            "message": msg,
+            "receipt": receipt,
+            "transaction": receipt.get("transaction")
         })
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

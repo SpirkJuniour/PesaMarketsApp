@@ -1,0 +1,880 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6 md:space-y-8" x-data="bondsDeskController()">
+    
+    <!-- ========================================== -->
+    <!-- 1. FIXED INCOME DESK HEADER & MACRO TILES  -->
+    <!-- ========================================== -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-start gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-white dark:bg-dark-800 p-2.5 border border-slate-200/80 dark:border-dark-750 flex items-center justify-center shadow-xs flex-shrink-0">
+                <img src="/static/logos/cbk.svg" alt="Central Bank of Kenya" class="w-full h-full object-contain">
+            </div>
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span> CBK Primary Auction System (DhowCSD) Active
+                    </span>
+                    <span class="text-xs text-slate-400">&bull; NSE Secondary Fixed Income OTC</span>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                    Government Bonds & Treasury Bills Desk
+                </h1>
+                <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                    Direct CBK primary auction bidding, secondary market OTC settlement, yield curves, and portfolio cashflow analytics.
+                </p>
+            </div>
+        </div>
+
+        <!-- Quick Desk Actions -->
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <button @click="scrollToOrderTicket()" 
+                    class="px-5 py-2.5 rounded-full bg-primary hover:bg-[#E00B41] text-white font-bold text-xs shadow-md shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2">
+                <i class="fas fa-hand-holding-dollar"></i>
+                <span>Place Auction Bid / Buy</span>
+            </button>
+            <a href="{% url 'portfolio' %}" 
+               class="px-4 py-2.5 rounded-full bg-white dark:bg-dark-850 hover:bg-slate-50 dark:hover:bg-dark-800 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-dark-750 text-xs font-bold shadow-xs transition-all flex items-center gap-2">
+                <i class="fas fa-wallet text-slate-400"></i>
+                <span>Fixed Income Portfolio</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Macro Indicators Ribbon -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-white dark:bg-dark-850 p-4 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">CBK Policy Rate (CBR)</span>
+            <div class="flex items-baseline justify-between">
+                <span class="text-lg font-black font-mono text-slate-900 dark:text-white">12.75%</span>
+                <span class="text-[11px] font-bold text-slate-400">Neutral</span>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-dark-850 p-4 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">91-Day T-Bill Benchmark</span>
+            <div class="flex items-baseline justify-between">
+                <span class="text-lg font-black font-mono text-emerald-600 dark:text-emerald-400">15.72%</span>
+                <span class="text-[11px] font-bold text-emerald-500">-8 bps</span>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-dark-850 p-4 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">10-Yr IFB (Tax-Exempt)</span>
+            <div class="flex items-baseline justify-between">
+                <span class="text-lg font-black font-mono text-primary">17.85%</span>
+                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-primary/10 text-primary">0% WHT</span>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-dark-850 p-4 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">2Y - 10Y Sovereign Spread</span>
+            <div class="flex items-baseline justify-between">
+                <span class="text-lg font-black font-mono text-blue-500">+100 bps</span>
+                <span class="text-[11px] font-bold text-slate-400">Normal Slope</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. INTERACTIVE BUY & AUCTION BID TICKET    -->
+    <!-- (The Core Feature: Buy Bonds & T-Bills)     -->
+    <!-- ========================================== -->
+    <div id="bondOrderTicket" class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-md overflow-hidden relative">
+        <div class="absolute -right-16 -top-16 w-56 h-56 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        <!-- Ticket Header Banner -->
+        <div class="p-5 sm:p-6 bg-slate-50/60 dark:bg-dark-900/60 border-b border-slate-100 dark:border-dark-750 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-2xl bg-white dark:bg-dark-800 p-2 border border-slate-200 dark:border-dark-750 flex items-center justify-center shadow-xs flex-shrink-0">
+                    <img src="/static/logos/cbk.svg" alt="CBK" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-lg font-black text-slate-900 dark:text-white">Institutional Order Ticket & Allotment Engine</h2>
+                        <span class="text-[10px] font-black uppercase tracking-wider bg-primary text-white px-2.5 py-0.5 rounded-full">LIVE DESK</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        Subscribe to CBK primary auctions or execute on the secondary OTC debt market with zero broker commissions.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Execution Route Switcher (Pill Style) -->
+            <div class="flex bg-slate-100 dark:bg-dark-800 p-1 rounded-full border border-slate-200/60 dark:border-dark-750 text-xs font-bold">
+                <button type="button" @click="executionRoute = 'AUCTION'" 
+                        :class="executionRoute === 'AUCTION' ? 'bg-white dark:bg-dark-900 text-primary shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'"
+                        class="px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5">
+                    <i class="fas fa-gavel text-[10px]"></i>
+                    <span>Primary CBK Auction (DhowCSD)</span>
+                </button>
+                <button type="button" @click="executionRoute = 'SECONDARY'" 
+                        :class="executionRoute === 'SECONDARY' ? 'bg-white dark:bg-dark-900 text-primary shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'"
+                        class="px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5">
+                    <i class="fas fa-bolt text-[10px]"></i>
+                    <span>Secondary Market OTC (Instant)</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left 7 Cols: Security Selector & Order Configuration -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Security Selector Cards -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">
+                        1. Select Government Security
+                    </label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <template x-for="item in catalogList" :key="item.symbol">
+                            <button type="button" @click="selectSecurity(item.symbol)"
+                                    :class="selectedSymbol === item.symbol ? 'border-primary bg-primary/5 ring-2 ring-primary/20 dark:bg-primary/10 text-primary font-bold' : 'border-slate-200/80 dark:border-dark-750 bg-slate-50/50 dark:bg-dark-800 text-slate-700 dark:text-slate-300 hover:border-slate-300'"
+                                    class="p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between group shadow-2xs">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-lg bg-white dark:bg-dark-750 p-1 border border-slate-200/60 dark:border-dark-700 flex items-center justify-center">
+                                            <img :src="item.logo || '/static/logos/cbk.svg'" alt="CBK" class="w-full h-full object-contain">
+                                        </div>
+                                        <span class="font-mono font-black text-xs" x-text="item.symbol"></span>
+                                    </div>
+                                    <span class="text-[9px] uppercase font-extrabold px-1.5 py-0.5 rounded-full"
+                                          :class="item.tax_exempt ? 'bg-primary text-white' : (item.subcategory === 'tbill' ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400')"
+                                          x-text="item.tax_exempt ? 'TAX-FREE' : (item.subcategory === 'tbill' ? 'T-BILL' : 'BOND')"></span>
+                                </div>
+                                <div class="text-[11px] font-semibold text-slate-800 dark:text-slate-200 truncate" x-text="item.name"></div>
+                                <div class="mt-2.5 pt-2 border-t border-slate-200/60 dark:border-dark-700 flex items-center justify-between text-[11px]">
+                                    <span class="text-slate-400">YTM:</span>
+                                    <span class="font-mono font-black text-emerald-600 dark:text-emerald-400" x-text="item.yield_to_maturity + '%'"></span>
+                                </div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Bidding Type Selection (If Primary Auction) -->
+                <div x-show="executionRoute === 'AUCTION'" class="bg-slate-50 dark:bg-dark-800/60 p-4 rounded-3xl border border-slate-200/60 dark:border-dark-750">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Bidding Mode</label>
+                        <span class="text-[10px] text-slate-400">Retail & Institutional Auction Standards</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <label @click="bidType = 'NON_COMPETITIVE'" 
+                                :class="bidType === 'NON_COMPETITIVE' ? 'border-primary bg-white dark:bg-dark-850 shadow-xs ring-1 ring-primary' : 'border-slate-200 dark:border-dark-700 bg-transparent'"
+                                class="p-3.5 rounded-2xl border cursor-pointer flex items-start gap-2.5 transition-all">
+                            <input type="radio" name="bidType" value="NON_COMPETITIVE" x-model="bidType" class="mt-0.5 text-primary focus:ring-primary">
+                            <div>
+                                <span class="font-bold text-slate-900 dark:text-white block">Non-Competitive Bid</span>
+                                <span class="text-[11px] text-slate-400 block mt-0.5">Guaranteed allotment. Takes weighted average accepted yield (Up to KES 20M).</span>
+                            </div>
+                        </label>
+
+                        <label @click="bidType = 'COMPETITIVE'" 
+                                :class="bidType === 'COMPETITIVE' ? 'border-primary bg-white dark:bg-dark-850 shadow-xs ring-1 ring-primary' : 'border-slate-200 dark:border-dark-700 bg-transparent'"
+                                class="p-3.5 rounded-2xl border cursor-pointer flex items-start gap-2.5 transition-all">
+                            <input type="radio" name="bidType" value="COMPETITIVE" x-model="bidType" class="mt-0.5 text-primary focus:ring-primary">
+                            <div>
+                                <span class="font-bold text-slate-900 dark:text-white block">Competitive Bid</span>
+                                <span class="text-[11px] text-slate-400 block mt-0.5">Specify desired bidding yield rate. Subject to CBK cut-off yield.</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Custom Bidding Yield Rate (Only if Competitive) -->
+                    <div x-show="bidType === 'COMPETITIVE'" class="mt-3 pt-3 border-t border-slate-200/60 dark:border-dark-700 flex items-center justify-between gap-4">
+                        <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Your Target Bidding Yield (% p.a.):</span>
+                        <div class="flex items-center gap-2">
+                            <input type="number" step="0.01" min="5" max="30" x-model.number="bidYield" 
+                                   class="w-28 bg-white dark:bg-dark-850 border border-slate-200 dark:border-dark-700 px-3 py-1.5 rounded-full text-xs font-mono font-bold text-right outline-none focus:ring-2 focus:ring-primary">
+                            <span class="text-xs font-bold text-slate-500">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Face Value & Amount Configuration -->
+                <div class="bg-slate-50 dark:bg-dark-800/80 p-5 rounded-3xl border border-slate-200/60 dark:border-dark-750">
+                    <div class="flex justify-between items-center mb-1 text-xs">
+                        <span class="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">
+                            2. Investment Face Value (Nominal Amount)
+                        </span>
+                        <span class="font-semibold text-emerald-600 dark:text-emerald-400" 
+                              x-text="'Min Lot: KES ' + activeSecurity.face_value.toLocaleString()"></span>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-4 mt-2">
+                        <div class="relative flex-1">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400 text-sm">KES</span>
+                            <input type="number" 
+                                   x-model.number="faceValue" 
+                                   :min="activeSecurity.face_value" 
+                                   :step="activeSecurity.face_value"
+                                   @input="onFaceValueInput()"
+                                   class="w-full pl-16 pr-4 py-2.5 bg-white dark:bg-dark-900 border border-slate-200 dark:border-dark-700 rounded-2xl font-mono text-2xl font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-primary" 
+                                   placeholder="100,000">
+                        </div>
+
+                        <div class="text-right flex-shrink-0">
+                            <span class="block text-[10px] uppercase font-semibold text-slate-400">Total Lots</span>
+                            <span class="font-mono text-lg font-bold text-slate-800 dark:text-slate-200" x-text="units + ' Units'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Shortcut Quick Amount Chips (Pills) -->
+                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-4 pt-3 border-t border-slate-200/60 dark:border-dark-700 text-xs">
+                        <button type="button" @click="setFaceValue(50000)" :disabled="activeSecurity.subcategory === 'tbill'"
+                                class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-primary hover:text-white border border-slate-200/60 dark:border-dark-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-xs">
+                            50K
+                        </button>
+                        <button type="button" @click="setFaceValue(100000)" 
+                                class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-primary hover:text-white border border-slate-200/60 dark:border-dark-600 transition-colors text-xs">
+                            100K
+                        </button>
+                        <button type="button" @click="setFaceValue(250000)" 
+                                class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-primary hover:text-white border border-slate-200/60 dark:border-dark-600 transition-colors text-xs">
+                            250K
+                        </button>
+                        <button type="button" @click="setFaceValue(500000)" 
+                                class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-primary hover:text-white border border-slate-200/60 dark:border-dark-600 transition-colors text-xs">
+                            500K
+                        </button>
+                        <button type="button" @click="setFaceValue(1000000)" 
+                                class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-primary hover:text-white border border-slate-200/60 dark:border-dark-600 transition-colors text-xs">
+                            1.0M
+                        </button>
+                        <button type="button" @click="setFaceValue(5000000)" 
+                                class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-primary hover:text-white border border-slate-200/60 dark:border-dark-600 transition-colors text-xs">
+                            5.0M
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Settlement Account Choice -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-400 font-medium">Settlement Route:</span>
+                        <select x-model="settlementAccount" class="bg-slate-100 dark:bg-dark-800 text-slate-800 dark:text-slate-200 font-bold text-xs rounded-full px-3.5 py-1.5 outline-none border border-slate-200 dark:border-dark-700">
+                            <option value="DHOWCSD">Central Depository (CBK DhowCSD #CD-884192)</option>
+                            <option value="WALLET">PesaMarkets Multi-Currency Trading Balance</option>
+                            <option value="RTGS">Direct Bank Wire / RTGS Settlement</option>
+                        </select>
+                    </div>
+                    <div class="text-slate-400">
+                        Trading Balance: <span class="font-mono font-bold text-slate-800 dark:text-slate-200" x-text="formatPrice(5212.17)">$5,212.17</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right 5 Cols: Financial Breakdown Card & Submit Action -->
+            <div class="lg:col-span-5 bg-gradient-to-br from-[#222222] via-dark-850 to-[#222222] text-white p-6 rounded-3xl border border-slate-800 flex flex-col justify-between shadow-xl">
+                
+                <div>
+                    <!-- Card Header -->
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-white/10 p-1.5 flex items-center justify-center flex-shrink-0">
+                                <img src="/static/logos/cbk.svg" alt="CBK" class="w-full h-full object-contain">
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-mono text-primary uppercase tracking-widest block font-bold">ALLOTMENT SUMMARY</span>
+                                <h3 class="text-base font-black tracking-tight" x-text="activeSecurity.name"></h3>
+                            </div>
+                        </div>
+                        <span class="font-mono text-xs px-2.5 py-1 rounded-full bg-white/10 text-slate-300 font-bold" x-text="activeSecurity.symbol"></span>
+                    </div>
+
+                    <!-- Comprehensive Breakdown Table -->
+                    <div class="space-y-3.5 my-5 text-xs">
+                        <div class="flex justify-between items-center text-slate-400">
+                            <span>Nominal Face Value:</span>
+                            <span class="font-mono font-bold text-white text-sm" x-text="'KES ' + faceValue.toLocaleString()"></span>
+                        </div>
+
+                        <div class="flex justify-between items-center text-slate-400">
+                            <span>Issue / Clean Price:</span>
+                            <span class="font-mono font-bold text-white" x-text="activeSecurity.price.toFixed(2) + '% of Par'"></span>
+                        </div>
+
+                        <div class="flex justify-between items-center text-slate-400">
+                            <span>Yield to Maturity (YTM):</span>
+                            <span class="font-mono font-black text-emerald-400 text-sm" x-text="activeSecurity.yield_to_maturity + '% p.a.'"></span>
+                        </div>
+
+                        <div class="flex justify-between items-center text-slate-400">
+                            <span>Coupon Rate:</span>
+                            <span class="font-mono font-bold text-white" 
+                                  x-text="activeSecurity.subcategory === 'tbill' ? '0.00% (Zero Coupon Discount)' : activeSecurity.coupon_rate + '% p.a. Semi-Annual'"></span>
+                        </div>
+
+                        <div x-show="activeSecurity.subcategory === 'bond'" class="flex justify-between items-center text-slate-400">
+                            <span>Semi-Annual Coupon Payout:</span>
+                            <span class="font-mono font-bold text-primary" x-text="'KES ' + calculateSemiAnnualCoupon().toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"></span>
+                        </div>
+
+                        <div class="flex justify-between items-center text-slate-400">
+                            <span>Tax Status:</span>
+                            <span class="font-bold" 
+                                  :class="activeSecurity.tax_exempt ? 'text-primary' : 'text-slate-300'"
+                                  x-text="activeSecurity.tax_exempt ? 'Tax Exempt (0% WHT)' : '15% Withholding Tax'"></span>
+                        </div>
+
+                        <div class="flex justify-between items-center text-slate-400">
+                            <span>Maturity Date:</span>
+                            <span class="font-mono font-bold text-white" x-text="activeSecurity.maturity_date + ' (' + activeSecurity.maturity_days + ' Days)'"></span>
+                        </div>
+
+                        <div class="flex justify-between items-center text-slate-400">
+                            <span>Est. Capital Gain / Return:</span>
+                            <span class="font-mono font-bold text-emerald-400" x-text="'KES ' + calculateNetReturn().toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"></span>
+                        </div>
+
+                        <!-- Grand Total Settlement Payable -->
+                        <div class="pt-4 border-t border-slate-800 flex justify-between items-baseline">
+                            <div>
+                                <span class="text-xs uppercase font-extrabold text-slate-400 block">Total Settlement Cost</span>
+                                <span class="text-[10px] text-slate-500" x-text="'USD Equivalent: $' + (calculateTotalCost() / 130).toFixed(2)"></span>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-mono text-2xl font-black text-emerald-400 block" x-text="'KES ' + calculateTotalCost().toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Action Button (Pill Style) -->
+                <div>
+                    <button type="button" @click="submitBondOrder()" 
+                            :disabled="isSubmitting || faceValue <= 0"
+                            class="w-full py-4 rounded-full bg-primary hover:bg-[#E00B41] active:scale-[0.98] transition-all text-white font-black text-sm shadow-lg shadow-primary/25 flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <template x-if="!isSubmitting">
+                            <span class="flex items-center gap-2">
+                                <i class="fas fa-check-double"></i>
+                                <span x-text="executionRoute === 'AUCTION' ? 'Submit Primary CBK Auction Bid' : 'Execute Secondary OTC Purchase'"></span>
+                            </span>
+                        </template>
+                        <template x-if="isSubmitting">
+                            <span class="flex items-center gap-2">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <span>Registering Order with Central Depository...</span>
+                            </span>
+                        </template>
+                    </button>
+                    <p class="text-[10px] text-center text-slate-400 mt-2.5">
+                        Official CSD Allotment Engine. Transactions are settled via CBK DhowCSD and NSE Clearing.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. FULL GOVERNMENT SECURITIES CATALOG      -->
+    <!-- (Filterable Table with All Key Data)       -->
+    <!-- ========================================== -->
+    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-xs overflow-hidden">
+        
+        <!-- Table Header & Filter Tabs -->
+        <div class="p-5 border-b border-slate-100 dark:border-dark-750 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Active Government Debt Securities Catalog</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Comprehensive list of Kenya Treasury Bills, Fixed Coupon Bonds, and Infrastructure Bonds</p>
+            </div>
+
+            <!-- Tab Pills -->
+            <div class="flex items-center gap-1.5 overflow-x-auto ticker-scroll">
+                <button type="button" @click="filterTab = 'all'" 
+                        :class="filterTab === 'all' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
+                        class="px-4 py-1.5 rounded-full text-xs font-bold transition-all">All</button>
+                <button type="button" @click="filterTab = 'tbill'" 
+                        :class="filterTab === 'tbill' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
+                        class="px-4 py-1.5 rounded-full text-xs font-bold transition-all">T-Bills</button>
+                <button type="button" @click="filterTab = 'bond'" 
+                        :class="filterTab === 'bond' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
+                        class="px-4 py-1.5 rounded-full text-xs font-bold transition-all">Fixed Coupon</button>
+                <button type="button" @click="filterTab = 'tax_exempt'" 
+                        :class="filterTab === 'tax_exempt' ? 'bg-primary text-white shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
+                        class="px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1">
+                    <i class="fas fa-shield-halved text-[10px]"></i>
+                    <span>Infrastructure (Tax-Free)</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[780px] text-xs">
+                <thead>
+                    <tr class="bg-slate-50/70 dark:bg-dark-900/50 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-100 dark:border-dark-750 text-[10px]">
+                        <th class="px-6 py-3.5">Security / Issue</th>
+                        <th class="px-6 py-3.5">Tenor</th>
+                        <th class="px-6 py-3.5">Coupon (% p.a.)</th>
+                        <th class="px-6 py-3.5">Yield to Maturity (YTM)</th>
+                        <th class="px-6 py-3.5">Clean Price</th>
+                        <th class="px-6 py-3.5">Tax Status</th>
+                        <th class="px-6 py-3.5">Maturity Date</th>
+                        <th class="px-6 py-3.5 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-dark-800">
+                    <template x-for="item in filteredCatalog" :key="item.symbol">
+                        <tr class="hover:bg-slate-50 dark:hover:bg-dark-800/60 transition-colors group">
+                            
+                            <!-- Security & Issue -->
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-white dark:bg-dark-750 p-1 border border-slate-200/60 dark:border-dark-700 flex items-center justify-center shadow-2xs flex-shrink-0">
+                                        <img :src="item.logo || '/static/logos/cbk.svg'" alt="CBK" class="w-full h-full object-contain">
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <a :href="'/asset/' + item.symbol + '/'" class="font-extrabold text-sm text-slate-900 dark:text-white group-hover:text-primary transition-colors" x-text="item.name"></a>
+                                            <span class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-dark-700 text-slate-500 font-bold" x-text="item.issue_number"></span>
+                                        </div>
+                                        <span class="text-slate-400 text-[11px] block" x-text="item.description.slice(0, 55) + '...'"></span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Tenor -->
+                            <td class="px-6 py-4 font-mono font-medium" x-text="item.maturity_days >= 365 ? (item.maturity_days / 365).toFixed(0) + ' Years' : item.maturity_days + ' Days'"></td>
+
+                            <!-- Coupon -->
+                            <td class="px-6 py-4 font-mono font-bold text-slate-800 dark:text-slate-200" 
+                                x-text="item.subcategory === 'tbill' ? '0.00% (Discount)' : item.coupon_rate.toFixed(2) + '%'"></td>
+
+                            <!-- YTM -->
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center font-mono font-black text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full" 
+                                      x-text="item.yield_to_maturity + '%'"></span>
+                            </td>
+
+                            <!-- Clean Price -->
+                            <td class="px-6 py-4 font-mono font-bold text-slate-700 dark:text-slate-300" x-text="item.price.toFixed(2) + '%'"></td>
+
+                            <!-- Tax Status -->
+                            <td class="px-6 py-4">
+                                <span class="inline-block text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full"
+                                      :class="item.tax_exempt ? 'bg-primary/10 text-primary' : 'bg-slate-100 dark:bg-dark-750 text-slate-500'"
+                                      x-text="item.tax_exempt ? 'Tax Exempt' : '15% WHT'"></span>
+                            </td>
+
+                            <!-- Maturity Date -->
+                            <td class="px-6 py-4 font-mono text-slate-500" x-text="item.maturity_date"></td>
+
+                            <!-- Buy Button -->
+                            <td class="px-6 py-4 text-right">
+                                <button type="button" @click="selectSecurity(item.symbol); scrollToOrderTicket();" 
+                                        class="px-4 py-1.5 rounded-full bg-primary hover:bg-[#E00B41] text-white font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 ml-auto">
+                                    <i class="fas fa-hand-holding-dollar text-[10px]"></i>
+                                    <span>Buy / Bid</span>
+                                </button>
+                            </td>
+
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 4. CBK AUCTION CALENDAR & RECENT AUCTIONS  -->
+    <!-- ========================================== -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Upcoming Auction Calendar -->
+        <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-xs">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="far fa-calendar-check text-primary"></i>
+                        <span>Upcoming CBK Primary Auction Calendar</span>
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Official auction issuance schedule for government debt</p>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                {% for auc in auction_calendar %}
+                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-dark-800 border border-slate-100 dark:border-dark-750 flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-white dark:bg-dark-750 p-1.5 border border-slate-200/60 dark:border-dark-700 flex items-center justify-center flex-shrink-0">
+                            <img src="/static/logos/cbk.svg" alt="CBK" class="w-full h-full object-contain">
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-xs text-slate-900 dark:text-white">{{ auc.instrument }}</span>
+                                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-dark-700 text-slate-600 dark:text-slate-300">{{ auc.symbol }}</span>
+                            </div>
+                            <span class="text-[11px] text-slate-400 mt-0.5 block">{{ auc.day }}, {{ auc.date }} &bull; Target: <strong class="text-slate-700 dark:text-slate-300">{{ auc.amount }}</strong></span>
+                        </div>
+                    </div>
+                    <button type="button" @click="selectSecurity('{{ auc.symbol }}'); scrollToOrderTicket();" 
+                            class="px-4 py-2 rounded-full bg-primary hover:bg-[#E00B41] text-white font-bold text-xs transition-colors flex items-center gap-1 shadow-2xs">
+                        <span>Bid Now</span>
+                        <i class="fas fa-arrow-right text-[9px]"></i>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Historical Auction Results -->
+        <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-xs overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fas fa-chart-simple text-blue-500"></i>
+                        <span>Recent CBK Auction Results</span>
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Weighted average yields & over-subscription ratios</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs min-w-[420px]">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-dark-900/50 text-slate-400 uppercase text-[10px] font-semibold border-b border-slate-100 dark:border-dark-750">
+                            <th class="py-2.5 px-3">Instrument</th>
+                            <th class="py-2.5 px-3">Offered</th>
+                            <th class="py-2.5 px-3">Accepted</th>
+                            <th class="py-2.5 px-3">WAV Yield</th>
+                            <th class="py-2.5 px-3 text-right">Sub. Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-dark-800">
+                        {% for res in recent_auctions %}
+                        <tr class="hover:bg-slate-50/50 dark:hover:bg-dark-800/50">
+                            <td class="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-200">{{ res.instrument }}</td>
+                            <td class="py-2.5 px-3 font-mono text-slate-500">{{ res.offered }}</td>
+                            <td class="py-2.5 px-3 font-mono text-slate-500">{{ res.accepted }}</td>
+                            <td class="py-2.5 px-3 font-mono font-bold text-emerald-600 dark:text-emerald-400">{{ res.wav_yield }}%</td>
+                            <td class="py-2.5 px-3 font-mono font-bold text-right text-blue-500">{{ res.subscription }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 5. USER'S FIXED INCOME PORTFOLIO & HOLDINGS-->
+    <!-- ========================================== -->
+    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-xs p-6 space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-dark-750">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="fas fa-vault text-primary"></i>
+                    <span>Your Active Fixed Income Portfolio</span>
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">Government securities holdings registered under your CSD Depository profile</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <span class="text-xs text-slate-400">Next Scheduled Coupon:</span>
+                <span class="px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs" x-text="bondPortfolio.next_coupon_payment + ' on ' + bondPortfolio.next_coupon_date"></span>
+            </div>
+        </div>
+
+        <!-- Portfolio Metric Summary Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="bg-slate-50 dark:bg-dark-800 p-4 rounded-2xl border border-slate-100 dark:border-dark-750">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Total Face Value</span>
+                <span class="text-xl font-black font-mono text-slate-900 dark:text-white" x-text="'KES ' + bondPortfolio.total_face_value.toLocaleString()"></span>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-dark-800 p-4 rounded-2xl border border-slate-100 dark:border-dark-750">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Total Capital Invested</span>
+                <span class="text-xl font-black font-mono text-emerald-600 dark:text-emerald-400" x-text="'KES ' + bondPortfolio.total_invested.toLocaleString()"></span>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-dark-800 p-4 rounded-2xl border border-slate-100 dark:border-dark-750">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Weighted Average Yield</span>
+                <span class="text-xl font-black font-mono text-primary" x-text="bondPortfolio.avg_yield + '% p.a.'"></span>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-dark-800 p-4 rounded-2xl border border-slate-100 dark:border-dark-750">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Unrealized Capital Gain</span>
+                <span class="text-xl font-black font-mono text-blue-500" x-text="'+KES ' + bondPortfolio.unrealized_pnl.toLocaleString()"></span>
+            </div>
+        </div>
+
+        <!-- Holdings Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs min-w-[700px]">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-dark-900/50 text-slate-400 uppercase text-[10px] font-semibold border-b border-slate-100 dark:border-dark-750">
+                        <th class="py-3 px-4">Instrument</th>
+                        <th class="py-3 px-4">Face Value</th>
+                        <th class="py-3 px-4">Units / Lots</th>
+                        <th class="py-3 px-4">Cost Invested</th>
+                        <th class="py-3 px-4">Current Value</th>
+                        <th class="py-3 px-4">Yield (YTM)</th>
+                        <th class="py-3 px-4">Maturity Date</th>
+                        <th class="py-3 px-4 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-dark-800">
+                    <template x-for="h in bondPortfolio.holdings" :key="h.symbol">
+                        <tr class="hover:bg-slate-50/50 dark:hover:bg-dark-800/50">
+                            <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-lg bg-white dark:bg-dark-750 p-1 border border-slate-200/60 dark:border-dark-700 flex items-center justify-center flex-shrink-0">
+                                    <img :src="h.logo || '/static/logos/cbk.svg'" alt="CBK" class="w-full h-full object-contain">
+                                </div>
+                                <span class="font-mono text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-dark-700 text-slate-600 dark:text-slate-300 font-bold" x-text="h.symbol"></span>
+                                <span x-text="h.name"></span>
+                            </td>
+                            <td class="py-3.5 px-4 font-mono font-bold" x-text="'KES ' + h.face_value.toLocaleString()"></td>
+                            <td class="py-3.5 px-4 font-mono text-slate-500" x-text="h.units + ' Lots'"></td>
+                            <td class="py-3.5 px-4 font-mono text-slate-500" x-text="'KES ' + h.cost.toLocaleString()"></td>
+                            <td class="py-3.5 px-4 font-mono font-bold text-emerald-600 dark:text-emerald-400" x-text="'KES ' + h.current_value.toLocaleString()"></td>
+                            <td class="py-3.5 px-4 font-mono font-black text-emerald-600 dark:text-emerald-400" x-text="h.yield + '%'"></td>
+                            <td class="py-3.5 px-4 font-mono text-slate-500" x-text="h.maturity"></td>
+                            <td class="py-3.5 px-4 text-right">
+                                <button type="button" @click="selectSecurity(h.symbol); scrollToOrderTicket();" 
+                                        class="text-xs font-bold text-primary hover:underline">
+                                    Buy More
+                                </button>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 6. ORDER CONFIRMATION RECEIPT MODAL        -->
+    <!-- ========================================== -->
+    <div x-show="orderReceiptModal" x-cloak
+         class="fixed inset-0 z-50 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="w-full max-w-lg bg-white dark:bg-dark-850 rounded-3xl shadow-2xl border border-slate-200 dark:border-dark-750 p-6 sm:p-8 text-center animate-in fade-in zoom-in-95 duration-200">
+            
+            <div class="w-16 h-16 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center mx-auto text-2xl mb-4">
+                <i class="fas fa-check-double"></i>
+            </div>
+            
+            <span class="text-[10px] font-mono uppercase font-bold tracking-wider text-primary bg-primary/10 px-3.5 py-1 rounded-full">
+                CENTRAL DEPOSITORY SYSTEM ALLOTMENT
+            </span>
+
+            <h3 class="text-xl font-black text-slate-900 dark:text-white mt-2.5">Government Debt Order Placed!</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" x-text="receiptMessage"></p>
+
+            <!-- Detailed Receipt Card -->
+            <div class="my-6 p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-dark-800 text-left text-xs space-y-2.5 border border-slate-100 dark:border-dark-750">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">CSD Reference:</span>
+                    <span class="font-mono font-bold text-slate-900 dark:text-white" x-text="receiptData.csd_reference"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Instrument:</span>
+                    <span class="font-bold text-slate-800 dark:text-slate-200" x-text="receiptData.name"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Total Nominal Face Value:</span>
+                    <span class="font-mono font-bold text-slate-900 dark:text-white" x-text="'KES ' + (receiptData.face_value_kes ? receiptData.face_value_kes.toLocaleString() : '0')"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Units Allotted:</span>
+                    <span class="font-mono text-slate-700 dark:text-slate-300" x-text="receiptData.units + ' Units'"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Net Settlement Amount:</span>
+                    <span class="font-mono font-black text-emerald-600 dark:text-emerald-400 text-sm" x-text="'KES ' + (receiptData.settlement_cost_kes ? receiptData.settlement_cost_kes.toLocaleString(undefined, {minimumFractionDigits: 2}) : '0')"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Yield to Maturity (YTM):</span>
+                    <span class="font-mono font-bold text-emerald-500" x-text="receiptData.yield_to_maturity + '% p.a.'"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Maturity Settlement Date:</span>
+                    <span class="font-mono text-slate-700 dark:text-slate-300" x-text="receiptData.maturity_date"></span>
+                </div>
+                <div class="flex justify-between items-center pt-2.5 border-t border-slate-200/60 dark:border-dark-700">
+                    <span class="text-slate-400">Allotment Status:</span>
+                    <span class="font-bold text-emerald-500 flex items-center gap-1">
+                        <i class="fas fa-circle-check text-[11px]"></i>
+                        <span x-text="receiptData.status"></span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" @click="orderReceiptModal = false" 
+                        class="flex-1 py-3 rounded-full bg-slate-100 dark:bg-dark-800 font-bold text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition-colors">
+                    Done
+                </button>
+                <a href="{% url 'portfolio' %}" 
+                   class="flex-1 py-3 rounded-full bg-primary hover:bg-[#E00B41] text-white font-bold text-xs transition-colors shadow-xs">
+                    View Portfolio Holdings
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Alpine.js Bonds Controller -->
+<script>
+    function bondsDeskController() {
+        return {
+            catalogList: {{ all_bonds_json|safe }},
+            bondPortfolio: {{ bond_portfolio_json|safe }},
+            selectedSymbol: '{{ selected_bond.symbol|default:"IFB10Y" }}',
+            activeSecurity: null,
+            executionRoute: 'AUCTION', // 'AUCTION' or 'SECONDARY'
+            bidType: 'NON_COMPETITIVE',
+            bidYield: 17.85,
+            faceValue: 100000,
+            units: 2,
+            settlementAccount: 'DHOWCSD',
+            filterTab: 'all',
+            isSubmitting: false,
+            orderReceiptModal: false,
+            receiptMessage: '',
+            receiptData: {},
+
+            init() {
+                this.selectSecurity(this.selectedSymbol);
+            },
+
+            get filteredCatalog() {
+                if (this.filterTab === 'tbill') {
+                    return this.catalogList.filter(b => b.subcategory === 'tbill');
+                } else if (this.filterTab === 'bond') {
+                    return this.catalogList.filter(b => b.subcategory === 'bond');
+                } else if (this.filterTab === 'tax_exempt') {
+                    return this.catalogList.filter(b => b.tax_exempt);
+                }
+                return this.catalogList;
+            },
+
+            selectSecurity(sym) {
+                const found = this.catalogList.find(b => b.symbol === sym) || this.catalogList[0];
+                this.selectedSymbol = found.symbol;
+                this.activeSecurity = found;
+                this.bidYield = found.yield_to_maturity;
+                
+                // Set default face value
+                const minLot = found.face_value || (found.subcategory === 'tbill' ? 100000 : 50000);
+                if (this.faceValue < minLot) {
+                    this.faceValue = minLot;
+                }
+                this.units = Math.max(1, Math.round(this.faceValue / minLot));
+            },
+
+            setFaceValue(val) {
+                const minLot = this.activeSecurity.face_value || 50000;
+                this.faceValue = Math.max(minLot, val);
+                this.units = Math.max(1, Math.round(this.faceValue / minLot));
+            },
+
+            onFaceValueInput() {
+                const minLot = this.activeSecurity.face_value || 50000;
+                if (this.faceValue >= minLot) {
+                    this.units = Math.max(1, Math.round(this.faceValue / minLot));
+                }
+            },
+
+            calculateTotalCost() {
+                if (!this.activeSecurity || this.faceValue <= 0) return 0;
+                return Math.round(this.faceValue * (this.activeSecurity.price / 100.0) * 100) / 100;
+            },
+
+            calculateSemiAnnualCoupon() {
+                if (!this.activeSecurity || this.activeSecurity.subcategory === 'tbill') return 0;
+                const annual = this.faceValue * (this.activeSecurity.coupon_rate / 100.0);
+                return Math.round((annual / 2.0) * 100) / 100;
+            },
+
+            calculateNetReturn() {
+                if (!this.activeSecurity) return 0;
+                const cost = this.calculateTotalCost();
+                if (this.activeSecurity.subcategory === 'tbill') {
+                    const gross = this.faceValue - cost;
+                    const tax = this.activeSecurity.tax_exempt ? 0 : gross * 0.15;
+                    return Math.round((gross - tax) * 100) / 100;
+                } else {
+                    const annualCoupon = this.faceValue * (this.activeSecurity.coupon_rate / 100.0);
+                    const tax = this.activeSecurity.tax_exempt ? 0 : annualCoupon * 0.15;
+                    return Math.round((annualCoupon - tax) * 100) / 100;
+                }
+            },
+
+            scrollToOrderTicket() {
+                const el = document.getElementById('bondOrderTicket');
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            },
+
+            async submitBondOrder() {
+                if (this.faceValue <= 0 || this.isSubmitting) return;
+                this.isSubmitting = true;
+
+                try {
+                    const res = await fetch('/api/bonds/buy/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            symbol: this.selectedSymbol,
+                            face_value: this.faceValue,
+                            units: this.units,
+                            order_type: this.executionRoute === 'AUCTION' ? (this.bidType === 'COMPETITIVE' ? 'AUCTION_COMPETITIVE' : 'AUCTION_NON_COMPETITIVE') : 'SECONDARY_MARKET',
+                            bid_yield: this.bidYield,
+                            channel: this.settlementAccount
+                        })
+                    });
+                    const d = await res.json();
+                    if (d.success) {
+                        this.receiptMessage = d.message;
+                        this.receiptData = d.receipt || {};
+                        this.orderReceiptModal = true;
+                        
+                        // Update local portfolio view
+                        if (d.receipt && d.receipt.face_value_kes) {
+                            this.bondPortfolio.total_invested += d.receipt.settlement_cost_kes;
+                            this.bondPortfolio.total_face_value += d.receipt.face_value_kes;
+                            
+                            const existing = this.bondPortfolio.holdings.find(h => h.symbol === this.selectedSymbol);
+                            if (existing) {
+                                existing.units += d.receipt.units;
+                                existing.face_value += d.receipt.face_value_kes;
+                                existing.cost += d.receipt.settlement_cost_kes;
+                                existing.current_value += d.receipt.settlement_cost_kes;
+                            } else {
+                                this.bondPortfolio.holdings.push({
+                                    symbol: this.selectedSymbol,
+                                    name: this.activeSecurity.name,
+                                    face_value: d.receipt.face_value_kes,
+                                    units: d.receipt.units,
+                                    cost: d.receipt.settlement_cost_kes,
+                                    current_value: d.receipt.settlement_cost_kes,
+                                    yield: this.activeSecurity.yield_to_maturity,
+                                    maturity: this.activeSecurity.maturity_date,
+                                    logo: '/static/logos/cbk.svg'
+                                });
+                            }
+                        }
+                    } else {
+                        alert(d.error || 'Failed to place order');
+                    }
+                } catch(e) {
+                    console.error('Error submitting bond order:', e);
+                    alert('Communication error submitting bond order.');
+                } finally {
+                    this.isSubmitting = false;
+                }
+            }
+        };
+    }
+</script>
+{% endblock %}

@@ -6,7 +6,7 @@
     <meta name="color-scheme" content="dark light">
     <title>{% if page_title %}{{ page_title }} | {% endif %}PesaMarkets - Financial Intelligence & Trading</title>
     
-    <!-- Instant Anti-Flicker Theme Initializer (prevents light mode flash) -->
+    <!-- Instant Anti-Flicker Theme Initializer -->
     <script>
         (function() {
             const saved = localStorage.getItem('pesa_theme');
@@ -19,7 +19,7 @@
         })();
     </script>
     
-    <!-- Google Fonts: Inter -->
+    <!-- Google Fonts: Inter & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -39,46 +39,82 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
                     },
                     colors: {
-                        dark: {
-                            950: '#070a12',
-                            900: '#0b0f19',
-                            850: '#101626',
-                            800: '#141c30',
-                            750: '#1a243c',
-                            700: '#222f4c',
-                            600: '#33446b',
+                        brand: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#FF385C',
+                            600: '#E00B41',
+                            700: '#BE123C',
+                            800: '#9F1239',
+                            900: '#881337',
+                            DEFAULT: '#FF385C',
+                            hover: '#E00B41',
+                        },
+                        coral: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            500: '#FF385C',
+                            600: '#E00B41',
                         },
                         pesa: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            200: '#a7f3d0',
-                            300: '#6ee7b7',
-                            400: '#34d399',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            800: '#065f46',
-                            900: '#064e3b',
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#FF385C',
+                            600: '#E00B41',
+                            700: '#BE123C',
+                            800: '#9F1239',
+                            900: '#881337',
+                        },
+                        neutral: {
+                            50: '#F7F7F7',
+                            100: '#EBEBEB',
+                            200: '#DDDDDD',
+                            300: '#C4C4C4',
+                            400: '#9E9E9E',
+                            500: '#717171',
+                            600: '#525252',
+                            700: '#333333',
+                            800: '#222222',
+                            850: '#1A1A1A',
+                            900: '#141414',
+                            950: '#0D0D0D',
+                        },
+                        dark: {
+                            950: '#0C0C0C',
+                            900: '#121212',
+                            850: '#181818',
+                            800: '#222222',
+                            750: '#2A2A2A',
+                            700: '#333333',
+                            600: '#484848',
                         },
                         up: {
-                            light: '#10b981',
+                            light: '#008A05',
                             dark: '#10b981',
-                            bg: 'rgba(16, 185, 129, 0.12)'
+                            bg: 'rgba(16, 185, 129, 0.10)'
                         },
                         down: {
-                            light: '#f43f5e',
+                            light: '#C13515',
                             dark: '#f43f5e',
-                            bg: 'rgba(244, 63, 94, 0.12)'
+                            bg: 'rgba(244, 63, 94, 0.10)'
                         }
                     },
                     boxShadow: {
-                        'glow-emerald': '0 0 25px -5px rgba(16, 185, 129, 0.3)',
-                        'glow-blue': '0 0 25px -5px rgba(59, 130, 246, 0.35)',
-                        'glow-purple': '0 0 25px -5px rgba(147, 51, 234, 0.35)',
+                        'pill': '0 1px 2px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05)',
+                        'card': '0 6px 16px rgba(0,0,0,0.08)',
+                        'card-hover': '0 12px 28px rgba(0,0,0,0.12)',
+                        'brand-glow': '0 4px 18px -2px rgba(255, 56, 92, 0.35)',
                     }
                 }
             }
@@ -96,11 +132,11 @@
             background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(156, 163, 175, 0.3);
+            background: rgba(156, 163, 175, 0.25);
             border-radius: 9999px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(156, 163, 175, 0.5);
+            background: rgba(156, 163, 175, 0.45);
         }
         
         .ticker-scroll::-webkit-scrollbar {
@@ -111,7 +147,7 @@
             scrollbar-width: none;
         }
 
-        /* Infinite Marquee Ticker Tape Animation (Bloomberg / Yahoo Finance style) */
+        /* Infinite Marquee Ticker Tape Animation */
         @keyframes tickerScroll {
             0% {
                 transform: translate3d(0, 0, 0);
@@ -131,9 +167,16 @@
         .ticker-marquee-wrapper:hover {
             animation-play-state: paused;
         }
+
+        .listing-card {
+            transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+        .listing-card:hover {
+            transform: translateY(-2px);
+        }
     </style>
 </head>
-<body class="bg-[#F8FAFC] dark:bg-dark-900 text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-pesa-500 selection:text-white min-h-screen flex flex-col transition-colors duration-200">
+<body class="bg-white dark:bg-dark-900 text-neutral-800 dark:text-neutral-100 font-sans antialiased selection:bg-[#FF385C] selection:text-white min-h-screen flex flex-col transition-colors duration-200">
 
     <!-- Global App State Manager via Alpine.js -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden" 
@@ -143,7 +186,6 @@
             searchQuery: '', 
             searchResults: [], 
             searchLoading: false,
-            aiModalOpen: false,
             toastMessage: '',
             toastVisible: false,
             activeCurrency: localStorage.getItem('pesa_currency') || 'USD',
@@ -190,18 +232,18 @@
          }"
          @keydown.window.ctrl.k.prevent="searchOpen = true"
          @keydown.window.meta.k.prevent="searchOpen = true"
-         @keydown.escape="searchOpen = false; aiModalOpen = false">
+         @keydown.escape="searchOpen = false">
 
         <!-- ========================================== -->
         <!-- 1. LIVE MARKET INDICES TICKER TAPE RIBBON  -->
         <!-- (Continuous Auto-Scrolling Marquee)        -->
         <!-- ========================================== -->
-        <div class="bg-white/95 dark:bg-dark-950/95 backdrop-blur-md border-b border-slate-200/80 dark:border-dark-750/80 z-40 text-xs py-1.5 flex items-center select-none overflow-hidden relative">
+        <div class="bg-white/95 dark:bg-dark-950/95 backdrop-blur-md border-b border-[#EBEBEB] dark:border-dark-750 z-40 text-xs py-2 flex items-center select-none overflow-hidden relative">
             
             <!-- Pinned Static Live Badge on Left -->
-            <div class="flex items-center gap-1.5 pl-3 pr-3.5 py-0.5 bg-white dark:bg-dark-950 z-30 flex-shrink-0 border-r border-slate-200 dark:border-dark-750 shadow-[8px_0_12px_-2px_rgba(0,0,0,0.08)] dark:shadow-[8px_0_12px_-2px_rgba(7,10,18,0.7)]">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="text-slate-500 dark:text-slate-400 font-extrabold uppercase tracking-wider text-[10px]">MARKETS</span>
+            <div class="flex items-center gap-1.5 pl-4 pr-4 py-0.5 bg-white dark:bg-dark-950 z-30 flex-shrink-0 border-r border-[#EBEBEB] dark:border-dark-750 shadow-xs">
+                <span class="w-2 h-2 rounded-full bg-[#FF385C] animate-pulse"></span>
+                <span class="text-neutral-500 dark:text-neutral-400 font-extrabold uppercase tracking-wider text-[10px]">MARKETS</span>
             </div>
             
             <!-- Continuous Marquee Track -->
@@ -217,10 +259,13 @@
                         {% if indices %}
                             {% for idx in indices %}
                             <a href="{% if idx.symbol == '^NSE20' %}{% url 'markets' %}?category=nse{% elif idx.symbol == 'BTC-USD' %}{% url 'asset_detail' 'BTC' %}{% elif idx.symbol == 'ETH-USD' %}{% url 'asset_detail' 'ETH' %}{% elif idx.symbol == 'SCOM' %}{% url 'asset_detail' 'SCOM' %}{% elif idx.symbol == 'NVDA' %}{% url 'asset_detail' 'NVDA' %}{% elif idx.symbol == 'AAPL' %}{% url 'asset_detail' 'AAPL' %}{% elif idx.symbol == 'SOL' %}{% url 'asset_detail' 'SOL' %}{% else %}{% url 'markets' %}{% endif %}" 
-                               class="flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-dark-800/80 px-2 py-0.5 rounded-lg transition-all flex-shrink-0 group">
-                                <span class="font-bold text-slate-700 dark:text-slate-300 group-hover:text-pesa-500 transition-colors">{{ idx.name }}</span>
-                                <span class="font-mono text-slate-900 dark:text-slate-100 font-medium">{{ idx.price|floatformat:2 }}</span>
-                                <span class="inline-flex items-center font-bold text-[11px] {% if idx.is_positive %}text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40{% else %}text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40{% endif %} px-1.5 py-0.2 rounded">
+                               class="flex items-center gap-2 hover:bg-neutral-100 dark:hover:bg-dark-800/80 px-2.5 py-1 rounded-full transition-all flex-shrink-0 group">
+                                {% if idx.logo %}
+                                <img src="{{ idx.logo }}" alt="{{ idx.name }}" class="w-4 h-4 object-contain rounded-full bg-white p-0.5 border border-neutral-200 dark:border-dark-700">
+                                {% endif %}
+                                <span class="font-bold text-neutral-800 dark:text-neutral-200 group-hover:text-[#FF385C] transition-colors text-xs">{{ idx.name }}</span>
+                                <span class="font-mono text-neutral-900 dark:text-white font-medium text-xs">{{ idx.price|floatformat:2 }}</span>
+                                <span class="inline-flex items-center font-bold text-[10px] {% if idx.is_positive %}text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40{% else %}text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40{% endif %} px-1.5 py-0.5 rounded-full">
                                     {% if idx.is_positive %}+{% endif %}{{ idx.change_percent }}%
                                 </span>
                             </a>
@@ -233,10 +278,13 @@
                         {% if indices %}
                             {% for idx in indices %}
                             <a href="{% if idx.symbol == '^NSE20' %}{% url 'markets' %}?category=nse{% elif idx.symbol == 'BTC-USD' %}{% url 'asset_detail' 'BTC' %}{% elif idx.symbol == 'ETH-USD' %}{% url 'asset_detail' 'ETH' %}{% elif idx.symbol == 'SCOM' %}{% url 'asset_detail' 'SCOM' %}{% elif idx.symbol == 'NVDA' %}{% url 'asset_detail' 'NVDA' %}{% elif idx.symbol == 'AAPL' %}{% url 'asset_detail' 'AAPL' %}{% elif idx.symbol == 'SOL' %}{% url 'asset_detail' 'SOL' %}{% else %}{% url 'markets' %}{% endif %}" 
-                               class="flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-dark-800/80 px-2 py-0.5 rounded-lg transition-all flex-shrink-0 group">
-                                <span class="font-bold text-slate-700 dark:text-slate-300 group-hover:text-pesa-500 transition-colors">{{ idx.name }}</span>
-                                <span class="font-mono text-slate-900 dark:text-slate-100 font-medium">{{ idx.price|floatformat:2 }}</span>
-                                <span class="inline-flex items-center font-bold text-[11px] {% if idx.is_positive %}text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40{% else %}text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40{% endif %} px-1.5 py-0.2 rounded">
+                               class="flex items-center gap-2 hover:bg-neutral-100 dark:hover:bg-dark-800/80 px-2.5 py-1 rounded-full transition-all flex-shrink-0 group">
+                                {% if idx.logo %}
+                                <img src="{{ idx.logo }}" alt="{{ idx.name }}" class="w-4 h-4 object-contain rounded-full bg-white p-0.5 border border-neutral-200 dark:border-dark-700">
+                                {% endif %}
+                                <span class="font-bold text-neutral-800 dark:text-neutral-200 group-hover:text-[#FF385C] transition-colors text-xs">{{ idx.name }}</span>
+                                <span class="font-mono text-neutral-900 dark:text-white font-medium text-xs">{{ idx.price|floatformat:2 }}</span>
+                                <span class="inline-flex items-center font-bold text-[10px] {% if idx.is_positive %}text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40{% else %}text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40{% endif %} px-1.5 py-0.5 rounded-full">
                                     {% if idx.is_positive %}+{% endif %}{{ idx.change_percent }}%
                                 </span>
                             </a>
@@ -254,209 +302,233 @@
             <!-- 2. DESKTOP & TABLET SIDEBAR NAVIGATION     -->
             <!-- ========================================== -->
             <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" 
-                   class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-dark-900 border-r border-slate-200/80 dark:border-dark-750/80 transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0 flex flex-col flex-shrink-0">
+                   class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-dark-900 border-r border-[#EBEBEB] dark:border-dark-750 transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0 flex flex-col flex-shrink-0">
                 
                 <!-- Logo & Brand -->
-                <div class="h-16 flex items-center justify-between px-6 border-b border-slate-200/80 dark:border-dark-750/80">
+                <div class="h-20 flex items-center justify-between px-6 border-b border-[#EBEBEB] dark:border-dark-750">
                     <a href="{% url 'home' %}" class="flex items-center gap-3 group">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-pesa-600 via-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-md shadow-pesa-500/20 group-hover:scale-105 transition-transform">
-                            <i class="fas fa-chart-line text-lg"></i>
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#FF385C] to-[#E61E4D] flex items-center justify-center text-white shadow-brand-glow group-hover:scale-105 transition-transform">
+                            <i class="fas fa-chart-line text-sm"></i>
                         </div>
                         <div>
-                            <span class="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-1">
-                                Pesa<span class="text-pesa-500">Markets</span>
+                            <span class="text-lg font-extrabold tracking-tight text-neutral-900 dark:text-white flex items-center">
+                                Pesa<span class="text-[#FF385C]">Markets</span>
                             </span>
-                            <span class="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-400 -mt-1">Intelligence & Trade</span>
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 -mt-1">Financial Marketplace</span>
                         </div>
                     </a>
                     
-                    <button @click="sidebarOpen = false" class="md:hidden text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <button @click="sidebarOpen = false" class="md:hidden text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200">
                         <i class="fas fa-times text-lg"></i>
                     </button>
                 </div>
 
                 <!-- Navigation Links -->
                 <nav class="flex-1 overflow-y-auto px-4 py-5 space-y-1.5">
-                    <div class="px-3 pb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Main Menu</div>
+                    <div class="px-4 pb-2 text-[11px] font-bold uppercase tracking-wider text-neutral-400">Main Menu</div>
                     
                     <a href="{% url 'home' %}" 
-                       class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all {% if active_tab == 'home' %}bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 font-semibold border border-pesa-500/20{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-dark-800/80{% endif %}">
-                        <div class="w-5 text-center"><i class="fas fa-grid-2 fa-th-large"></i></div>
-                        <span>Dashboard</span>
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'home' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                        <div class="w-5 text-center"><i class="fas fa-compass"></i></div>
+                        <span>Explore</span>
                     </a>
 
                     <a href="{% url 'markets' %}" 
-                       class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all {% if active_tab == 'markets' %}bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 font-semibold border border-pesa-500/20{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-dark-800/80{% endif %}">
-                        <div class="w-5 text-center"><i class="fas fa-chart-mixed fa-chart-line"></i></div>
-                        <span>Markets & Screeners</span>
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'markets' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                        <div class="w-5 text-center"><i class="fas fa-layer-group"></i></div>
+                        <span>Markets & Listings</span>
                     </a>
 
                     <a href="{% url 'watchlist' %}" 
-                       class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all {% if active_tab == 'watchlist' %}bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 font-semibold border border-pesa-500/20{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-dark-800/80{% endif %}">
-                        <div class="w-5 text-center"><i class="far fa-star"></i></div>
-                        <span>Watchlists</span>
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'watchlist' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                        <div class="w-5 text-center"><i class="far fa-heart"></i></div>
+                        <span>Wishlists</span>
                     </a>
 
                     <a href="{% url 'portfolio' %}" 
-                       class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all {% if active_tab == 'portfolio' %}bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 font-semibold border border-pesa-500/20{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-dark-800/80{% endif %}">
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'portfolio' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
                         <div class="w-5 text-center"><i class="fas fa-wallet"></i></div>
-                        <span>Portfolio Holdings</span>
+                        <span>My Portfolio</span>
                     </a>
 
                     <a href="{% url 'trade' %}" 
-                       class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all {% if active_tab == 'trade' %}bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 font-semibold border border-pesa-500/20{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-dark-800/80{% endif %}">
-                        <div class="w-5 text-center"><i class="fas fa-exchange-alt"></i></div>
-                        <span>Trade Terminal</span>
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'trade' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                        <div class="w-5 text-center"><i class="fas fa-arrow-right-arrow-left"></i></div>
+                        <span>Trade Desk</span>
+                    </a>
+
+                    <a href="{% url 'bonds' %}" 
+                       class="flex items-center justify-between px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'bonds' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                        <span class="flex items-center gap-3.5">
+                            <div class="w-5 text-center"><i class="fas fa-landmark text-[#FF385C]"></i></div>
+                            <span>Bonds & T-Bills</span>
+                        </span>
+                        <span class="text-[9px] font-extrabold uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full">17.8%</span>
                     </a>
 
                     <a href="{% url 'news' %}" 
-                       class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all {% if active_tab == 'news' %}bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 font-semibold border border-pesa-500/20{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-dark-800/80{% endif %}">
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'news' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
                         <div class="w-5 text-center"><i class="far fa-newspaper"></i></div>
-                        <span>News & Analysis</span>
+                        <span>Market Insights</span>
                     </a>
 
-                    <div class="pt-4 px-3 pb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Tools & Account</div>
+                    <div class="pt-5 px-4 pb-2 text-[11px] font-bold uppercase tracking-wider text-neutral-400">Tools & Account</div>
 
-                    <!-- AI Assistant Trigger (Image 1 style) -->
-                    <button @click="aiModalOpen = true" 
-                            class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-blue-600/10 to-indigo-600/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 hover:from-blue-600/20 hover:to-indigo-600/20 transition-all">
-                        <span class="flex items-center gap-3">
-                            <i class="fas fa-wand-magic-sparkles text-blue-500"></i>
-                            <span>AI Analyst</span>
+                    <!-- Pro Terminal -->
+                    <a href="{% url 'terminal' %}" 
+                       class="w-full flex items-center justify-between px-4 py-2.5 rounded-full text-xs font-bold transition-all {% if active_tab == 'terminal' %}bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-md{% else %}bg-neutral-100 dark:bg-dark-800 text-neutral-800 dark:text-neutral-200 hover:border-[#FF385C]/40 hover:text-[#FF385C]{% endif %} border border-[#DDDDDD] dark:border-dark-750">
+                        <span class="flex items-center gap-2.5">
+                            <i class="fas fa-terminal text-[#FF385C] text-xs"></i>
+                            <span>Terminal Pro</span>
                         </span>
-                        <span class="text-[10px] font-bold bg-blue-500 text-white px-2 py-0.5 rounded-full uppercase">Plus</span>
-                    </button>
+                        <span class="text-[9px] font-black bg-[#FF385C] text-white px-2 py-0.5 rounded-full uppercase tracking-wider">PRO</span>
+                    </a>
 
                     <a href="{% url 'settings' %}" 
-                       class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all {% if active_tab == 'settings' %}bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 font-semibold border border-pesa-500/20{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-dark-800/80{% endif %}">
-                        <div class="w-5 text-center"><i class="fas fa-sliders-h fa-cog"></i></div>
-                        <span>Preferences</span>
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'settings' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                        <div class="w-5 text-center"><i class="fas fa-sliders-h"></i></div>
+                        <span>Settings</span>
                     </a>
 
                     <a href="{% url 'support' %}" 
-                       class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all {% if active_tab == 'support' %}bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 font-semibold border border-pesa-500/20{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-dark-800/80{% endif %}">
-                        <div class="w-5 text-center"><i class="far fa-circle-question fa-question-circle"></i></div>
-                        <span>Help & Support</span>
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'support' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                        <div class="w-5 text-center"><i class="far fa-circle-question"></i></div>
+                        <span>Help Center</span>
                     </a>
                 </nav>
 
                 <!-- Sidebar Footer Widget: Buying Power -->
-                <div class="p-4 border-t border-slate-200/80 dark:border-dark-750/80">
-                    <div class="bg-slate-100 dark:bg-dark-850 p-3.5 rounded-2xl border border-slate-200/60 dark:border-dark-750/60">
-                        <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
+                <div class="p-4 border-t border-[#EBEBEB] dark:border-dark-750">
+                    <div class="bg-neutral-50 dark:bg-dark-850 p-4 rounded-3xl border border-[#DDDDDD] dark:border-dark-750">
+                        <div class="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 mb-1">
                             <span>Buying Power</span>
-                            <span class="font-bold text-emerald-500">Active</span>
+                            <span class="font-bold text-emerald-600 dark:text-emerald-400">Available</span>
                         </div>
-                        <div class="text-lg font-extrabold font-mono text-slate-900 dark:text-white mb-2" x-text="formatPrice(5212.17)">
+                        <div class="text-xl font-extrabold font-mono text-neutral-900 dark:text-white mb-3" x-text="formatPrice(5212.17)">
                             $5,212.17
                         </div>
-                        <a href="{% url 'trade' %}" class="block w-full py-2 text-center text-xs font-bold text-white bg-pesa-600 hover:bg-pesa-500 rounded-xl transition-colors shadow-sm">
-                            <i class="fas fa-plus-circle mr-1"></i> Quick Deposit / Trade
+                        <a href="{% url 'trade' %}" class="block w-full py-2.5 text-center text-xs font-bold text-white bg-[#FF385C] hover:bg-[#E00B41] rounded-full transition-all shadow-brand-glow">
+                            <i class="fas fa-plus mr-1"></i> Quick Deposit / Trade
                         </a>
                     </div>
                 </div>
             </aside>
 
             <!-- ========================================== -->
-            <!-- 3. TOP APP HEADER WITH UNIVERSAL CONTROLS  -->
+            <!-- 3. TOP APP HEADER WITH FLOATING SEARCH PILL-->
             <!-- ========================================== -->
             <div class="flex-1 flex flex-col h-full overflow-hidden">
                 
-                <header class="h-16 bg-white dark:bg-dark-900 border-b border-slate-200/80 dark:border-dark-750/80 px-4 md:px-8 flex items-center justify-between z-30 flex-shrink-0">
+                <header class="h-20 bg-white dark:bg-dark-900 border-b border-[#EBEBEB] dark:border-dark-750 px-4 md:px-8 flex items-center justify-between z-30 flex-shrink-0">
                     <!-- Left: Mobile Hamburger & Search Trigger -->
-                    <div class="flex items-center gap-3 flex-1 max-w-xl">
-                        <button @click="sidebarOpen = true" class="md:hidden text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 p-2">
+                    <div class="flex items-center gap-3">
+                        <button @click="sidebarOpen = true" class="md:hidden text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white p-2">
                             <i class="fas fa-bars text-lg"></i>
                         </button>
                         
-                        <!-- Universal Yahoo Finance Search Bar Trigger -->
-                        <div @click="searchOpen = true" 
-                             class="flex-1 flex items-center gap-3 bg-slate-100 dark:bg-dark-850 hover:bg-slate-200/70 dark:hover:bg-dark-800 px-4 py-2 rounded-2xl border border-slate-200/80 dark:border-dark-750 cursor-pointer transition-all group">
-                            <i class="fas fa-search text-slate-400 dark:text-slate-400 group-hover:text-pesa-500 transition-colors"></i>
-                            <span class="text-sm text-slate-400 dark:text-slate-400 flex-1 truncate">Search quotes, news, symbols (e.g. SCOM, AAPL, BTC)...</span>
-                            <kbd class="hidden sm:inline-block font-mono text-[10px] bg-white dark:bg-dark-750 border border-slate-200 dark:border-dark-700 px-2 py-0.5 rounded text-slate-500 dark:text-slate-400 font-semibold shadow-2xs">Ctrl K</kbd>
-                        </div>
+                        <!-- Mobile Logo Icon -->
+                        <a href="{% url 'home' %}" class="md:hidden flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-[#FF385C] flex items-center justify-center text-white shadow-sm">
+                                <i class="fas fa-chart-line text-xs"></i>
+                            </div>
+                            <span class="font-extrabold text-base tracking-tight text-neutral-900 dark:text-white">Pesa<span class="text-[#FF385C]">Markets</span></span>
+                        </a>
                     </div>
 
-                    <!-- Right Header Utilities: Currency, Theme Toggle, Notifications, User -->
-                    <div class="flex items-center gap-3 sm:gap-4 ml-3">
+                    <!-- Center: Iconic Floating 3-Segment Pill Search Bar -->
+                    <div class="hidden sm:flex items-center justify-center flex-1 max-w-xl mx-4">
+                        <button @click="searchOpen = true" 
+                                class="flex items-center divide-x divide-[#EBEBEB] dark:divide-dark-750 bg-white dark:bg-dark-850 hover:bg-neutral-50 dark:hover:bg-dark-800 border border-[#DDDDDD] dark:border-dark-750 shadow-pill hover:shadow-card transition-all duration-200 rounded-full py-2 px-3 group">
+                            <span class="px-3.5 text-xs font-bold text-neutral-800 dark:text-neutral-100 group-hover:text-[#FF385C] transition-colors">Any Market</span>
+                            <span class="px-3.5 text-xs font-bold text-neutral-800 dark:text-neutral-100 group-hover:text-[#FF385C] transition-colors">All Assets</span>
+                            <span class="px-3.5 text-xs text-neutral-400 font-normal">Search quotes...</span>
+                            <div class="pl-2">
+                                <div class="w-8 h-8 rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white flex items-center justify-center shadow-brand-glow transition-transform group-hover:scale-105">
+                                    <i class="fas fa-search text-xs"></i>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Right Header Utilities: Currency, Theme Toggle, Notifications, User Pill -->
+                    <div class="flex items-center gap-2.5 sm:gap-3">
                         
-                        <!-- Currency Selector Dropdown -->
+                        <!-- Currency Selector Dropdown Pill -->
                         <div class="relative" x-data="{ currOpen: false }">
                             <button @click="currOpen = !currOpen" 
-                                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-dark-850 hover:bg-slate-200 dark:hover:bg-dark-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-dark-750 transition-colors">
-                                <i class="fas fa-globe text-pesa-500"></i>
+                                    class="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-white dark:bg-dark-850 hover:bg-neutral-100 dark:hover:bg-dark-800 text-neutral-800 dark:text-neutral-200 border border-[#DDDDDD] dark:border-dark-750 transition-colors shadow-2xs">
+                                <i class="fas fa-globe text-[#FF385C]"></i>
                                 <span x-text="activeCurrency">USD</span>
-                                <i class="fas fa-chevron-down text-[9px] text-slate-400 ml-0.5"></i>
+                                <i class="fas fa-chevron-down text-[9px] text-neutral-400 ml-0.5"></i>
                             </button>
                             
                             <div x-show="currOpen" @click.outside="currOpen = false" x-cloak
-                                 class="absolute right-0 mt-2 w-36 bg-white dark:bg-dark-850 rounded-2xl shadow-xl border border-slate-200 dark:border-dark-750 py-1.5 z-50">
-                                <button @click="setCurrency('USD'); currOpen = false" class="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-dark-800 flex items-center justify-between">
+                                 class="absolute right-0 mt-2 w-40 bg-white dark:bg-dark-850 rounded-2xl shadow-card border border-[#EBEBEB] dark:border-dark-750 py-1.5 z-50">
+                                <button @click="setCurrency('USD'); currOpen = false" class="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-dark-800 flex items-center justify-between">
                                     <span>USD ($)</span>
-                                    <span x-show="activeCurrency === 'USD'" class="text-pesa-500"><i class="fas fa-check"></i></span>
+                                    <span x-show="activeCurrency === 'USD'" class="text-[#FF385C]"><i class="fas fa-check"></i></span>
                                 </button>
-                                <button @click="setCurrency('KES'); currOpen = false" class="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-dark-800 flex items-center justify-between">
+                                <button @click="setCurrency('KES'); currOpen = false" class="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-dark-800 flex items-center justify-between">
                                     <span>KES (Shilling)</span>
-                                    <span x-show="activeCurrency === 'KES'" class="text-pesa-500"><i class="fas fa-check"></i></span>
+                                    <span x-show="activeCurrency === 'KES'" class="text-[#FF385C]"><i class="fas fa-check"></i></span>
                                 </button>
-                                <button @click="setCurrency('EUR'); currOpen = false" class="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-dark-800 flex items-center justify-between">
+                                <button @click="setCurrency('EUR'); currOpen = false" class="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-dark-800 flex items-center justify-between">
                                     <span>EUR (€)</span>
-                                    <span x-show="activeCurrency === 'EUR'" class="text-pesa-500"><i class="fas fa-check"></i></span>
+                                    <span x-show="activeCurrency === 'EUR'" class="text-[#FF385C]"><i class="fas fa-check"></i></span>
                                 </button>
-                                <button @click="setCurrency('GBP'); currOpen = false" class="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-dark-800 flex items-center justify-between">
+                                <button @click="setCurrency('GBP'); currOpen = false" class="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-dark-800 flex items-center justify-between">
                                     <span>GBP (£)</span>
-                                    <span x-show="activeCurrency === 'GBP'" class="text-pesa-500"><i class="fas fa-check"></i></span>
+                                    <span x-show="activeCurrency === 'GBP'" class="text-[#FF385C]"><i class="fas fa-check"></i></span>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Dark / Light Mode Toggle Button -->
                         <button @click="toggleTheme()" 
-                                class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-dark-850 hover:bg-slate-200 dark:hover:bg-dark-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors border border-slate-200 dark:border-dark-750" 
+                                class="w-9 h-9 rounded-full bg-white dark:bg-dark-850 hover:bg-neutral-100 dark:hover:bg-dark-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center transition-colors border border-[#DDDDDD] dark:border-dark-750 shadow-2xs" 
                                 :title="darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
-                            <i :class="darkMode ? 'fas fa-sun text-amber-400' : 'fas fa-moon text-indigo-600'"></i>
+                            <i :class="darkMode ? 'fas fa-sun text-amber-400' : 'fas fa-moon text-indigo-500'"></i>
                         </button>
 
-                        <!-- Notification Dropdown (Yahoo Alert center) -->
+                        <!-- Notification Dropdown -->
                         <div class="relative" x-data="{ notifOpen: false }">
                             <button @click="notifOpen = !notifOpen" 
-                                    class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-dark-850 hover:bg-slate-200 dark:hover:bg-dark-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors border border-slate-200 dark:border-dark-750 relative">
+                                    class="w-9 h-9 rounded-full bg-white dark:bg-dark-850 hover:bg-neutral-100 dark:hover:bg-dark-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center transition-colors border border-[#DDDDDD] dark:border-dark-750 relative shadow-2xs">
                                 <i class="far fa-bell"></i>
-                                <span class="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white dark:ring-dark-900"></span>
+                                <span class="absolute top-2 right-2 w-2 h-2 bg-[#FF385C] rounded-full ring-2 ring-white dark:ring-dark-900"></span>
                             </button>
                             
                             <div x-show="notifOpen" @click.outside="notifOpen = false" x-cloak
-                                 class="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-dark-850 rounded-2xl shadow-2xl border border-slate-200 dark:border-dark-750 overflow-hidden z-50">
-                                <div class="px-4 py-3 border-b border-slate-100 dark:border-dark-750 flex items-center justify-between bg-slate-50 dark:bg-dark-900/50">
-                                    <div class="font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                                 class="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-dark-850 rounded-3xl shadow-card-hover border border-[#EBEBEB] dark:border-dark-750 overflow-hidden z-50">
+                                <div class="px-5 py-3.5 border-b border-[#EBEBEB] dark:border-dark-750 flex items-center justify-between bg-neutral-50 dark:bg-dark-900/50">
+                                    <div class="font-bold text-sm text-neutral-900 dark:text-white flex items-center gap-2">
                                         <span>Market Alerts</span>
-                                        <span class="text-[10px] bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 font-bold px-2 py-0.5 rounded-full">3 New</span>
+                                        <span class="text-[10px] bg-[#FFF0F3] text-[#FF385C] font-bold px-2 py-0.5 rounded-full">3 New</span>
                                     </div>
-                                    <button class="text-xs text-pesa-600 dark:text-pesa-400 hover:underline">Mark all read</button>
+                                    <button class="text-xs text-[#FF385C] hover:underline font-semibold">Mark all read</button>
                                 </div>
-                                <div class="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-dark-800">
-                                    <a href="{% url 'asset_detail' 'SCOM' %}" class="block p-3.5 hover:bg-slate-50 dark:hover:bg-dark-800/60 transition-colors">
+                                <div class="max-h-80 overflow-y-auto divide-y divide-[#EBEBEB] dark:divide-dark-800">
+                                    <a href="{% url 'asset_detail' 'SCOM' %}" class="block p-4 hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors">
                                         <div class="flex gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center flex-shrink-0 text-xs">
+                                            <div class="w-9 h-9 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 text-xs">
                                                 <i class="fas fa-arrow-trend-up"></i>
                                             </div>
                                             <div>
-                                                <p class="text-xs font-semibold text-slate-900 dark:text-slate-100">Safaricom PLC (SCOM) Up +2.4%</p>
-                                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Surpassed KES 14.85 on record M-PESA volume report.</p>
-                                                <span class="text-[10px] text-slate-400 mt-1 block">15 mins ago</span>
+                                                <p class="text-xs font-bold text-neutral-900 dark:text-white">Safaricom PLC (SCOM) Up +2.4%</p>
+                                                <p class="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">Surpassed KES 14.85 on record M-PESA volume report.</p>
+                                                <span class="text-[10px] text-neutral-400 mt-1 block">15 mins ago</span>
                                             </div>
                                         </div>
                                     </a>
-                                    <a href="{% url 'asset_detail' 'BTC' %}" class="block p-3.5 hover:bg-slate-50 dark:hover:bg-dark-800/60 transition-colors">
+                                    <a href="{% url 'asset_detail' 'BTC' %}" class="block p-4 hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors">
                                         <div class="flex gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center flex-shrink-0 text-xs">
+                                            <div class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-xs">
                                                 <i class="fas fa-bell"></i>
                                             </div>
                                             <div>
-                                                <p class="text-xs font-semibold text-slate-900 dark:text-slate-100">Bitcoin Breaks Above $64,800</p>
-                                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Price target alert reached for your portfolio holding.</p>
-                                                <span class="text-[10px] text-slate-400 mt-1 block">1 hour ago</span>
+                                                <p class="text-xs font-bold text-neutral-900 dark:text-white">Bitcoin Breaks Above $64,800</p>
+                                                <p class="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">Price target alert reached for your portfolio holding.</p>
+                                                <span class="text-[10px] text-neutral-400 mt-1 block">1 hour ago</span>
                                             </div>
                                         </div>
                                     </a>
@@ -464,28 +536,29 @@
                             </div>
                         </div>
 
-                        <!-- User Profile Menu -->
+                        <!-- Iconic User Profile Pill: Hamburger + Avatar -->
                         <div class="relative" x-data="{ userOpen: false }">
-                            <button @click="userOpen = !userOpen" class="flex items-center gap-2 p-1 pl-1.5 pr-2 rounded-full hover:bg-slate-100 dark:hover:bg-dark-800 transition-colors">
+                            <button @click="userOpen = !userOpen" 
+                                    class="flex items-center gap-2.5 p-1 pl-3.5 pr-1.5 rounded-full border border-[#DDDDDD] dark:border-dark-750 hover:shadow-pill bg-white dark:bg-dark-850 transition-all">
+                                <i class="fas fa-bars text-xs text-neutral-600 dark:text-neutral-300"></i>
                                 <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" 
                                      alt="Richard Cooper" 
-                                     class="w-8 h-8 rounded-full object-cover ring-2 ring-pesa-500/30">
-                                <span class="hidden lg:block text-xs font-bold text-slate-800 dark:text-slate-200">Richard Cooper</span>
-                                <i class="fas fa-chevron-down text-[10px] text-slate-400"></i>
+                                     class="w-8 h-8 rounded-full object-cover">
                             </button>
 
                             <div x-show="userOpen" @click.outside="userOpen = false" x-cloak
-                                 class="absolute right-0 mt-2 w-56 bg-white dark:bg-dark-850 rounded-2xl shadow-xl border border-slate-200 dark:border-dark-750 py-2 z-50">
-                                <div class="px-4 py-2.5 border-b border-slate-100 dark:border-dark-750">
-                                    <p class="text-xs font-bold text-slate-900 dark:text-white">Richard Cooper</p>
-                                    <p class="text-[11px] text-slate-400 truncate">r.cooper@pesamarkets.com</p>
-                                    <span class="inline-block mt-1 text-[10px] font-bold bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 px-2 py-0.5 rounded">Pro Tier</span>
+                                 class="absolute right-0 mt-2 w-60 bg-white dark:bg-dark-850 rounded-3xl shadow-card-hover border border-[#EBEBEB] dark:border-dark-750 py-2.5 z-50">
+                                <div class="px-5 py-3 border-b border-[#EBEBEB] dark:border-dark-750">
+                                    <p class="text-xs font-bold text-neutral-900 dark:text-white">Richard Cooper</p>
+                                    <p class="text-[11px] text-neutral-400 truncate">r.cooper@pesamarkets.com</p>
+                                    <span class="inline-block mt-1.5 text-[10px] font-bold bg-[#FFF0F3] text-[#FF385C] px-2.5 py-0.5 rounded-full">Terminal Pro Tier</span>
                                 </div>
-                                <a href="{% url 'profile' %}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-dark-800"><i class="far fa-user mr-2 text-slate-400"></i> Profile & KYC</a>
-                                <a href="{% url 'portfolio' %}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-dark-800"><i class="fas fa-wallet mr-2 text-slate-400"></i> Holdings & Tax</a>
-                                <a href="{% url 'settings' %}" class="block px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-dark-800"><i class="fas fa-sliders-h mr-2 text-slate-400"></i> Settings</a>
-                                <hr class="my-1 border-slate-100 dark:border-dark-750">
-                                <a href="#" class="block px-4 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20"><i class="fas fa-arrow-right-from-bracket mr-2"></i> Sign Out</a>
+                                <a href="{% url 'terminal' %}" class="block px-5 py-2.5 text-xs font-bold text-[#FF385C] hover:bg-[#FFF0F3] dark:hover:bg-[#FF385C]/10"><i class="fas fa-terminal mr-2"></i> Terminal Pro</a>
+                                <a href="{% url 'profile' %}" class="block px-5 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-dark-800"><i class="far fa-user mr-2 text-neutral-400"></i> Profile & KYC</a>
+                                <a href="{% url 'portfolio' %}" class="block px-5 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-dark-800"><i class="fas fa-wallet mr-2 text-neutral-400"></i> Holdings & Tax</a>
+                                <a href="{% url 'settings' %}" class="block px-5 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-dark-800"><i class="fas fa-sliders-h mr-2 text-neutral-400"></i> Settings</a>
+                                <hr class="my-1.5 border-[#EBEBEB] dark:border-dark-750">
+                                <a href="#" class="block px-5 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20"><i class="fas fa-arrow-right-from-bracket mr-2"></i> Sign Out</a>
                             </div>
                         </div>
 
@@ -495,7 +568,7 @@
                 <!-- ========================================== -->
                 <!-- 4. MAIN SCROLLABLE CONTENT BODY            -->
                 <!-- ========================================== -->
-                <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-[#F8FAFC] dark:bg-dark-900 pb-24 md:pb-8">
+                <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-[#F7F7F7] dark:bg-dark-900 pb-24 md:pb-8">
                     {% block content %}
                     {% endblock %}
                 </main>
@@ -504,99 +577,109 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- 5. MOBILE BOTTOM NAVIGATION (Matching Image 2) -->
+        <!-- 5. MOBILE BOTTOM NAVIGATION                -->
         <!-- ========================================== -->
-        <nav class="md:hidden fixed bottom-0 inset-x-0 bg-white/95 dark:bg-dark-900/95 backdrop-blur-lg border-t border-slate-200 dark:border-dark-750 px-4 py-2 flex items-center justify-around z-40">
-            <a href="{% url 'home' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'home' %}text-pesa-500 font-bold{% else %}text-slate-400{% endif %}">
-                <i class="fas fa-house text-lg"></i>
-                <span>Home</span>
+        <nav class="md:hidden fixed bottom-0 inset-x-0 bg-white/95 dark:bg-dark-900/95 backdrop-blur-lg border-t border-[#EBEBEB] dark:border-dark-750 px-4 py-2 flex items-center justify-around z-40">
+            <a href="{% url 'home' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'home' %}text-[#FF385C] font-bold{% else %}text-neutral-400{% endif %}">
+                <i class="fas fa-compass text-lg"></i>
+                <span>Explore</span>
             </a>
             
-            <a href="{% url 'markets' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'markets' %}text-pesa-500 font-bold{% else %}text-slate-400{% endif %}">
-                <i class="fas fa-chart-line text-lg"></i>
-                <span>Markets</span>
+            <a href="{% url 'markets' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'markets' %}text-[#FF385C] font-bold{% else %}text-neutral-400{% endif %}">
+                <i class="fas fa-layer-group text-lg"></i>
+                <span>Listings</span>
             </a>
 
-            <!-- Central Floating Trade / Swap Button (Image 2 style) -->
-            <a href="{% url 'trade' %}" class="-mt-6 w-13 h-13 w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/40 hover:scale-105 active:scale-95 transition-transform">
-                <i class="fas fa-arrow-right-arrow-left text-lg"></i>
+            <!-- Central Floating Trade / Swap Pill Button -->
+            <a href="{% url 'trade' %}" class="-mt-5 w-12 h-12 rounded-full bg-gradient-to-tr from-[#FF385C] to-[#E61E4D] text-white flex items-center justify-center shadow-brand-glow hover:scale-105 active:scale-95 transition-transform">
+                <i class="fas fa-arrow-right-arrow-left text-base"></i>
             </a>
 
-            <a href="{% url 'watchlist' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'watchlist' %}text-pesa-500 font-bold{% else %}text-slate-400{% endif %}">
-                <i class="far fa-star text-lg"></i>
-                <span>Watchlist</span>
+            <a href="{% url 'watchlist' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'watchlist' %}text-[#FF385C] font-bold{% else %}text-neutral-400{% endif %}">
+                <i class="far fa-heart text-lg"></i>
+                <span>Wishlist</span>
             </a>
 
-            <a href="{% url 'portfolio' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'portfolio' %}text-pesa-500 font-bold{% else %}text-slate-400{% endif %}">
+            <a href="{% url 'portfolio' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'portfolio' %}text-[#FF385C] font-bold{% else %}text-neutral-400{% endif %}">
                 <i class="fas fa-wallet text-lg"></i>
-                <span>Holdings</span>
+                <span>Portfolio</span>
             </a>
         </nav>
 
         <!-- ========================================== -->
-        <!-- 6. UNIVERSAL YAHOO SEARCH MODAL (CMD + K)  -->
+        <!-- 6. FLOATING SEARCH MODAL DIALOG            -->
         <!-- ========================================== -->
         <div x-show="searchOpen" x-cloak
-             class="fixed inset-0 z-50 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm flex items-start justify-center pt-16 px-4">
+             class="fixed inset-0 z-50 bg-neutral-900/50 dark:bg-black/70 backdrop-blur-sm flex items-start justify-center pt-16 px-4">
             <div @click.outside="searchOpen = false" 
-                 class="w-full max-w-2xl bg-white dark:bg-dark-850 rounded-3xl shadow-2xl border border-slate-200 dark:border-dark-750 overflow-hidden transform transition-all">
+                 class="w-full max-w-2xl bg-white dark:bg-dark-850 rounded-3xl shadow-card-hover border border-[#DDDDDD] dark:border-dark-750 overflow-hidden transform transition-all">
                 
                 <!-- Search Input Bar -->
-                <div class="p-4 border-b border-slate-100 dark:border-dark-750 flex items-center gap-3">
-                    <i class="fas fa-search text-slate-400 text-lg"></i>
+                <div class="p-4 border-b border-[#EBEBEB] dark:border-dark-750 flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-[#FF385C] flex items-center justify-center text-white flex-shrink-0">
+                        <i class="fas fa-search text-xs"></i>
+                    </div>
                     <input type="text" 
                            x-model="searchQuery" 
                            @input.debounce.250ms="performSearch()"
-                           placeholder="Search stocks, crypto, commodities, forex (e.g. SCOM, AAPL, BTC, NVDA)..."
-                           class="w-full bg-transparent border-none outline-none text-base font-medium text-slate-900 dark:text-white placeholder-slate-400"
+                           placeholder="Search stocks, bonds, treasury bills, crypto (e.g. SCOM, T91, IFB10Y, AAPL, BTC)..."
+                           class="w-full bg-transparent border-none outline-none text-base font-medium text-neutral-900 dark:text-white placeholder-neutral-400"
                            x-ref="searchInput"
                            x-init="$watch('searchOpen', value => { if(value) setTimeout(() => $refs.searchInput.focus(), 50) })">
-                    <button @click="searchOpen = false" class="text-xs bg-slate-100 dark:bg-dark-750 text-slate-500 px-2.5 py-1 rounded-lg">ESC</button>
+                    <button @click="searchOpen = false" class="text-xs bg-neutral-100 dark:bg-dark-750 text-neutral-500 font-bold px-3 py-1.5 rounded-full">ESC</button>
                 </div>
 
                 <!-- Live Results -->
-                <div class="max-h-96 overflow-y-auto p-2">
+                <div class="max-h-96 overflow-y-auto p-3">
                     <template x-if="searchLoading">
-                        <div class="p-6 text-center text-slate-400 text-sm">
-                            <i class="fas fa-spinner fa-spin mr-2"></i> Searching market data...
+                        <div class="p-8 text-center text-neutral-400 text-sm">
+                            <i class="fas fa-spinner fa-spin mr-2 text-[#FF385C]"></i> Searching market quotes...
                         </div>
                     </template>
 
                     <template x-if="!searchLoading && searchResults.length > 0">
-                        <div class="space-y-1">
+                        <div class="space-y-1.5">
                             <template x-for="item in searchResults" :key="item.symbol">
                                 <a :href="'/asset/' + item.symbol + '/'" 
                                    @click="searchOpen = false"
-                                   class="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-dark-800 transition-colors group">
+                                   class="flex items-center justify-between p-3.5 rounded-2xl hover:bg-neutral-50 dark:hover:bg-dark-800 transition-colors group">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-dark-750 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-300 group-hover:bg-pesa-500 group-hover:text-white transition-colors" x-text="item.symbol"></div>
+                                        <div class="w-10 h-10 rounded-2xl bg-white dark:bg-dark-750 border border-neutral-200 dark:border-dark-700 flex items-center justify-center p-1.5 flex-shrink-0 shadow-2xs">
+                                            <template x-if="item.logo">
+                                                <img :src="item.logo" :alt="item.symbol" class="w-full h-full object-contain">
+                                            </template>
+                                            <template x-if="!item.logo">
+                                                <span class="font-bold text-xs text-neutral-800 dark:text-white" x-text="item.symbol"></span>
+                                            </template>
+                                        </div>
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <span class="font-bold text-sm text-slate-900 dark:text-white" x-text="item.symbol"></span>
-                                                <span class="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-slate-100 dark:bg-dark-700 text-slate-500" x-text="item.market"></span>
+                                                <span class="font-bold text-sm text-neutral-900 dark:text-white group-hover:text-[#FF385C] transition-colors" x-text="item.symbol"></span>
+                                                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-dark-700 text-neutral-500" x-text="item.market"></span>
                                             </div>
-                                            <span class="text-xs text-slate-400" x-text="item.name"></span>
+                                            <span class="text-xs text-neutral-500 dark:text-neutral-400" x-text="item.name"></span>
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                        <span class="font-mono font-bold text-sm text-slate-900 dark:text-white" x-text="formatPrice(item.price)"></span>
-                                        <div :class="item.change_percent >= 0 ? 'text-emerald-500' : 'text-rose-500'" class="text-xs font-semibold" x-text="(item.change_percent >= 0 ? '+' : '') + item.change_percent + '%'"></div>
+                                        <span class="font-mono font-bold text-sm text-neutral-900 dark:text-white" x-text="formatPrice(item.price)"></span>
+                                        <div :class="item.change_percent >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'" class="text-xs font-semibold" x-text="(item.change_percent >= 0 ? '+' : '') + item.change_percent + '%'"></div>
                                     </div>
                                 </a>
                             </template>
                         </div>
                     </template>
 
-                    <!-- Popular Default Suggestions when search is empty -->
+                    <!-- Popular Suggestions when search is empty -->
                     <template x-if="!searchLoading && searchResults.length === 0">
                         <div class="p-4">
-                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Trending Searches</p>
+                            <p class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-3">Trending Opportunities</p>
                             <div class="flex flex-wrap gap-2">
-                                <a href="{% url 'asset_detail' 'SCOM' %}" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-dark-800 text-xs font-bold hover:bg-pesa-500 hover:text-white transition-colors">SCOM (Safaricom)</a>
-                                <a href="{% url 'asset_detail' 'AAPL' %}" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-dark-800 text-xs font-bold hover:bg-pesa-500 hover:text-white transition-colors">AAPL (Apple)</a>
-                                <a href="{% url 'asset_detail' 'NVDA' %}" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-dark-800 text-xs font-bold hover:bg-pesa-500 hover:text-white transition-colors">NVDA (NVIDIA)</a>
-                                <a href="{% url 'asset_detail' 'BTC' %}" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-dark-800 text-xs font-bold hover:bg-pesa-500 hover:text-white transition-colors">BTC (Bitcoin)</a>
-                                <a href="{% url 'asset_detail' 'TSLA' %}" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-dark-800 text-xs font-bold hover:bg-pesa-500 hover:text-white transition-colors">TSLA (Tesla)</a>
+                                <a href="{% url 'asset_detail' 'SCOM' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#FF385C] hover:text-white transition-colors">SCOM (Safaricom)</a>
+                                <a href="{% url 'asset_detail' 'IFB10Y' %}" class="px-3.5 py-1.5 rounded-full bg-[#FFF0F3] text-[#FF385C] border border-[#FF385C]/20 text-xs font-bold hover:bg-[#FF385C] hover:text-white transition-colors">IFB10Y (17.85% Bond)</a>
+                                <a href="{% url 'asset_detail' 'T91' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#FF385C] hover:text-white transition-colors">T91 (91D T-Bill)</a>
+                                <a href="{% url 'asset_detail' 'AAPL' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#FF385C] hover:text-white transition-colors">AAPL (Apple)</a>
+                                <a href="{% url 'asset_detail' 'NVDA' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#FF385C] hover:text-white transition-colors">NVDA (NVIDIA)</a>
+                                <a href="{% url 'asset_detail' 'BTC' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#FF385C] hover:text-white transition-colors">BTC (Bitcoin)</a>
                             </div>
                         </div>
                     </template>
@@ -605,73 +688,7 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- 7. PESA AI ASSISTANT MODAL (Image 1 Style) -->
-        <!-- ========================================== -->
-        <div x-show="aiModalOpen" x-cloak
-             class="fixed inset-0 z-50 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-            <div @click.outside="aiModalOpen = false"
-                 class="w-full max-w-xl bg-white dark:bg-dark-850 rounded-3xl shadow-2xl border border-slate-200 dark:border-dark-750 overflow-hidden flex flex-col">
-                <div class="p-5 border-b border-slate-100 dark:border-dark-750 flex items-center justify-between bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-teal-500/10">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-                            <i class="fas fa-wand-magic-sparkles"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-extrabold text-slate-900 dark:text-white">Pesa AI Market Assistant</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Real-time financial reasoning & portfolio diagnostics</p>
-                        </div>
-                    </div>
-                    <button @click="aiModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                        <i class="fas fa-times text-lg"></i>
-                    </button>
-                </div>
-
-                <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto text-sm">
-                    <div class="bg-blue-50/80 dark:bg-blue-950/30 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/40">
-                        <h4 class="font-bold text-blue-900 dark:text-blue-300 flex items-center gap-2 mb-1">
-                            <i class="fas fa-bolt text-blue-500"></i> Market Pulse Summary
-                        </h4>
-                        <p class="text-xs text-blue-800 dark:text-blue-300/80 leading-relaxed">
-                            Global indices are tilting bullish today led by technology momentum in semiconductor leaders (NVDA +4.4%) and steady Central Bank monetary policies in Kenya keeping inflation at 4.2%.
-                        </p>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div class="p-3.5 bg-slate-50 dark:bg-dark-800 rounded-2xl border border-slate-100 dark:border-dark-700">
-                            <span class="text-slate-400 font-semibold uppercase text-[10px] block">Top Valuation Pick</span>
-                            <span class="font-bold text-slate-800 dark:text-slate-100 text-sm mt-0.5 block">SCOM (Safaricom)</span>
-                            <span class="text-emerald-500 font-medium">Undervalued by 22%</span>
-                        </div>
-                        <div class="p-3.5 bg-slate-50 dark:bg-dark-800 rounded-2xl border border-slate-100 dark:border-dark-700">
-                            <span class="text-slate-400 font-semibold uppercase text-[10px] block">Risk Appetite</span>
-                            <span class="font-bold text-slate-800 dark:text-slate-100 text-sm mt-0.5 block">High / Greed (68)</span>
-                            <span class="text-blue-500 font-medium">Strong Inflows</span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Ask AI Market Questions</p>
-                        <div class="space-y-2">
-                            <button @click="showToast('AI analysis generated!')" class="w-full text-left p-2.5 rounded-xl bg-slate-100 dark:bg-dark-800 hover:bg-slate-200 dark:hover:bg-dark-750 text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                                <span>"What is the fair value target for Safaricom (SCOM)?"</span>
-                                <i class="fas fa-arrow-right text-[10px] text-slate-400"></i>
-                            </button>
-                            <button @click="showToast('AI analysis generated!')" class="w-full text-left p-2.5 rounded-xl bg-slate-100 dark:bg-dark-800 hover:bg-slate-200 dark:hover:bg-dark-750 text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                                <span>"Compare dividend yields between KCB and Equity Bank"</span>
-                                <i class="fas fa-arrow-right text-[10px] text-slate-400"></i>
-                            </button>
-                            <button @click="showToast('AI analysis generated!')" class="w-full text-left p-2.5 rounded-xl bg-slate-100 dark:bg-dark-800 hover:bg-slate-200 dark:hover:bg-dark-750 text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                                <span>"Assess downside risks for Bitcoin at current levels"</span>
-                                <i class="fas fa-arrow-right text-[10px] text-slate-400"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- 8. TOAST NOTIFICATION BANNER               -->
+        <!-- 7. TOAST NOTIFICATION BANNER               -->
         <!-- ========================================== -->
         <div x-show="toastVisible" x-cloak
              x-transition:enter="transition ease-out duration-300"
@@ -680,8 +697,8 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 transform translate-y-0"
              x-transition:leave-end="opacity-0 transform translate-y-4"
-             class="fixed bottom-20 md:bottom-6 right-6 z-50 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-semibold">
-            <i class="fas fa-check-circle text-pesa-500 text-base"></i>
+             class="fixed bottom-20 md:bottom-6 right-6 z-50 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 px-5 py-3 rounded-full shadow-card-hover flex items-center gap-3 text-xs font-bold">
+            <i class="fas fa-check-circle text-[#FF385C] text-base"></i>
             <span x-text="toastMessage">Action completed successfully</span>
         </div>
 

@@ -1,0 +1,908 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-[1700px] mx-auto space-y-4 font-sans" x-data="terminalController()">
+    
+    <!-- ======================================================== -->
+    <!-- 1. BLOOMBERG & SAXOTRADERGO INSTITUTIONAL TERMINAL HEADER -->
+    <!-- ======================================================== -->
+    <div class="bg-slate-950 text-slate-100 rounded-3xl border border-slate-800 p-4 md:p-5 shadow-2xl relative overflow-hidden">
+        <!-- Amber Bloomberg Glow Accent -->
+        <div class="absolute -top-12 -left-12 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -top-12 -right-12 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
+            <!-- Left Branding & Terminal Identifier -->
+            <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-2xl bg-white dark:bg-dark-800 p-2 border border-slate-700 flex items-center justify-center shadow-lg flex-shrink-0" x-show="terminalData.asset.logo">
+                    <img :src="terminalData.asset.logo" :alt="terminalData.asset.name" class="w-full h-full object-contain">
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 via-orange-600 to-amber-700 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-amber-500/20" x-show="!terminalData.asset.logo">
+                    <i class="fas fa-terminal"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono font-black text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            BLOOMBERG &bull; SAXOTRADERGO WORKSTATION
+                        </span>
+                        <span class="text-[9px] font-mono font-bold bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full uppercase">PRO TIER</span>
+                    </div>
+                    <h1 class="text-xl md:text-2xl font-black text-white tracking-tight flex items-center gap-2 mt-0.5">
+                        <span x-text="currentSymbol"></span>
+                        <span class="text-sm font-semibold text-slate-400 font-mono" x-text="terminalData.asset.name"></span>
+                        <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-cyan-400 font-mono" x-text="terminalData.asset.market"></span>
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Center: Financial Center Clocks (Bloomberg Global Desk) -->
+            <div class="hidden xl:flex items-center gap-4 bg-slate-900/90 border border-slate-800 px-4 py-2 rounded-full text-xs font-mono">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span class="text-slate-400 font-bold">NBO:</span>
+                    <span class="text-white" x-text="clocks.nbo">14:02 EAT</span>
+                </div>
+                <span class="text-slate-700">&bull;</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span class="text-slate-400 font-bold">LND:</span>
+                    <span class="text-white" x-text="clocks.lnd">12:02 GMT</span>
+                </div>
+                <span class="text-slate-700">&bull;</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span class="text-slate-400 font-bold">NYC:</span>
+                    <span class="text-white" x-text="clocks.nyc">07:02 EST</span>
+                </div>
+                <span class="text-slate-700">&bull;</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span class="text-slate-400 font-bold">TYO:</span>
+                    <span class="text-white" x-text="clocks.tyo">20:02 JST</span>
+                </div>
+            </div>
+
+            <!-- Right: Quick Actions -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <button @click="copyTelemetry()" class="px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-mono font-bold transition-all flex items-center gap-1.5">
+                    <i class="far fa-copy text-amber-400"></i>
+                    <span>COPY DESK</span>
+                </button>
+                <a :href="'/trade/?symbol=' + currentSymbol" class="px-5 py-2 rounded-full bg-primary hover:bg-[#E00B41] text-white text-xs font-mono font-bold shadow-md shadow-primary/25 transition-all flex items-center gap-1.5">
+                    <i class="fas fa-bolt"></i>
+                    <span>TRADE TICKET</span>
+                </a>
+                <a :href="'/asset/' + currentSymbol + '/'" class="px-4 py-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono font-bold transition-all">
+                    <span>DETAIL PAGE &rarr;</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Bloomberg Command Prompt & Quick Ticker Ribbon -->
+        <div class="mt-4 pt-4 border-t border-slate-850 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <!-- Command Line Input -->
+            <form @submit.prevent="executeCommand()" class="flex items-center gap-2 bg-slate-900 border border-slate-750 rounded-full px-4 py-1.5 flex-1 max-w-xl group focus-within:border-primary transition-colors">
+                <span class="text-amber-500 font-mono font-black text-xs">&gt;</span>
+                <input type="text" 
+                       x-model="cmdInput" 
+                       placeholder="Bloomberg Command (e.g. SCOM <GO>, NVDA FA, L2, TECH, FLOW, ECO, YCRV)..." 
+                       class="w-full bg-transparent border-none outline-none text-xs font-mono text-amber-300 placeholder-slate-500 uppercase tracking-wide">
+                <button type="submit" class="text-[10px] font-mono font-black px-3 py-1 rounded-full bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors">
+                    &lt;GO&gt;
+                </button>
+            </form>
+
+            <!-- Ticker Fast Switcher Ribbon -->
+            <div class="flex items-center gap-1.5 overflow-x-auto ticker-scroll pb-1">
+                <template x-for="item in allAssets" :key="item.symbol">
+                    <button @click="switchSymbol(item.symbol)"
+                            :class="currentSymbol === item.symbol ? 'bg-primary text-white font-black shadow-md shadow-primary/20' : 'bg-slate-900/90 hover:bg-slate-800 text-slate-300 border border-slate-800 font-semibold'"
+                            class="px-3 py-1.5 rounded-full text-xs font-mono transition-all flex items-center gap-2 flex-shrink-0">
+                        <div class="w-4 h-4 rounded-full bg-white p-0.5 flex items-center justify-center flex-shrink-0" x-show="item.logo">
+                            <img :src="item.logo" :alt="item.symbol" class="w-full h-full object-contain">
+                        </div>
+                        <span x-text="item.symbol"></span>
+                        <span :class="currentSymbol === item.symbol ? 'text-white' : (item.change_percent >= 0 ? 'text-emerald-400' : 'text-rose-400')" 
+                              class="text-[10px] font-bold" 
+                              x-text="(item.change_percent >= 0 ? '+' : '') + item.change_percent + '%'"></span>
+                    </button>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 2. WORKSTATION SUB-VIEW NAVIGATION TABS (F1 - F6)        -->
+    <!-- ======================================================== -->
+    <div class="flex items-center gap-2 overflow-x-auto ticker-scroll bg-white dark:bg-dark-850 p-2 rounded-full border border-slate-200/80 dark:border-dark-750 shadow-xs">
+        <button @click="activeView = 'l2'" 
+                :class="activeView === 'l2' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                class="px-4 py-2 rounded-full text-xs font-mono font-bold transition-all flex items-center gap-2 flex-shrink-0">
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black">F1</span>
+            <span>OVERVIEW & LEVEL 2 DEPTH</span>
+        </button>
+
+        <button @click="activeView = 'fa'" 
+                :class="activeView === 'fa' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                class="px-4 py-2 rounded-full text-xs font-mono font-bold transition-all flex items-center gap-2 flex-shrink-0">
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-cyan-500 text-slate-950 font-black">F2</span>
+            <span>VALUATION & STATEMENTS (FA)</span>
+        </button>
+
+        <button @click="activeView = 'tech'" 
+                :class="activeView === 'tech' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                class="px-4 py-2 rounded-full text-xs font-mono font-bold transition-all flex items-center gap-2 flex-shrink-0">
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black">F3</span>
+            <span>SAXO TECHNICALS & SENTIMENT</span>
+        </button>
+
+        <button @click="activeView = 'flow'" 
+                :class="activeView === 'flow' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                class="px-4 py-2 rounded-full text-xs font-mono font-bold transition-all flex items-center gap-2 flex-shrink-0">
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500 text-white font-black">F4</span>
+            <span>TIME & SALES / BLOCK TAPE</span>
+        </button>
+
+        <button @click="activeView = 'eco'" 
+                :class="activeView === 'eco' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                class="px-4 py-2 rounded-full text-xs font-mono font-bold transition-all flex items-center gap-2 flex-shrink-0">
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500 text-white font-black">F5</span>
+            <span>MACRO CALENDAR & CBK/FED (ECO)</span>
+        </button>
+
+        <button @click="activeView = 'ycrv'" 
+                :class="activeView === 'ycrv' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                class="px-4 py-2 rounded-full text-xs font-mono font-bold transition-all flex items-center gap-2 flex-shrink-0">
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-primary text-white font-black">F6</span>
+            <span>SOVEREIGN YIELDS & CORR (YCRV)</span>
+        </button>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 3. VIEW 1: OVERVIEW & LEVEL 2 MARKET DEPTH (F1)           -->
+    <!-- ======================================================== -->
+    <div x-show="activeView === 'l2'" class="space-y-4">
+        
+        <!-- Live Telemetry Strip -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div class="bg-white dark:bg-dark-850 p-3.5 rounded-2xl border border-slate-200/80 dark:border-dark-750 shadow-xs">
+                <span class="text-[10px] font-mono uppercase text-slate-400 font-bold block">LAST EXECUTED</span>
+                <span class="text-lg font-black font-mono text-slate-900 dark:text-white block mt-0.5" x-text="formatPrice(terminalData.asset.price)"></span>
+                <span :class="terminalData.asset.change_percent >= 0 ? 'text-emerald-500' : 'text-rose-500'" class="text-xs font-mono font-bold">
+                    <span x-text="(terminalData.asset.change_percent >= 0 ? '+' : '') + terminalData.asset.change_percent + '%'"></span>
+                </span>
+            </div>
+
+            <div class="bg-white dark:bg-dark-850 p-3.5 rounded-2xl border border-slate-200/80 dark:border-dark-750 shadow-xs">
+                <span class="text-[10px] font-mono uppercase text-slate-400 font-bold block">BID &bull; ASK LADDER</span>
+                <span class="text-sm font-black font-mono text-slate-900 dark:text-white block mt-0.5">
+                    <span class="text-emerald-500" x-text="terminalData.level2.bids[0].price"></span> / 
+                    <span class="text-rose-500" x-text="terminalData.level2.asks[0].price"></span>
+                </span>
+                <span class="text-[11px] font-mono text-slate-400">
+                    Spread: <span class="font-bold text-amber-500" x-text="terminalData.level2.spread_bps + ' bps'"></span>
+                </span>
+            </div>
+
+            <div class="bg-white dark:bg-dark-850 p-3.5 rounded-2xl border border-slate-200/80 dark:border-dark-750 shadow-xs">
+                <span class="text-[10px] font-mono uppercase text-slate-400 font-bold block">VWAP (VOL-WEIGHTED)</span>
+                <span class="text-lg font-black font-mono text-slate-900 dark:text-white block mt-0.5" x-text="terminalData.asset.currency + ' ' + terminalData.level2.vwap"></span>
+                <span class="text-[11px] font-mono text-slate-400">Micro: <span class="text-cyan-400 font-bold" x-text="terminalData.level2.micro_price"></span></span>
+            </div>
+
+            <div class="bg-white dark:bg-dark-850 p-3.5 rounded-2xl border border-slate-200/80 dark:border-dark-750 shadow-xs">
+                <span class="text-[10px] font-mono uppercase text-slate-400 font-bold block">DAY'S RANGE (L - H)</span>
+                <span class="text-xs font-black font-mono text-slate-900 dark:text-white block mt-1" x-text="terminalData.asset.day_low + ' - ' + terminalData.asset.day_high"></span>
+                <div class="w-full bg-slate-100 dark:bg-dark-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div class="bg-pesa-500 h-full rounded-full" style="width: 65%;"></div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-dark-850 p-3.5 rounded-2xl border border-slate-200/80 dark:border-dark-750 shadow-xs">
+                <span class="text-[10px] font-mono uppercase text-slate-400 font-bold block">SESSION VOLUME</span>
+                <span class="text-lg font-black font-mono text-slate-900 dark:text-white block mt-0.5" x-text="terminalData.asset.volume"></span>
+                <span class="text-[11px] font-mono text-slate-400">Avg: <span x-text="terminalData.asset.avg_volume"></span></span>
+            </div>
+
+            <div class="bg-white dark:bg-dark-850 p-3.5 rounded-2xl border border-slate-200/80 dark:border-dark-750 shadow-xs">
+                <span class="text-[10px] font-mono uppercase text-slate-400 font-bold block">ORDER BOOK PRESSURE</span>
+                <span class="text-sm font-black font-mono text-slate-900 dark:text-white block mt-0.5">
+                    <span class="text-emerald-500" x-text="terminalData.level2.bid_pressure_pct + '% Bids'"></span>
+                </span>
+                <div class="flex h-1.5 w-full rounded-full overflow-hidden mt-2">
+                    <div class="bg-emerald-500 h-full" :style="'width: ' + terminalData.level2.bid_pressure_pct + '%'"></div>
+                    <div class="bg-rose-500 h-full" :style="'width: ' + terminalData.level2.ask_pressure_pct + '%'"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Workspace Grid: Level 2 Depth vs Diagnostic HUD -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            
+            <!-- Left: Level 2 Order Book (Saxo & Bloomberg Depth Ladder) (7 Cols) -->
+            <div class="lg:col-span-7 bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm overflow-hidden flex flex-col justify-between">
+                <div>
+                    <div class="p-4 border-b border-slate-100 dark:border-dark-750 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-white font-mono uppercase">Level 2 Market Depth (Order Book)</h3>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs font-mono">
+                            <span class="text-slate-400">Total Bids: <strong class="text-emerald-500" x-text="terminalData.level2.total_bid_size"></strong></span>
+                            <span class="text-slate-600 dark:text-slate-400">&bull;</span>
+                            <span class="text-slate-400">Total Asks: <strong class="text-rose-500" x-text="terminalData.level2.total_ask_size"></strong></span>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left font-mono text-xs">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-dark-900/60 text-[10px] text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-dark-750">
+                                    <th class="py-2.5 pl-4">Route</th>
+                                    <th class="py-2.5 text-right">Orders</th>
+                                    <th class="py-2.5 text-right">Bid Qty</th>
+                                    <th class="py-2.5 text-right font-bold text-emerald-500 pr-4">Bid Price</th>
+                                    <th class="py-2.5 pl-4 font-bold text-rose-500">Ask Price</th>
+                                    <th class="py-2.5 text-left">Ask Qty</th>
+                                    <th class="py-2.5 text-left">Orders</th>
+                                    <th class="py-2.5 pr-4 text-right">Route</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-dark-800">
+                                <template x-for="idx in [0,1,2,3,4,5,6,7]" :key="idx">
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-dark-800/60 transition-colors">
+                                        <!-- Bid Row Side -->
+                                        <td class="py-2 pl-4 text-[10px] text-slate-400" x-text="terminalData.level2.bids[idx].venue"></td>
+                                        <td class="py-2 text-right text-slate-500" x-text="terminalData.level2.bids[idx].orders"></td>
+                                        <td class="py-2 text-right text-slate-800 dark:text-slate-200 font-semibold" x-text="terminalData.level2.bids[idx].size.toLocaleString()"></td>
+                                        <td class="py-2 text-right font-bold text-emerald-600 dark:text-emerald-400 pr-4 relative">
+                                            <span class="relative z-10" x-text="terminalData.level2.bids[idx].price.toFixed(2)"></span>
+                                            <div class="absolute inset-y-0 right-0 bg-emerald-500/10 dark:bg-emerald-500/15 pointer-events-none" :style="'width: ' + terminalData.level2.bids[idx].depth_pct + '%'"></div>
+                                        </td>
+
+                                        <!-- Ask Row Side -->
+                                        <td class="py-2 pl-4 font-bold text-rose-600 dark:text-rose-400 relative">
+                                            <span class="relative z-10" x-text="terminalData.level2.asks[idx].price.toFixed(2)"></span>
+                                            <div class="absolute inset-y-0 left-0 bg-rose-500/10 dark:bg-rose-500/15 pointer-events-none" :style="'width: ' + terminalData.level2.asks[idx].depth_pct + '%'"></div>
+                                        </td>
+                                        <td class="py-2 text-left text-slate-800 dark:text-slate-200 font-semibold" x-text="terminalData.level2.asks[idx].size.toLocaleString()"></td>
+                                        <td class="py-2 text-left text-slate-500" x-text="terminalData.level2.asks[idx].orders"></td>
+                                        <td class="py-2 pr-4 text-right text-[10px] text-slate-400" x-text="terminalData.level2.asks[idx].venue"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-slate-50 dark:bg-dark-900/60 border-t border-slate-100 dark:border-dark-750 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                    <span>FEED: DIRECT MARKET ACCESS (DMA)</span>
+                    <span class="text-amber-500 font-bold" x-text="'SPREAD: ' + terminalData.level2.spread + ' (' + terminalData.level2.spread_bps + ' BPS)'"></span>
+                    <span>TICKS: REAL-TIME L2 STREAM</span>
+                </div>
+            </div>
+
+            <!-- Right: Saxo Client Sentiment & Core Valuation Summary (5 Cols) -->
+            <div class="lg:col-span-5 space-y-4">
+                
+                <!-- SaxoTraderGO Client Positioning Card -->
+                <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-chart-pie text-cyan-500 text-sm"></i>
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-white font-mono uppercase">Saxo Client Sentiment & Positioning</h3>
+                        </div>
+                        <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-500">LIVE COHORT</span>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs font-mono font-bold mb-1.5">
+                            <span class="text-emerald-500" x-text="terminalData.technicals_saxo.sentiment.long_pct + '% LONG'"></span>
+                            <span class="text-rose-500" x-text="terminalData.technicals_saxo.sentiment.short_pct + '% SHORT'"></span>
+                        </div>
+                        <div class="flex h-3 w-full rounded-full overflow-hidden bg-slate-100 dark:bg-dark-800">
+                            <div class="bg-emerald-500 h-full" :style="'width: ' + terminalData.technicals_saxo.sentiment.long_pct + '%'"></div>
+                            <div class="bg-rose-500 h-full" :style="'width: ' + terminalData.technicals_saxo.sentiment.short_pct + '%'"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-xs font-mono">
+                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-dark-800/80 border border-slate-100 dark:border-dark-700">
+                            <span class="text-slate-400 text-[10px] block">24H POSITION SHIFT</span>
+                            <span class="font-black text-slate-900 dark:text-white mt-0.5 block" x-text="terminalData.technicals_saxo.sentiment.shift_24h"></span>
+                        </div>
+                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-dark-800/80 border border-slate-100 dark:border-dark-700">
+                            <span class="text-slate-400 text-[10px] block">PUT / CALL RATIO</span>
+                            <span class="font-black text-amber-500 mt-0.5 block" x-text="terminalData.technicals_saxo.sentiment.put_call_ratio + ' (BULLISH)'"></span>
+                        </div>
+                    </div>
+
+                    <p class="text-[11px] font-mono text-slate-400" x-text="terminalData.technicals_saxo.sentiment.retail_inst_divergence"></p>
+                </div>
+
+                <!-- Bloomberg Valuation Snapshot Tile -->
+                <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white font-mono uppercase flex items-center gap-2">
+                            <i class="fas fa-shield-halved text-amber-500"></i>
+                            <span>Financial Health & Credit Scores</span>
+                        </h3>
+                        <button @click="activeView = 'fa'" class="text-xs font-mono font-bold text-amber-500 hover:underline">Full FA &rarr;</button>
+                    </div>
+
+                    <div class="divide-y divide-slate-100 dark:divide-dark-800 text-xs font-mono">
+                        <div class="py-2 flex justify-between items-center">
+                            <span class="text-slate-400">Altman Z-Score</span>
+                            <span class="font-bold text-emerald-500" x-text="terminalData.valuation_fa.altman_z + ' (SAFE)'"></span>
+                        </div>
+                        <div class="py-2 flex justify-between items-center">
+                            <span class="text-slate-400">Piotroski F-Score</span>
+                            <span class="font-bold text-cyan-400" x-text="terminalData.valuation_fa.piotroski_f"></span>
+                        </div>
+                        <div class="py-2 flex justify-between items-center">
+                            <span class="text-slate-400">Trailing P/E Ratio</span>
+                            <span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.pe_ttm"></span>
+                        </div>
+                        <div class="py-2 flex justify-between items-center">
+                            <span class="text-slate-400">Forward P/E (N12M)</span>
+                            <span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.pe_fwd"></span>
+                        </div>
+                        <div class="py-2 flex justify-between items-center">
+                            <span class="text-slate-400">Dividend Yield</span>
+                            <span class="font-bold text-emerald-500" x-text="terminalData.valuation_fa.div_yield"></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 4. VIEW 2: BLOOMBERG VALUATION & FINANCIAL STATEMENTS (FA) -->
+    <!-- ======================================================== -->
+    <div x-show="activeView === 'fa'" x-cloak class="space-y-4">
+        
+        <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                <div>
+                    <h2 class="text-lg font-black text-slate-900 dark:text-white font-mono flex items-center gap-2">
+                        <i class="fas fa-file-invoice-dollar text-cyan-500"></i>
+                        <span>BLOOMBERG FINANCIAL ANALYSIS & MULTIPLES (FA &bull; DES)</span>
+                    </h2>
+                    <p class="text-xs font-mono text-slate-400 mt-0.5">Comprehensive fundamental ratios, profitability margins, balance sheet health and solvency</p>
+                </div>
+                <div class="text-xs font-mono bg-cyan-500/10 text-cyan-500 font-bold px-3 py-1 rounded-xl self-start sm:self-auto">
+                    AUDITED FINANCIAL STATEMENTS
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Pillar 1: Valuation Multiples & Capital Structure -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-mono font-bold uppercase tracking-wider text-amber-500 border-b border-amber-500/20 pb-2">
+                        1. Valuation Multiples
+                    </h3>
+                    <div class="divide-y divide-slate-100 dark:divide-dark-800 text-xs font-mono">
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Market Capitalization</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.market_cap"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Enterprise Value (EV)</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.enterprise_value"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Trailing P/E (TTM)</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.pe_ttm"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Forward P/E (N12M)</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.pe_fwd"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">PEG Ratio</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.peg_ratio"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Price / Book (P/B)</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.pb_ratio"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Price / Sales (P/S)</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.ps_ratio"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">EV / EBITDA</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.ev_ebitda"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">EV / Free Cash Flow</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.ev_fcf"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">FCF Yield</span><span class="font-bold text-emerald-500" x-text="terminalData.valuation_fa.fcf_yield"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Shares Outstanding</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.shares_out"></span></div>
+                    </div>
+                </div>
+
+                <!-- Pillar 2: Profitability & Return Ratios -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-cyan-400/20 pb-2">
+                        2. Profitability & Returns
+                    </h3>
+                    <div class="divide-y divide-slate-100 dark:divide-dark-800 text-xs font-mono">
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Return on Equity (ROE)</span><span class="font-bold text-emerald-500" x-text="terminalData.valuation_fa.roe"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Return on Inv. Capital (ROIC)</span><span class="font-bold text-emerald-500" x-text="terminalData.valuation_fa.roic"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Return on Assets (ROA)</span><span class="font-bold text-cyan-400" x-text="terminalData.valuation_fa.roa"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Gross Margin</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.gross_margin"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Operating (EBIT) Margin</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.operating_margin"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Net Profit Margin</span><span class="font-bold text-emerald-500" x-text="terminalData.valuation_fa.net_margin"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Earnings Per Share (EPS)</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.asset.eps || 'N/A'"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Dividend Yield</span><span class="font-bold text-emerald-500" x-text="terminalData.valuation_fa.div_yield"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Payout Ratio</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.payout_ratio"></span></div>
+                    </div>
+                </div>
+
+                <!-- Pillar 3: Solvency, Credit Risk & Quality Scores -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-500 border-b border-emerald-500/20 pb-2">
+                        3. Solvency & Credit Risk
+                    </h3>
+                    <div class="divide-y divide-slate-100 dark:divide-dark-800 text-xs font-mono">
+                        <div class="py-2 flex justify-between items-center">
+                            <span class="text-slate-400">Altman Z-Score</span>
+                            <span class="font-bold text-emerald-500" x-text="terminalData.valuation_fa.altman_z"></span>
+                        </div>
+                        <div class="py-2 flex justify-between items-center">
+                            <span class="text-slate-400">Default Probability</span>
+                            <span class="text-[11px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">Safe Zone</span>
+                        </div>
+                        <div class="py-2 flex justify-between items-center">
+                            <span class="text-slate-400">Piotroski F-Score</span>
+                            <span class="font-bold text-cyan-400" x-text="terminalData.valuation_fa.piotroski_f"></span>
+                        </div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Current Ratio</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.current_ratio"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Quick Ratio</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.quick_ratio"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Debt to Equity</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.valuation_fa.debt_to_equity"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Interest Coverage</span><span class="font-bold text-emerald-500" x-text="terminalData.valuation_fa.interest_coverage"></span></div>
+                        <div class="py-2 flex justify-between"><span class="text-slate-400">Beta (Volatility)</span><span class="font-bold text-slate-800 dark:text-slate-200" x-text="terminalData.asset.beta"></span></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 5. VIEW 3: SAXO TECHNICAL SCANNER & CLIENT SENTIMENT     -->
+    <!-- ======================================================== -->
+    <div x-show="activeView === 'tech'" x-cloak class="space-y-4">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            
+            <!-- Technical Indicators Dashboard (7 Cols) -->
+            <div class="lg:col-span-7 bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-dark-800 pb-4">
+                    <h3 class="font-black text-sm text-slate-900 dark:text-white font-mono uppercase flex items-center gap-2">
+                        <i class="fas fa-wave-square text-emerald-500"></i>
+                        <span>SAXOTRADERGO TECHNICAL SCANNER</span>
+                    </h3>
+                    <span class="text-xs font-mono font-bold text-emerald-500" x-text="'RSI: ' + terminalData.technicals_saxo.rsi_14 + ' (' + terminalData.technicals_saxo.rsi_status + ')'"></span>
+                </div>
+
+                <!-- Oscillators Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+                    <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-dark-800 border border-slate-100 dark:border-dark-700">
+                        <span class="text-slate-400 text-[10px] block">RSI (14-PERIOD)</span>
+                        <div class="flex justify-between items-baseline mt-1">
+                            <span class="text-xl font-black text-emerald-500" x-text="terminalData.technicals_saxo.rsi_14"></span>
+                            <span class="text-xs font-bold text-slate-400" x-text="terminalData.technicals_saxo.rsi_status"></span>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-dark-800 border border-slate-100 dark:border-dark-700">
+                        <span class="text-slate-400 text-[10px] block">MACD (12, 26, 9)</span>
+                        <div class="flex justify-between items-baseline mt-1">
+                            <span class="text-lg font-black text-cyan-400" x-text="'Hist: +' + terminalData.technicals_saxo.macd.hist"></span>
+                            <span class="text-[10px] text-emerald-400 font-bold">Bullish Convergence</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-dark-800 border border-slate-100 dark:border-dark-700">
+                        <span class="text-slate-400 text-[10px] block">BOLLINGER BANDS (20, 2)</span>
+                        <div class="mt-1 space-y-0.5 text-[11px]">
+                            <div class="flex justify-between"><span>Upper:</span> <strong class="text-slate-800 dark:text-slate-200" x-text="terminalData.technicals_saxo.bollinger.upper"></strong></div>
+                            <div class="flex justify-between"><span>Lower:</span> <strong class="text-slate-800 dark:text-slate-200" x-text="terminalData.technicals_saxo.bollinger.lower"></strong></div>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-dark-800 border border-slate-100 dark:border-dark-700">
+                        <span class="text-slate-400 text-[10px] block">ATR (14) & ADX TREND</span>
+                        <div class="flex justify-between items-baseline mt-1">
+                            <span class="text-lg font-black text-amber-500" x-text="'ATR: ' + terminalData.technicals_saxo.atr_14"></span>
+                            <span class="text-[11px] text-slate-400" x-text="'ADX: ' + terminalData.technicals_saxo.adx_14.value"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Moving Averages Matrix Table -->
+                <div>
+                    <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">Moving Averages Alignment Grid</h4>
+                    <table class="w-full font-mono text-xs text-left">
+                        <thead>
+                            <tr class="bg-slate-50 dark:bg-dark-900/60 text-[10px] text-slate-400 uppercase">
+                                <th class="p-2.5">Period</th>
+                                <th class="p-2.5">Value</th>
+                                <th class="p-2.5">Distance</th>
+                                <th class="p-2.5">Status</th>
+                                <th class="p-2.5 text-right">Signal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-dark-800">
+                            <template x-for="ma in terminalData.technicals_saxo.moving_averages" :key="ma.period">
+                                <tr>
+                                    <td class="p-2.5 font-bold text-slate-800 dark:text-slate-200" x-text="ma.period"></td>
+                                    <td class="p-2.5" x-text="ma.value"></td>
+                                    <td class="p-2.5 text-emerald-500 font-bold" x-text="ma.pct"></td>
+                                    <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-500 font-black" x-text="ma.status"></span></td>
+                                    <td class="p-2.5 text-right text-slate-400" x-text="ma.signal"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pivot Points Table (5 Cols) -->
+            <div class="lg:col-span-5 bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-dark-800 pb-3">
+                    <h3 class="font-black text-sm text-slate-900 dark:text-white font-mono uppercase flex items-center gap-2">
+                        <i class="fas fa-crosshairs text-amber-500"></i>
+                        <span>CLASSIC & FIBONACCI PIVOTS</span>
+                    </h3>
+                    <span class="text-xs font-mono text-slate-400">DAILY INTERVAL</span>
+                </div>
+
+                <div class="divide-y divide-slate-100 dark:divide-dark-800 text-xs font-mono">
+                    <div class="py-2.5 flex justify-between items-center text-rose-500 font-bold"><span>Resistance 3 (R3)</span><span x-text="terminalData.technicals_saxo.pivots.r3"></span></div>
+                    <div class="py-2.5 flex justify-between items-center text-rose-500 font-bold"><span>Resistance 2 (R2)</span><span x-text="terminalData.technicals_saxo.pivots.r2"></span></div>
+                    <div class="py-2.5 flex justify-between items-center text-rose-400"><span>Resistance 1 (R1)</span><span x-text="terminalData.technicals_saxo.pivots.r1"></span></div>
+                    <div class="py-3 flex justify-between items-center text-amber-400 font-black text-sm bg-amber-500/10 px-3 rounded-xl my-1">
+                        <span>PIVOT POINT (PP)</span>
+                        <span x-text="terminalData.technicals_saxo.pivots.pp"></span>
+                    </div>
+                    <div class="py-2.5 flex justify-between items-center text-emerald-400"><span>Support 1 (S1)</span><span x-text="terminalData.technicals_saxo.pivots.s1"></span></div>
+                    <div class="py-2.5 flex justify-between items-center text-emerald-500 font-bold"><span>Support 2 (S2)</span><span x-text="terminalData.technicals_saxo.pivots.s2"></span></div>
+                    <div class="py-2.5 flex justify-between items-center text-emerald-500 font-bold"><span>Support 3 (S3)</span><span x-text="terminalData.technicals_saxo.pivots.s3"></span></div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 6. VIEW 4: TIME & SALES / INSTITUTIONAL BLOCK TAPE (F4)  -->
+    <!-- ======================================================== -->
+    <div x-show="activeView === 'flow'" x-cloak class="space-y-4">
+        
+        <div class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-100 dark:border-dark-750 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h3 class="font-black text-sm text-slate-900 dark:text-white font-mono uppercase flex items-center gap-2">
+                        <i class="fas fa-layer-group text-purple-500"></i>
+                        <span>REAL-TIME TIME & SALES (BLOCK TRADE TAPE)</span>
+                    </h3>
+                    <p class="text-xs font-mono text-slate-400 mt-0.5">Live execution telemetry across central matching engines and dark pool routes</p>
+                </div>
+                <div class="flex items-center gap-3 text-xs font-mono">
+                    <span class="text-emerald-500 font-bold" x-text="terminalData.block_data.cvd"></span>
+                    <span class="text-slate-400">&bull;</span>
+                    <span class="text-purple-400 font-bold" x-text="terminalData.block_data.inst_block_ratio"></span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left font-mono text-xs">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-dark-900/60 text-[10px] text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-dark-750">
+                            <th class="py-3 px-5">Timestamp</th>
+                            <th class="py-3 px-5">Side</th>
+                            <th class="py-3 px-5">Trade Price</th>
+                            <th class="py-3 px-5">Size (Lots)</th>
+                            <th class="py-3 px-5">Total Value</th>
+                            <th class="py-3 px-5">Execution Route</th>
+                            <th class="py-3 px-5 text-right">Condition</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-dark-800">
+                        <template x-for="(trade, idx) in terminalData.block_data.tape" :key="idx">
+                            <tr class="hover:bg-slate-50 dark:hover:bg-dark-800/60 transition-colors">
+                                <td class="py-2.5 px-5 text-slate-400" x-text="trade.time"></td>
+                                <td class="py-2.5 px-5">
+                                    <span :class="trade.side === 'BUY' ? 'bg-emerald-500/15 text-emerald-500' : (trade.side === 'SELL' ? 'bg-rose-500/15 text-rose-500' : 'bg-amber-500/15 text-amber-500')" 
+                                          class="px-2 py-0.5 rounded text-[10px] font-black" 
+                                          x-text="trade.side"></span>
+                                </td>
+                                <td class="py-2.5 px-5 font-bold text-slate-800 dark:text-slate-100" x-text="trade.price"></td>
+                                <td class="py-2.5 px-5 font-semibold text-slate-700 dark:text-slate-300" x-text="trade.size"></td>
+                                <td class="py-2.5 px-5 font-bold text-slate-900 dark:text-white" x-text="trade.total"></td>
+                                <td class="py-2.5 px-5 text-xs text-slate-400" x-text="trade.venue"></td>
+                                <td class="py-2.5 px-5 text-right">
+                                    <span :class="trade.condition === 'INST BLOCK' ? 'bg-purple-500/15 text-purple-400 font-black' : 'text-slate-400'" 
+                                          class="px-2 py-0.5 rounded text-[10px]" 
+                                          x-text="trade.condition"></span>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 7. VIEW 5: MACRO CALENDAR & CBK/FED RADAR (ECO)          -->
+    <!-- ======================================================== -->
+    <div x-show="activeView === 'eco'" x-cloak class="space-y-4">
+        
+        <!-- Central Banks Benchmark Interest Rates Grid -->
+        <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-dark-800 pb-3">
+                <h3 class="font-black text-sm text-slate-900 dark:text-white font-mono uppercase flex items-center gap-2">
+                    <i class="fas fa-landmark text-blue-500"></i>
+                    <span>GLOBAL CENTRAL BANK MONETARY POLICY RADAR</span>
+                </h3>
+                <span class="text-xs font-mono text-slate-400">POLICY TARGET RATES</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <template x-for="cb in terminalData.central_banks" :key="cb.bank">
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-dark-800 border border-slate-100 dark:border-dark-700">
+                        <span class="text-[10px] font-mono text-slate-400 block font-bold" x-text="cb.bank"></span>
+                        <div class="flex justify-between items-baseline mt-1">
+                            <span class="text-xl font-black font-mono text-slate-900 dark:text-white" x-text="cb.rate.toFixed(2) + '%'"></span>
+                            <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400" x-text="cb.stance"></span>
+                        </div>
+                        <div class="mt-2 pt-2 border-t border-slate-200/60 dark:border-dark-700 text-[10px] font-mono text-slate-400 flex justify-between">
+                            <span>Inflation:</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-300" x-text="cb.inflation + '%'"></span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- High Impact Economic Calendar -->
+        <div class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-100 dark:border-dark-750 flex items-center justify-between">
+                <h3 class="font-black text-sm text-slate-900 dark:text-white font-mono uppercase flex items-center gap-2">
+                    <i class="far fa-calendar-check text-emerald-500"></i>
+                    <span>BLOOMBERG ECONOMIC CALENDAR & RELEASES (ECO &bull; GO)</span>
+                </h3>
+                <span class="text-xs font-mono font-bold text-amber-500">TODAY'S DISPATCHES</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left font-mono text-xs">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-dark-900/60 text-[10px] text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-dark-750">
+                            <th class="py-3 px-5">Time</th>
+                            <th class="py-3 px-5">Country</th>
+                            <th class="py-3 px-5">Indicator Event</th>
+                            <th class="py-3 px-5">Period</th>
+                            <th class="py-3 px-5 font-bold text-emerald-500">Actual</th>
+                            <th class="py-3 px-5">Consensus</th>
+                            <th class="py-3 px-5">Prior</th>
+                            <th class="py-3 px-5 text-right">Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-dark-800">
+                        <template x-for="(event, idx) in terminalData.economic_calendar" :key="idx">
+                            <tr class="hover:bg-slate-50 dark:hover:bg-dark-800/60 transition-colors">
+                                <td class="py-2.5 px-5 text-slate-400" x-text="event.time"></td>
+                                <td class="py-2.5 px-5 font-bold text-slate-800 dark:text-slate-200" x-text="event.country"></td>
+                                <td class="py-2.5 px-5 font-semibold text-slate-900 dark:text-white" x-text="event.event"></td>
+                                <td class="py-2.5 px-5 text-slate-400" x-text="event.period"></td>
+                                <td class="py-2.5 px-5 font-black text-emerald-500" x-text="event.actual"></td>
+                                <td class="py-2.5 px-5 text-slate-400" x-text="event.forecast"></td>
+                                <td class="py-2.5 px-5 text-slate-400" x-text="event.prior"></td>
+                                <td class="py-2.5 px-5 text-right">
+                                    <span :class="event.impact === 'HIGH' ? 'bg-rose-500/15 text-rose-500' : 'bg-amber-500/15 text-amber-500'" 
+                                          class="px-2 py-0.5 rounded text-[10px] font-black" 
+                                          x-text="event.impact"></span>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 8. VIEW 6: SOVEREIGN YIELD CURVES & CORRELATIONS (YCRV)  -->
+    <!-- ======================================================== -->
+    <div x-show="activeView === 'ycrv'" x-cloak class="space-y-4">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            
+            <!-- Kenya Sovereign Yield Curve Ladder -->
+            <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-dark-800 pb-3">
+                    <h3 class="font-black text-sm text-slate-900 dark:text-white font-mono uppercase flex items-center gap-2">
+                        <i class="fas fa-chart-line text-emerald-500"></i>
+                        <span>KENYA SOVEREIGN YIELD CURVE (CBK BENCHMARKS)</span>
+                    </h3>
+                    <span class="text-xs font-mono font-bold text-emerald-500">DOMESTIC DEBT</span>
+                </div>
+
+                <div class="divide-y divide-slate-100 dark:divide-dark-800 text-xs font-mono">
+                    <template x-for="bond in terminalData.yield_curves.kenya" :key="bond.tenor">
+                        <div class="py-2.5 flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-slate-800 dark:text-slate-200" x-text="bond.tenor"></span>
+                                <span class="text-[10px] text-slate-400 block" x-text="bond.type"></span>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-black text-sm text-emerald-500" x-text="bond.yield.toFixed(2) + '%'"></span>
+                                <span :class="bond.change >= 0 ? 'text-emerald-400' : 'text-rose-400'" class="text-[10px] block" x-text="(bond.change >= 0 ? '+' : '') + bond.change + '%'"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- US Treasuries Curve & Intermarket Correlations -->
+            <div class="space-y-4">
+                
+                <!-- US Treasuries Curve -->
+                <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-dark-800 pb-3">
+                        <h3 class="font-black text-sm text-slate-900 dark:text-white font-mono uppercase flex items-center gap-2">
+                            <i class="fas fa-flag-usa text-blue-500"></i>
+                            <span>US TREASURY BENCHMARK CURVE</span>
+                        </h3>
+                        <span class="text-xs font-mono text-cyan-400 font-bold" x-text="'2Y/10Y Spread: ' + terminalData.yield_curves.curve_spread_2_10"></span>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
+                        <template x-for="ust in terminalData.yield_curves.us_treasuries" :key="ust.tenor">
+                            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-dark-800 border border-slate-100 dark:border-dark-700">
+                                <span class="text-[10px] text-slate-400 block" x-text="ust.tenor"></span>
+                                <span class="font-black text-sm text-slate-900 dark:text-white mt-0.5 block" x-text="ust.yield.toFixed(2) + '%'"></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Intermarket Correlation Matrix with Current Asset -->
+                <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-3">
+                    <h3 class="font-black text-sm text-slate-900 dark:text-white font-mono uppercase flex items-center gap-2 border-b border-slate-100 dark:border-dark-800 pb-3">
+                        <i class="fas fa-arrows-split-up-and-left text-amber-500"></i>
+                        <span>INTERMARKET CROSS-ASSET CORRELATION MATRIX</span>
+                    </h3>
+
+                    <div class="divide-y divide-slate-100 dark:divide-dark-800 text-xs font-mono">
+                        <template x-for="corr in terminalData.correlations" :key="corr.asset">
+                            <div class="py-2.5 flex justify-between items-center">
+                                <div>
+                                    <span class="font-bold text-slate-800 dark:text-slate-200" x-text="corr.asset"></span>
+                                    <span class="text-[10px] text-slate-400 block" x-text="corr.direction"></span>
+                                </div>
+                                <div class="text-right">
+                                    <span :class="corr.corr >= 0 ? 'text-emerald-500' : 'text-rose-500'" class="font-black text-sm" x-text="(corr.corr >= 0 ? '+' : '') + corr.corr"></span>
+                                    <span class="text-[10px] text-slate-400 block" x-text="'Beta: ' + corr.beta"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Terminal Pro Controller Script -->
+<script>
+    function terminalController() {
+        return {
+            activeView: 'l2',
+            currentSymbol: '{{ symbol }}',
+            terminalData: {{ terminal_json|safe }},
+            allAssets: {{ terminal_json|safe }}.all_assets,
+            cmdInput: '',
+            clocks: {
+                nbo: '14:02 EAT',
+                lnd: '12:02 GMT',
+                nyc: '07:02 EST',
+                tyo: '20:02 JST'
+            },
+
+            init() {
+                this.updateClocks();
+                setInterval(() => this.updateClocks(), 1000);
+
+                // Handle keyboard shortcuts (F1 - F6)
+                window.addEventListener('keydown', (e) => {
+                    if (document.activeElement.tagName === 'INPUT') return;
+                    if (e.key === 'F1' || e.key === '1') { e.preventDefault(); this.activeView = 'l2'; }
+                    if (e.key === 'F2' || e.key === '2') { e.preventDefault(); this.activeView = 'fa'; }
+                    if (e.key === 'F3' || e.key === '3') { e.preventDefault(); this.activeView = 'tech'; }
+                    if (e.key === 'F4' || e.key === '4') { e.preventDefault(); this.activeView = 'flow'; }
+                    if (e.key === 'F5' || e.key === '5') { e.preventDefault(); this.activeView = 'eco'; }
+                    if (e.key === 'F6' || e.key === '6') { e.preventDefault(); this.activeView = 'ycrv'; }
+                });
+            },
+
+            updateClocks() {
+                const now = new Date();
+                const fmt = (offset) => {
+                    const d = new Date(now.getTime() + offset * 3600000);
+                    return d.toTimeString().substring(0, 8);
+                };
+                this.clocks.nbo = fmt(3) + ' EAT';
+                this.clocks.lnd = fmt(0) + ' GMT';
+                this.clocks.nyc = fmt(-5) + ' EST';
+                this.clocks.tyo = fmt(9) + ' JST';
+            },
+
+            async switchSymbol(sym) {
+                if (!sym || sym === this.currentSymbol) return;
+                try {
+                    const res = await fetch('/api/terminal/' + encodeURIComponent(sym) + '/');
+                    if (res.ok) {
+                        const data = await res.json();
+                        this.terminalData = data;
+                        this.currentSymbol = sym.toUpperCase();
+                        window.history.pushState({}, '', '/terminal/?symbol=' + sym);
+                        this.showToast('Terminal switched to ' + sym.toUpperCase());
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            },
+
+            executeCommand() {
+                const raw = this.cmdInput.trim().toUpperCase().replace(/<GO>/g, '').trim();
+                this.cmdInput = '';
+                if (!raw) return;
+
+                if (raw === 'L2' || raw === 'BOOK' || raw === 'DEPTH') {
+                    this.activeView = 'l2';
+                    return;
+                }
+                if (raw === 'FA' || raw === 'DES' || raw === 'VALUATION') {
+                    this.activeView = 'fa';
+                    return;
+                }
+                if (raw === 'TECH' || raw === 'CHART' || raw === 'RSI' || raw === 'MACD') {
+                    this.activeView = 'tech';
+                    return;
+                }
+                if (raw === 'FLOW' || raw === 'TAPE' || raw === 'BLOCK') {
+                    this.activeView = 'flow';
+                    return;
+                }
+                if (raw === 'ECO' || raw === 'CALENDAR' || raw === 'CBK' || raw === 'FED') {
+                    this.activeView = 'eco';
+                    return;
+                }
+                if (raw === 'YCRV' || raw === 'YIELD' || raw === 'CORR') {
+                    this.activeView = 'ycrv';
+                    return;
+                }
+                if (raw === 'BONDS' || raw === 'TBILL' || raw === 'TBILLS' || raw === 'DHOWCSD') {
+                    window.location.href = '{% url "bonds" %}';
+                    return;
+                }
+
+                const parts = raw.split(/\s+/);
+                const candidateSym = parts[0];
+                if (this.allAssets.some(a => a.symbol === candidateSym)) {
+                    this.switchSymbol(candidateSym);
+                    if (parts.length > 1) {
+                        const sub = parts[1];
+                        if (sub === 'FA' || sub === 'DES') this.activeView = 'fa';
+                        else if (sub === 'L2') this.activeView = 'l2';
+                        else if (sub === 'TECH') this.activeView = 'tech';
+                        else if (sub === 'FLOW') this.activeView = 'flow';
+                    }
+                } else {
+                    this.showToast('Unknown terminal command: ' + raw);
+                }
+            },
+
+            copyTelemetry() {
+                const payload = `${this.currentSymbol} [${this.terminalData.asset.name}]: Price: ${this.terminalData.asset.currency} ${this.terminalData.asset.price} | Spread: ${this.terminalData.level2.spread_bps} bps | PE: ${this.terminalData.valuation_fa.pe_ttm} | RSI: ${this.terminalData.technicals_saxo.rsi_14}`;
+                navigator.clipboard.writeText(payload);
+                this.showToast('Terminal telemetry copied to clipboard');
+            }
+        };
+    }
+</script>
+{% endblock %}

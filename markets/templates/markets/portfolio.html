@@ -5,25 +5,21 @@
     
     <!-- ========================================== -->
     <!-- 1. PORTFOLIO HERO BANNER & GAINS           -->
-    <!-- (Inspired by Image 1 & Image 2)            -->
     <!-- ========================================== -->
-    <div class="bg-gradient-to-br from-slate-900 via-dark-850 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-800 relative overflow-hidden">
-        <div class="absolute -right-12 -top-12 w-64 h-64 bg-pesa-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute right-32 -bottom-12 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
-
+    <div class="bg-white dark:bg-dark-850 p-6 sm:p-8 rounded-3xl shadow-sm border border-[#EBEBEB] dark:border-dark-750 relative overflow-hidden">
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-pesa-400 block mb-1">Total Portfolio Value</span>
-                <div class="text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-tight" x-text="formatPrice({{ portfolio.total_value_usd }})">
+                <span class="text-xs font-bold uppercase tracking-wider text-neutral-400 block mb-1">Total Portfolio Value</span>
+                <div class="text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-tight text-neutral-900 dark:text-white" x-text="formatPrice({{ portfolio.total_value_usd }})">
                     ${{ portfolio.total_value_usd }}
                 </div>
                 
-                <div class="mt-4 flex flex-wrap items-center gap-4 text-xs">
-                    <div class="flex items-center gap-1.5 bg-emerald-500/15 text-emerald-400 px-3 py-1 rounded-full font-bold">
+                <div class="mt-4 flex flex-wrap items-center gap-3 text-xs">
+                    <div class="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 px-3 py-1 rounded-full font-bold">
                         <i class="fas fa-arrow-up text-[10px]"></i>
                         <span>Today: +${{ portfolio.day_profit_usd }} (+{{ portfolio.day_profit_percent }}%)</span>
                     </div>
-                    <div class="flex items-center gap-1.5 bg-blue-500/15 text-blue-400 px-3 py-1 rounded-full font-bold">
+                    <div class="flex items-center gap-1.5 bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 px-3 py-1 rounded-full font-bold">
                         <i class="fas fa-award text-[10px]"></i>
                         <span>All-Time: +${{ portfolio.total_profit_usd }} (+{{ portfolio.total_profit_percent }}%)</span>
                     </div>
@@ -31,16 +27,16 @@
             </div>
 
             <!-- Cash & Buying Power Widget -->
-            <div class="bg-white/5 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/10 flex flex-col gap-3 min-w-[220px]">
+            <div class="bg-neutral-50 dark:bg-dark-800 p-5 rounded-3xl border border-[#EBEBEB] dark:border-dark-700 flex flex-col gap-3 min-w-[240px]">
                 <div>
-                    <span class="text-[11px] text-slate-400 uppercase font-semibold block">Available Cash</span>
-                    <span class="text-xl font-bold font-mono text-white" x-text="formatPrice({{ portfolio.cash_balance_usd }})">${{ portfolio.cash_balance_usd }}</span>
+                    <span class="text-[11px] text-neutral-400 uppercase font-bold block">Available Cash</span>
+                    <span class="text-2xl font-black font-mono text-neutral-900 dark:text-white" x-text="formatPrice({{ portfolio.cash_balance_usd }})">${{ portfolio.cash_balance_usd }}</span>
                 </div>
                 <div class="flex gap-2">
-                    <a href="{% url 'trade' %}" class="flex-1 py-2 text-center text-xs font-bold bg-pesa-500 hover:bg-pesa-400 text-white rounded-xl transition-colors">
+                    <a href="{% url 'trade' %}" class="flex-1 py-2 text-center text-xs font-bold bg-[#FF385C] hover:bg-[#E00B41] text-white rounded-full transition-colors shadow-brand-glow">
                         Trade
                     </a>
-                    <button @click="showToast('Deposit funds simulation active')" class="flex-1 py-2 text-center text-xs font-bold bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors">
+                    <button @click="showToast('Deposit simulation credited to USD wallet')" class="flex-1 py-2 text-center text-xs font-bold bg-white dark:bg-dark-750 hover:bg-neutral-100 text-neutral-800 dark:text-white border border-[#DDDDDD] dark:border-dark-700 rounded-full transition-colors">
                         Deposit
                     </button>
                 </div>
@@ -49,75 +45,74 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 2. ASSET ALLOCATION & DIVERSIFICATION      -->
-    <!-- (Yahoo Finance Portfolio Allocation)       -->
+    <!-- 2. ASSET ALLOCATION & ACTIVE HOLDINGS      -->
     <!-- ========================================== -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Donut Allocation Chart -->
-        <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm flex flex-col justify-between">
+        <div class="bg-white dark:bg-dark-850 p-6 md:p-7 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm flex flex-col justify-between">
             <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white mb-1">Asset Allocation</h3>
-                <p class="text-xs text-slate-400 mb-4">Portfolio diversification across equities, crypto & cash</p>
+                <h3 class="text-base font-bold text-neutral-900 dark:text-white mb-1">Asset Allocation</h3>
+                <p class="text-xs text-neutral-400 mb-4">Portfolio diversification across equities, crypto & cash</p>
                 
                 <div class="h-56 relative flex items-center justify-center">
                     <canvas id="allocationChart"></canvas>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-dark-800 text-xs">
+            <div class="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-[#EBEBEB] dark:border-dark-750 text-xs">
                 {% for item in allocation %}
-                <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-dark-800">
-                    <span class="font-bold text-slate-700 dark:text-slate-300">{{ item.label }}</span>
-                    <span class="font-mono text-slate-500">{{ item.percent }}%</span>
+                <div class="flex items-center justify-between p-2.5 rounded-2xl bg-neutral-50 dark:bg-dark-800">
+                    <span class="font-bold text-neutral-800 dark:text-neutral-200">{{ item.label }}</span>
+                    <span class="font-mono text-neutral-500">{{ item.percent }}%</span>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
         <!-- Holdings Performance Cards (2 Cols) -->
-        <div class="lg:col-span-2 bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm flex flex-col justify-between">
+        <div class="lg:col-span-2 bg-white dark:bg-dark-850 p-6 md:p-7 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Active Holdings</h3>
-                        <p class="text-xs text-slate-400 mt-0.5">Real-time market valuation and unrealized gains</p>
+                        <h3 class="text-base font-bold text-neutral-900 dark:text-white">Active Holdings</h3>
+                        <p class="text-xs text-neutral-400 mt-0.5">Real-time market valuation and unrealized gains</p>
                     </div>
-                    <a href="{% url 'trade' %}" class="text-xs font-bold text-pesa-600 dark:text-pesa-400 hover:underline">
+                    <a href="{% url 'trade' %}" class="text-xs font-bold text-[#FF385C] hover:underline">
                         + Add Holding
                     </a>
                 </div>
 
                 <div class="space-y-3">
                     {% for h in portfolio.holdings %}
-                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-dark-800 border border-slate-100 dark:border-dark-750 flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
+                    <div class="p-4 rounded-3xl bg-neutral-50 dark:bg-dark-800 border border-[#EBEBEB] dark:border-dark-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
                         
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-white dark:bg-dark-750 flex items-center justify-center font-bold text-xs text-slate-800 dark:text-slate-200 shadow-2xs group-hover:bg-pesa-500 group-hover:text-white transition-colors">
-                                {{ h.symbol }}
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-12 h-12 rounded-2xl bg-white dark:bg-dark-750 border border-neutral-200 dark:border-dark-700 p-2 flex items-center justify-center flex-shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                                <img src="{{ h.logo }}" alt="{{ h.name }}" class="w-full h-full object-contain">
                             </div>
                             <div>
-                                <a href="{% url 'asset_detail' h.symbol %}" class="font-bold text-sm text-slate-900 dark:text-white hover:text-pesa-500 transition-colors">
+                                <a href="{% url 'asset_detail' h.symbol %}" class="font-bold text-sm text-neutral-900 dark:text-white hover:text-[#FF385C] transition-colors">
                                     {{ h.name }}
                                 </a>
-                                <p class="text-xs text-slate-400 mt-0.5">
+                                <p class="text-xs text-neutral-400 mt-0.5 font-mono">
                                     {{ h.shares }} shares &bull; Avg {{ h.currency }} {{ h.avg_buy_price }}
                                 </p>
                             </div>
                         </div>
 
                         <div class="flex items-center justify-between sm:justify-end gap-6">
-                            <div>
-                                <span class="block font-mono font-bold text-sm text-slate-900 dark:text-white" x-text="formatPrice({{ h.total_value_usd }})">
+                            <div class="text-right">
+                                <span class="block font-mono font-bold text-sm text-neutral-900 dark:text-white" x-text="formatPrice({{ h.total_value_usd }})">
                                     ${{ h.total_value_usd }}
                                 </span>
-                                <span class="block text-xs font-bold {% if h.profit_percent >= 0 %}text-emerald-500{% else %}text-rose-500{% endif %}">
+                                <span class="block text-xs font-bold {% if h.profit_percent >= 0 %}text-emerald-600 dark:text-emerald-400{% else %}text-rose-600 dark:text-rose-400{% endif %}">
                                     +${{ h.profit_usd }} (+{{ h.profit_percent }}%)
                                 </span>
                             </div>
 
                             <div class="flex gap-2">
-                                <a href="{% url 'trade' %}?symbol={{ h.symbol }}" class="px-3 py-1.5 rounded-xl bg-pesa-600 text-white text-xs font-bold hover:bg-pesa-500 transition-colors">
+                                <a href="{% url 'trade' %}?symbol={{ h.symbol }}" class="px-3.5 py-1.5 rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white text-xs font-bold transition-colors shadow-brand-glow">
                                     Trade
                                 </a>
                             </div>
@@ -128,9 +123,9 @@
                 </div>
             </div>
 
-            <div class="mt-4 pt-4 border-t border-slate-100 dark:border-dark-800 flex items-center justify-between text-xs text-slate-400">
-                <span>Holdings are updated real-time with continuous price feed.</span>
-                <span class="font-bold text-slate-700 dark:text-slate-300">Total Holdings: {{ portfolio.holdings|length }}</span>
+            <div class="mt-4 pt-4 border-t border-[#EBEBEB] dark:border-dark-750 flex items-center justify-between text-xs text-neutral-400">
+                <span>Holdings update real-time with continuous price feed.</span>
+                <span class="font-bold text-neutral-800 dark:text-neutral-200">Total Positions: {{ portfolio.holdings|length }}</span>
             </div>
         </div>
 
@@ -138,58 +133,215 @@
 
     <!-- ========================================== -->
     <!-- 3. COMPREHENSIVE HOLDINGS DETAIL TABLE     -->
-    <!-- (Yahoo Finance Portfolio Grid View)        -->
     <!-- ========================================== -->
-    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm overflow-hidden">
-        <div class="p-5 border-b border-slate-100 dark:border-dark-750 flex items-center justify-between">
-            <h3 class="text-base font-bold text-slate-900 dark:text-white">Holdings Breakdown Table</h3>
-            <span class="text-xs text-slate-400">USD Valuation Equivalent</span>
+    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-[#EBEBEB] dark:border-dark-750 flex items-center justify-between">
+            <h3 class="text-base font-bold text-neutral-900 dark:text-white">Holdings Breakdown Table</h3>
+            <span class="text-xs text-neutral-400">USD Valuation Equivalent</span>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[700px] text-xs">
                 <thead>
-                    <tr class="bg-slate-50/70 dark:bg-dark-900/50 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-100 dark:border-dark-750 text-[10px]">
-                        <th class="px-6 py-3.5">Asset</th>
-                        <th class="px-6 py-3.5">Shares</th>
-                        <th class="px-6 py-3.5">Avg Buy Price</th>
-                        <th class="px-6 py-3.5">Current Price</th>
-                        <th class="px-6 py-3.5">Total Value</th>
-                        <th class="px-6 py-3.5">Total Return</th>
-                        <th class="px-6 py-3.5">Portfolio Weight</th>
-                        <th class="px-6 py-3.5 text-right">Action</th>
+                    <tr class="bg-neutral-50 dark:bg-dark-900/50 text-neutral-400 uppercase tracking-wider font-semibold border-b border-[#EBEBEB] dark:border-dark-750 text-[10px]">
+                        <th class="px-6 py-4">Asset</th>
+                        <th class="px-6 py-4">Shares</th>
+                        <th class="px-6 py-4">Avg Buy Price</th>
+                        <th class="px-6 py-4">Current Price</th>
+                        <th class="px-6 py-4">Total Value</th>
+                        <th class="px-6 py-4">Total Return</th>
+                        <th class="px-6 py-4">Portfolio Weight</th>
+                        <th class="px-6 py-4 text-right">Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-dark-800">
+                <tbody class="divide-y divide-[#EBEBEB] dark:divide-dark-800">
                     {% for h in portfolio.holdings %}
-                    <tr class="hover:bg-slate-50 dark:hover:bg-dark-800/60 transition-colors">
+                    <tr class="hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors">
                         <td class="px-6 py-4">
-                            <a href="{% url 'asset_detail' h.symbol %}" class="font-bold text-slate-900 dark:text-white hover:text-pesa-500">
-                                {{ h.symbol }} - {{ h.name }}
+                            <a href="{% url 'asset_detail' h.symbol %}" class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-xl bg-white dark:bg-dark-750 border border-neutral-200 dark:border-dark-700 p-1 flex items-center justify-center shadow-2xs">
+                                    <img src="{{ h.logo }}" alt="{{ h.name }}" class="w-full h-full object-contain">
+                                </div>
+                                <span class="font-bold text-neutral-900 dark:text-white hover:text-[#FF385C]">
+                                    {{ h.symbol }} - {{ h.name }}
+                                </span>
                             </a>
                         </td>
                         <td class="px-6 py-4 font-mono font-medium">{{ h.shares }}</td>
-                        <td class="px-6 py-4 font-mono text-slate-500">{{ h.currency }} {{ h.avg_buy_price }}</td>
-                        <td class="px-6 py-4 font-mono font-bold text-slate-800 dark:text-slate-200">{{ h.currency }} {{ h.current_price }}</td>
-                        <td class="px-6 py-4 font-mono font-extrabold text-slate-900 dark:text-white" x-text="formatPrice({{ h.total_value_usd }})">
+                        <td class="px-6 py-4 font-mono text-neutral-500">{{ h.currency }} {{ h.avg_buy_price }}</td>
+                        <td class="px-6 py-4 font-mono font-bold text-neutral-800 dark:text-neutral-200">{{ h.currency }} {{ h.current_price }}</td>
+                        <td class="px-6 py-4 font-mono font-extrabold text-neutral-900 dark:text-white" x-text="formatPrice({{ h.total_value_usd }})">
                             ${{ h.total_value_usd }}
                         </td>
-                        <td class="px-6 py-4 font-mono font-bold text-emerald-500">
+                        <td class="px-6 py-4 font-mono font-bold text-emerald-600 dark:text-emerald-400">
                             +${{ h.profit_usd }} (+{{ h.profit_percent }}%)
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2">
-                                <div class="w-16 bg-slate-100 dark:bg-dark-750 h-1.5 rounded-full overflow-hidden">
-                                    <div class="bg-pesa-500 h-full rounded-full" style="width: {{ h.allocation_percent }}%;"></div>
+                                <div class="w-16 bg-neutral-100 dark:bg-dark-750 h-1.5 rounded-full overflow-hidden">
+                                    <div class="bg-[#FF385C] h-full rounded-full" style="width: {{ h.allocation_percent }}%;"></div>
                                 </div>
-                                <span class="font-mono text-slate-500">{{ h.allocation_percent }}%</span>
+                                <span class="font-mono text-neutral-500">{{ h.allocation_percent }}%</span>
                             </div>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <a href="{% url 'trade' %}?symbol={{ h.symbol }}" class="text-xs font-bold text-pesa-600 dark:text-pesa-400 hover:underline">
+                            <a href="{% url 'trade' %}?symbol={{ h.symbol }}" class="px-3.5 py-1.5 rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white font-bold text-xs transition-colors shadow-brand-glow">
                                 Trade
                             </a>
                         </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 4. GOVERNMENT BONDS & TREASURY BILLS DESK   -->
+    <!-- (Fixed Income Depository Holdings)         -->
+    <!-- ========================================== -->
+    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm p-6 sm:p-8 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EBEBEB] dark:border-dark-750">
+            <div>
+                <div class="flex items-center gap-2">
+                    <h3 class="text-base font-bold text-neutral-900 dark:text-white flex items-center gap-2">
+                        <i class="fas fa-landmark text-emerald-600"></i>
+                        <span>Government Bonds & Treasury Bills Holdings</span>
+                    </h3>
+                    <span class="text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 px-2 py-0.5 rounded-full">CBK DHOWCSD</span>
+                </div>
+                <p class="text-xs text-neutral-400 mt-0.5">Sovereign debt securities registered under your Central Depository account</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <a href="{% url 'bonds' %}" class="px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-colors flex items-center gap-1.5">
+                    <i class="fas fa-plus"></i>
+                    <span>Buy More Bonds / T-Bills</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Summary Ribbon -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="bg-neutral-50 dark:bg-dark-800 p-4 rounded-2xl border border-[#EBEBEB] dark:border-dark-700">
+                <span class="text-[10px] uppercase font-bold text-neutral-400 block mb-0.5">Total Face Value</span>
+                <span class="text-lg font-black font-mono text-neutral-900 dark:text-white">KES {{ bond_portfolio.total_face_value|floatformat:0 }}</span>
+            </div>
+            <div class="bg-neutral-50 dark:bg-dark-800 p-4 rounded-2xl border border-[#EBEBEB] dark:border-dark-700">
+                <span class="text-[10px] uppercase font-bold text-neutral-400 block mb-0.5">Capital Invested</span>
+                <span class="text-lg font-black font-mono text-emerald-600 dark:text-emerald-400">KES {{ bond_portfolio.total_invested|floatformat:0 }}</span>
+            </div>
+            <div class="bg-neutral-50 dark:bg-dark-800 p-4 rounded-2xl border border-[#EBEBEB] dark:border-dark-700">
+                <span class="text-[10px] uppercase font-bold text-neutral-400 block mb-0.5">Weighted Avg. Yield</span>
+                <span class="text-lg font-black font-mono text-[#FF385C]">{{ bond_portfolio.avg_yield }}% p.a.</span>
+            </div>
+            <div class="bg-neutral-50 dark:bg-dark-800 p-4 rounded-2xl border border-[#EBEBEB] dark:border-dark-700">
+                <span class="text-[10px] uppercase font-bold text-neutral-400 block mb-0.5">Next Coupon Payout</span>
+                <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">{{ bond_portfolio.next_coupon_payment }}</span>
+                <span class="text-[10px] text-neutral-400 block">{{ bond_portfolio.next_coupon_date }}</span>
+            </div>
+        </div>
+
+        <!-- Fixed Income Holdings Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[700px] text-xs">
+                <thead>
+                    <tr class="bg-neutral-50 dark:bg-dark-900/50 text-neutral-400 uppercase tracking-wider font-semibold border-b border-[#EBEBEB] dark:border-dark-750 text-[10px]">
+                        <th class="px-5 py-3.5">Security</th>
+                        <th class="px-5 py-3.5">Face Value</th>
+                        <th class="px-5 py-3.5">Lots</th>
+                        <th class="px-5 py-3.5">Cost Basis</th>
+                        <th class="px-5 py-3.5">Market Value</th>
+                        <th class="px-5 py-3.5">Yield (YTM)</th>
+                        <th class="px-5 py-3.5">Maturity</th>
+                        <th class="px-5 py-3.5 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#EBEBEB] dark:divide-dark-800">
+                    {% for bh in bond_portfolio.holdings %}
+                    <tr class="hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors">
+                        <td class="px-5 py-3.5 font-bold text-neutral-900 dark:text-white flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-xl bg-white dark:bg-dark-750 border border-neutral-200 dark:border-dark-700 p-1 flex items-center justify-center shadow-2xs">
+                                <img src="/static/logos/cbk.svg" alt="CBK" class="w-full h-full object-contain">
+                            </div>
+                            <div>
+                                <span class="font-mono text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-dark-750 text-neutral-700 dark:text-neutral-300">{{ bh.symbol }}</span>
+                                <span class="ml-1">{{ bh.name }}</span>
+                            </div>
+                        </td>
+                        <td class="px-5 py-3.5 font-mono font-bold">KES {{ bh.face_value|floatformat:0 }}</td>
+                        <td class="px-5 py-3.5 font-mono text-neutral-500">{{ bh.units }}</td>
+                        <td class="px-5 py-3.5 font-mono text-neutral-500">KES {{ bh.cost|floatformat:0 }}</td>
+                        <td class="px-5 py-3.5 font-mono font-bold text-emerald-600 dark:text-emerald-400">KES {{ bh.current_value|floatformat:0 }}</td>
+                        <td class="px-5 py-3.5 font-mono font-black text-emerald-600 dark:text-emerald-400">{{ bh.yield }}%</td>
+                        <td class="px-5 py-3.5 font-mono text-neutral-500">{{ bh.maturity }}</td>
+                        <td class="px-5 py-3.5 text-right">
+                            <a href="{% url 'bonds' %}?symbol={{ bh.symbol }}" class="px-3.5 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors shadow-sm">
+                                Buy / Reinvest
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 5. RECENT TRANSACTIONS & SETTLED ORDERS    -->
+    <!-- ========================================== -->
+    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-[#EBEBEB] dark:border-dark-750 flex items-center justify-between">
+            <div>
+                <h3 class="text-base font-bold text-neutral-900 dark:text-white">Recent Transactions & Trade History</h3>
+                <p class="text-xs text-neutral-400 mt-0.5">Execution records across equities, crypto, bonds, and CBK auctions</p>
+            </div>
+            <span class="text-xs font-mono text-neutral-400">{{ portfolio.transactions|length }} Transactions</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[650px] text-xs">
+                <thead>
+                    <tr class="bg-neutral-50 dark:bg-dark-900/50 text-neutral-400 uppercase tracking-wider font-semibold border-b border-[#EBEBEB] dark:border-dark-750 text-[10px]">
+                        <th class="px-6 py-4">ID / Ref</th>
+                        <th class="px-6 py-4">Asset</th>
+                        <th class="px-6 py-4">Type & Channel</th>
+                        <th class="px-6 py-4">Quantity / Size</th>
+                        <th class="px-6 py-4">Execution Price</th>
+                        <th class="px-6 py-4">Total Settlement</th>
+                        <th class="px-6 py-4">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#EBEBEB] dark:divide-dark-800">
+                    {% for tx in portfolio.transactions %}
+                    <tr class="hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors">
+                        <td class="px-6 py-4 font-mono font-bold text-neutral-400">{{ tx.id }}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-white dark:bg-dark-750 border border-neutral-200 dark:border-dark-700 p-1 flex items-center justify-center shadow-2xs">
+                                    <img src="{{ tx.logo }}" alt="{{ tx.asset_name }}" class="w-full h-full object-contain">
+                                </div>
+                                <div>
+                                    <span class="font-bold text-neutral-900 dark:text-white">{{ tx.asset_symbol }}</span>
+                                    <span class="text-[11px] text-neutral-400 block">{{ tx.asset_name }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="font-semibold text-neutral-700 dark:text-neutral-300">{{ tx.type }}</span>
+                        </td>
+                        <td class="px-6 py-4 font-mono text-neutral-600 dark:text-neutral-300">{{ tx.shares }}</td>
+                        <td class="px-6 py-4 font-mono text-neutral-600 dark:text-neutral-300">{{ tx.price }}</td>
+                        <td class="px-6 py-4 font-mono font-bold text-neutral-900 dark:text-white">{{ tx.total }}</td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center gap-1 font-bold text-[11px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full">
+                                <i class="fas fa-check text-[9px]"></i> {{ tx.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-8 text-neutral-400">No transactions recorded yet.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -223,14 +375,14 @@
                         datasets: [{
                             data: values,
                             backgroundColor: [
-                                '#10b981', // Safaricom (Emerald)
+                                '#FF385C', // Safaricom (Coral)
                                 '#3b82f6', // Apple (Blue)
                                 '#8b5cf6', // Nvidia (Purple)
                                 '#f59e0b', // Bitcoin (Amber)
                                 '#64748b'  // Cash (Slate)
                             ],
                             borderWidth: 2,
-                            borderColor: document.documentElement.classList.contains('dark') ? '#141c30' : '#ffffff',
+                            borderColor: document.documentElement.classList.contains('dark') ? '#181818' : '#ffffff',
                             hoverOffset: 6
                         }]
                     },
@@ -240,11 +392,11 @@
                         plugins: {
                             legend: { display: false },
                             tooltip: {
-                                backgroundColor: '#0f172a',
+                                backgroundColor: '#222222',
                                 titleColor: '#ffffff',
                                 bodyColor: '#ffffff',
                                 padding: 10,
-                                cornerRadius: 10,
+                                cornerRadius: 12,
                                 callbacks: {
                                     label: (context) => context.label + ': $' + context.parsed.toLocaleString(undefined, { minimumFractionDigits: 2 })
                                 }

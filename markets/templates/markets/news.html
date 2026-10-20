@@ -5,11 +5,17 @@
     
     <!-- ========================================== -->
     <!-- 1. NEWS HEADER & CATEGORY TABS             -->
-    <!-- (Yahoo Finance Newsroom Style)             -->
+    <!-- (Financial Wire & Newsroom Style)          -->
     <!-- ========================================== -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary/10 text-primary">
+                    <i class="fas fa-newspaper mr-1"></i> Global Wire
+                </span>
+                <span class="text-xs text-slate-400">&bull; Real-Time Market Dispatches</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                 Market Intelligence & News
             </h1>
             <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
@@ -19,53 +25,53 @@
 
         <!-- News Category Filter Pills -->
         <div class="flex items-center gap-2 overflow-x-auto ticker-scroll pb-1">
-            <a href="{% url 'news' %}" class="px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all {% if current_category == 'all' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50{% endif %}">
+            <a href="{% url 'news' %}" class="px-4 py-2 rounded-full text-xs font-bold transition-all {% if current_category == 'all' %}bg-primary text-white shadow-xs{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50 dark:hover:bg-dark-800{% endif %}">
                 All Stories
             </a>
-            <a href="{% url 'news' %}?category=east africa" class="px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all {% if current_category == 'east africa' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50{% endif %}">
-                <i class="fas fa-flag text-pesa-500 mr-1"></i> East Africa
+            <a href="{% url 'news' %}?category=east africa" class="px-4 py-2 rounded-full text-xs font-bold transition-all {% if current_category == 'east africa' %}bg-primary text-white shadow-xs{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50 dark:hover:bg-dark-800{% endif %}">
+                <i class="fas fa-flag {% if current_category == 'east africa' %}text-white{% else %}text-primary{% endif %} mr-1"></i> East Africa
             </a>
-            <a href="{% url 'news' %}?category=equities" class="px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all {% if current_category == 'equities' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50{% endif %}">
+            <a href="{% url 'news' %}?category=equities" class="px-4 py-2 rounded-full text-xs font-bold transition-all {% if current_category == 'equities' %}bg-primary text-white shadow-xs{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50 dark:hover:bg-dark-800{% endif %}">
                 Equities
             </a>
-            <a href="{% url 'news' %}?category=technology" class="px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all {% if current_category == 'technology' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50{% endif %}">
+            <a href="{% url 'news' %}?category=technology" class="px-4 py-2 rounded-full text-xs font-bold transition-all {% if current_category == 'technology' %}bg-primary text-white shadow-xs{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50 dark:hover:bg-dark-800{% endif %}">
                 Technology
             </a>
-            <a href="{% url 'news' %}?category=crypto" class="px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all {% if current_category == 'crypto' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50{% endif %}">
+            <a href="{% url 'news' %}?category=crypto" class="px-4 py-2 rounded-full text-xs font-bold transition-all {% if current_category == 'crypto' %}bg-primary text-white shadow-xs{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50 dark:hover:bg-dark-800{% endif %}">
                 Crypto
             </a>
-            <a href="{% url 'news' %}?category=commodities" class="px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all {% if current_category == 'commodities' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50{% endif %}">
+            <a href="{% url 'news' %}?category=commodities" class="px-4 py-2 rounded-full text-xs font-bold transition-all {% if current_category == 'commodities' %}bg-primary text-white shadow-xs{% else %}bg-white dark:bg-dark-850 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-dark-750 hover:bg-slate-50 dark:hover:bg-dark-800{% endif %}">
                 Commodities
             </a>
         </div>
     </div>
 
     <!-- ========================================== -->
-    <!-- 2. HERO STORY BANNER (Yahoo Top Story)     -->
+    <!-- 2. HERO STORY BANNER (Lead Market Story)   -->
     <!-- ========================================== -->
     {% if hero_news and current_category == 'all' %}
     <div @click="openStory({{ hero_news.id }})" 
-         class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer grid grid-cols-1 lg:grid-cols-12 group">
+         class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer grid grid-cols-1 lg:grid-cols-12 group">
         
         <div class="lg:col-span-7 h-64 sm:h-80 lg:h-full relative overflow-hidden">
             <img src="{{ hero_news.image }}" alt="{{ hero_news.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-            <span class="absolute bottom-4 left-4 text-[10px] font-extrabold uppercase tracking-wider bg-rose-600 text-white px-2.5 py-1 rounded-full">
+            <span class="absolute bottom-4 left-4 text-[10px] font-extrabold uppercase tracking-wider bg-primary text-white px-3 py-1 rounded-full shadow-xs">
                 Featured Lead
             </span>
         </div>
 
         <div class="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between">
             <div>
-                <div class="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-2">
-                    <span class="text-pesa-600 dark:text-pesa-400 font-bold">{{ hero_news.source }}</span>
+                <div class="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-2.5">
+                    <span class="text-primary font-bold">{{ hero_news.source }}</span>
                     <span>&bull;</span>
                     <span>{{ hero_news.time_ago }}</span>
                     <span>&bull;</span>
                     <span>{{ hero_news.read_time }}</span>
                 </div>
 
-                <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-tight group-hover:text-pesa-500 transition-colors">
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-tight group-hover:text-primary transition-colors">
                     {{ hero_news.title }}
                 </h2>
 
@@ -77,14 +83,15 @@
             <div class="mt-6 pt-4 border-t border-slate-100 dark:border-dark-800 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     {% for sym in hero_news.tickers %}
-                    <span class="text-xs font-mono font-bold bg-slate-100 dark:bg-dark-750 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-lg">
+                    <span class="text-xs font-mono font-bold bg-slate-100 dark:bg-dark-750 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-full">
                         ${{ sym }}
                     </span>
                     {% endfor %}
                 </div>
 
-                <span class="text-xs font-bold text-pesa-600 dark:text-pesa-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                    Read Article <i class="fas fa-arrow-right text-[10px]"></i>
+                <span class="text-xs font-bold text-primary flex items-center gap-1.5 group-hover:translate-x-1 transition-transform">
+                    <span>Read Article</span>
+                    <i class="fas fa-arrow-right text-[10px]"></i>
                 </span>
             </div>
         </div>
@@ -97,7 +104,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for story in news_list %}
         <div @click="openStory({{ story.id }})" 
-             class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group">
+             class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group">
             
             <div>
                 <div class="h-48 relative overflow-hidden">
@@ -106,7 +113,7 @@
                         <span class="text-[10px] font-bold uppercase tracking-wider bg-black/60 backdrop-blur-md text-white px-2.5 py-0.5 rounded-full">
                             {{ story.category }}
                         </span>
-                        <span class="text-[10px] font-bold uppercase tracking-wider {% if story.sentiment == 'Bullish' %}bg-emerald-600{% else %}bg-rose-600{% endif %} text-white px-2 py-0.5 rounded-full">
+                        <span class="text-[10px] font-bold uppercase tracking-wider {% if story.sentiment == 'Bullish' %}bg-emerald-600{% else %}bg-primary{% endif %} text-white px-2.5 py-0.5 rounded-full">
                             {{ story.sentiment }}
                         </span>
                     </div>
@@ -119,7 +126,7 @@
                         <span>{{ story.time_ago }}</span>
                     </div>
 
-                    <h3 class="font-black text-sm text-slate-900 dark:text-white leading-snug group-hover:text-pesa-500 transition-colors line-clamp-2">
+                    <h3 class="font-black text-sm text-slate-900 dark:text-white leading-snug group-hover:text-primary transition-colors line-clamp-2">
                         {{ story.title }}
                     </h3>
 
@@ -132,7 +139,7 @@
             <div class="p-5 pt-0 flex items-center justify-between text-xs">
                 <div class="flex items-center gap-1.5">
                     {% for sym in story.tickers %}
-                    <span class="font-mono text-[10px] font-bold bg-slate-100 dark:bg-dark-750 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded">
+                    <span class="font-mono text-[10px] font-bold bg-slate-100 dark:bg-dark-750 text-slate-700 dark:text-slate-300 px-2.5 py-0.5 rounded-full">
                         ${{ sym }}
                     </span>
                     {% endfor %}
@@ -145,7 +152,7 @@
 
     <!-- ========================================== -->
     <!-- 4. ARTICLE READER MODAL                    -->
-    <!-- (Yahoo Finance In-Depth Reader)            -->
+    <!-- (Financial Wire In-Depth Reader)           -->
     <!-- ========================================== -->
     <div x-show="storyModalOpen" x-cloak
          class="fixed inset-0 z-50 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
@@ -154,12 +161,12 @@
             
             <div class="p-5 border-b border-slate-100 dark:border-dark-750 flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-pesa-600 dark:text-pesa-400" x-text="activeStory.source"></span>
+                    <span class="text-xs font-bold text-primary" x-text="activeStory.source"></span>
                     <span class="text-xs text-slate-400">&bull;</span>
                     <span class="text-xs text-slate-400" x-text="activeStory.time_ago"></span>
                 </div>
-                <button @click="storyModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                    <i class="fas fa-times"></i>
+                <button @click="storyModalOpen = false" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-dark-750 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times text-xs"></i>
                 </button>
             </div>
 
@@ -173,10 +180,10 @@
                 <div class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed" x-text="activeStory.content"></div>
 
                 <div class="pt-4 border-t border-slate-100 dark:border-dark-750 flex items-center justify-between">
-                    <span class="text-xs text-slate-400">Mentioned Tickers:</span>
+                    <span class="text-xs text-slate-400 font-medium">Mentioned Tickers:</span>
                     <div class="flex gap-2">
                         <template x-for="ticker in activeStory.tickers || []" :key="ticker">
-                            <a :href="'/asset/' + ticker + '/'" class="px-2.5 py-1 rounded-xl bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 font-bold text-xs hover:bg-pesa-500 hover:text-white transition-colors" x-text="'$' + ticker"></a>
+                            <a :href="'/asset/' + ticker + '/'" class="px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs hover:bg-primary hover:text-white transition-colors" x-text="'$' + ticker"></a>
                         </template>
                     </div>
                 </div>

@@ -1,98 +1,102 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto space-y-6 md:space-y-8" x-data="dashboardController()">
+<div class="max-w-7xl mx-auto space-y-8" x-data="dashboardController()">
     
     <!-- ========================================== -->
     <!-- 1. GREETING & HERO SUMMARY SECTION         -->
-    <!-- (Inspired by Image 1 & Image 2)            -->
     <!-- ========================================== -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-5 bg-white dark:bg-dark-850 p-6 md:p-8 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm">
         <div>
-            <div class="flex items-center gap-2 mb-1">
-                <span class="text-xs font-bold uppercase tracking-wider text-pesa-600 dark:text-pesa-400 bg-pesa-50 dark:bg-pesa-950/40 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Live Market Session
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-[#FF385C] bg-[#FFF0F3] dark:bg-[#FF385C]/15 px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#FF385C] animate-ping"></span> Live Trading Session
                 </span>
-                <span class="text-xs text-slate-400">Regular Trading Hours</span>
+                <span class="text-xs text-neutral-400 font-medium">Nairobi (NSE) & Wall Street Active</span>
             </div>
-            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                Your Financial Insights
+            <h1 class="text-2xl md:text-3xl font-extrabold text-neutral-900 dark:text-white tracking-tight">
+                Your Market Overview
             </h1>
-            <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                Welcome back, Richard. Real-time portfolio valuation and global market catalysts.
+            <p class="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                Explore real-time opportunities, government securities, global equities, and portfolio performance.
             </p>
         </div>
 
-        <!-- Quick Action Buttons -->
+        <!-- Quick Action Pill Buttons -->
         <div class="flex items-center gap-2.5 flex-wrap">
-            <button @click="aiModalOpen = true" 
-                    class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs shadow-md shadow-blue-500/20 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2">
-                <i class="fas fa-wand-magic-sparkles"></i>
-                <span>AI Insights</span>
-            </button>
+            <a href="{% url 'terminal' %}" 
+               class="px-4 py-2.5 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 font-bold text-xs shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2">
+                <i class="fas fa-terminal text-[#FF385C]"></i>
+                <span>Terminal Pro</span>
+                <span class="text-[9px] bg-[#FF385C] text-white font-mono px-1.5 py-0.5 rounded-full">PRO</span>
+            </a>
+            <a href="{% url 'bonds' %}" 
+               class="px-4 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2">
+                <i class="fas fa-landmark"></i>
+                <span>Bonds & T-Bills</span>
+                <span class="text-[9px] bg-emerald-950/60 text-emerald-300 font-mono px-1.5 py-0.5 rounded-full">17.8%</span>
+            </a>
             <a href="{% url 'trade' %}" 
-               class="px-4 py-2.5 rounded-2xl bg-pesa-600 hover:bg-pesa-500 text-white font-bold text-xs shadow-md shadow-pesa-500/20 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2">
+               class="px-4 py-2.5 rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white font-bold text-xs shadow-brand-glow hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2">
                 <i class="fas fa-plus"></i>
                 <span>Buy / Trade Asset</span>
             </a>
             <a href="{% url 'portfolio' %}" 
-               class="px-3.5 py-2.5 rounded-2xl bg-white dark:bg-dark-850 hover:bg-slate-50 dark:hover:bg-dark-800 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-dark-750 text-xs font-semibold shadow-2xs transition-all flex items-center gap-2">
-                <i class="fas fa-arrow-down-to-bracket text-slate-400"></i>
+               class="px-4 py-2.5 rounded-full bg-white dark:bg-dark-800 hover:bg-neutral-100 text-neutral-700 dark:text-neutral-200 border border-[#DDDDDD] dark:border-dark-750 text-xs font-semibold shadow-2xs transition-all flex items-center gap-2">
+                <i class="fas fa-arrow-down-to-bracket text-neutral-400"></i>
                 <span>Deposit</span>
             </a>
         </div>
     </div>
 
     <!-- ========================================== -->
-    <!-- 2. FINANCIAL METRICS HERO TILES             -->
-    <!-- (Inspired by Image 1 & Image 2)            -->
+    <!-- 2. FINANCIAL METRICS HERO TILES            -->
     <!-- ========================================== -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
         
-        <!-- Tile 1: Total Portfolio Balance -->
-        <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
-            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-pesa-500/5 rounded-full blur-xl pointer-events-none"></div>
+        <!-- Tile 1: Total Portfolio Value -->
+        <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm hover:shadow-card transition-all group">
             <div class="flex justify-between items-start mb-3">
-                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Portfolio Value</span>
-                <div class="w-9 h-9 rounded-2xl bg-pesa-50 dark:bg-pesa-950/50 text-pesa-600 dark:text-pesa-400 flex items-center justify-center text-sm">
+                <span class="text-xs font-semibold text-neutral-500 dark:text-neutral-400">Total Portfolio Value</span>
+                <div class="w-10 h-10 rounded-full bg-[#FFF0F3] dark:bg-[#FF385C]/15 text-[#FF385C] flex items-center justify-center text-sm shadow-2xs">
                     <i class="fas fa-wallet"></i>
                 </div>
             </div>
-            <div class="text-2xl font-black font-mono text-slate-900 dark:text-white group-hover:text-pesa-500 transition-colors" x-text="formatPrice(27450.50)">
+            <div class="text-2xl font-black font-mono text-neutral-900 dark:text-white group-hover:text-[#FF385C] transition-colors" x-text="formatPrice(27450.50)">
                 $27,450.50
             </div>
             <div class="mt-3 flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
                     <i class="fas fa-arrow-up text-[9px]"></i> +5.96%
                 </span>
-                <span class="text-[11px] text-slate-400 font-medium">+$1,546.80 today</span>
+                <span class="text-[11px] text-neutral-400 font-medium">+$1,546.80 today</span>
             </div>
         </div>
 
         <!-- Tile 2: Available Cash / Buying Power -->
-        <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
+        <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm hover:shadow-card transition-all group">
             <div class="flex justify-between items-start mb-3">
-                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Available Cash (Wallets)</span>
-                <div class="w-9 h-9 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm">
+                <span class="text-xs font-semibold text-neutral-500 dark:text-neutral-400">Available Cash</span>
+                <div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm shadow-2xs">
                     <i class="fas fa-coins"></i>
                 </div>
             </div>
-            <div class="text-2xl font-black font-mono text-slate-900 dark:text-white group-hover:text-blue-500 transition-colors" x-text="formatPrice(5212.17)">
+            <div class="text-2xl font-black font-mono text-neutral-900 dark:text-white group-hover:text-blue-500 transition-colors" x-text="formatPrice(5212.17)">
                 $5,212.17
             </div>
             <div class="mt-3 flex items-center justify-between">
-                <span class="text-[11px] text-slate-400 font-medium">18.9% of portfolio</span>
-                <a href="{% url 'portfolio' %}" class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline">
-                    Add Cash &rarr;
+                <span class="text-[11px] text-neutral-400 font-medium">18.9% of portfolio</span>
+                <a href="{% url 'portfolio' %}" class="text-[11px] font-bold text-[#FF385C] hover:underline">
+                    Add Funds &rarr;
                 </a>
             </div>
         </div>
 
         <!-- Tile 3: Total Cumulative Profit -->
-        <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
+        <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm hover:shadow-card transition-all group">
             <div class="flex justify-between items-start mb-3">
-                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Unrealized Gains</span>
-                <div class="w-9 h-9 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm">
+                <span class="text-xs font-semibold text-neutral-500 dark:text-neutral-400">Total Unrealized Gains</span>
+                <div class="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm shadow-2xs">
                     <i class="fas fa-arrow-trend-up"></i>
                 </div>
             </div>
@@ -100,28 +104,28 @@
                 +$4,972.20
             </div>
             <div class="mt-3 flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
                     <i class="fas fa-chart-line text-[9px]"></i> +22.1%
                 </span>
-                <span class="text-[11px] text-slate-400 font-medium">all-time return</span>
+                <span class="text-[11px] text-neutral-400 font-medium">all-time alpha</span>
             </div>
         </div>
 
-        <!-- Tile 4: Active Watchlists & Tracked Assets -->
-        <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
+        <!-- Tile 4: Active Watchlists -->
+        <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm hover:shadow-card transition-all group">
             <div class="flex justify-between items-start mb-3">
-                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Tracked Watchlists</span>
-                <div class="w-9 h-9 rounded-2xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center text-sm">
-                    <i class="far fa-star"></i>
+                <span class="text-xs font-semibold text-neutral-500 dark:text-neutral-400">Tracked Wishlists</span>
+                <div class="w-10 h-10 rounded-full bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center text-sm shadow-2xs">
+                    <i class="far fa-heart"></i>
                 </div>
             </div>
-            <div class="text-2xl font-black font-mono text-slate-900 dark:text-white group-hover:text-purple-500 transition-colors">
+            <div class="text-2xl font-black font-mono text-neutral-900 dark:text-white group-hover:text-purple-500 transition-colors">
                 4 Lists
             </div>
             <div class="mt-3 flex items-center justify-between">
-                <span class="text-[11px] text-slate-400 font-medium">12 active tickers</span>
+                <span class="text-[11px] text-neutral-400 font-medium">18 active assets</span>
                 <a href="{% url 'watchlist' %}" class="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline">
-                    Manage &rarr;
+                    View &rarr;
                 </a>
             </div>
         </div>
@@ -129,28 +133,122 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 3. INTERACTIVE CHART & TRENDING ASSETS     -->
+    <!-- 3. FEATURED LISTINGS GRID                  -->
+    <!-- (Classic Card Grid with Logos & Hearts)    -->
+    <!-- ========================================== -->
+    <div class="space-y-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-xl font-bold text-neutral-900 dark:text-white">Featured Opportunities</h2>
+                <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Top-rated equities, treasury auctions, and digital assets</p>
+            </div>
+            <a href="{% url 'markets' %}" class="text-xs font-bold text-[#FF385C] hover:underline flex items-center gap-1">
+                Show all (18) <i class="fas fa-chevron-right text-[10px]"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {% for asset in trending %}
+            <div class="bg-white dark:bg-dark-850 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-xs hover:shadow-card transition-all duration-300 listing-card flex flex-col justify-between group relative overflow-hidden">
+                
+                <div>
+                    <!-- Top: Real Company Photograph with Floating Official Logo & Heart Wishlist -->
+                    <div class="h-44 w-full relative overflow-hidden bg-neutral-100 dark:bg-dark-800">
+                        <img src="{{ asset.image }}" alt="{{ asset.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                        
+                        <!-- Floating Company Official Logo Badge -->
+                        <div class="absolute bottom-3 left-3 w-12 h-12 rounded-2xl bg-white dark:bg-dark-850 p-2 border border-white/80 dark:border-dark-700 shadow-md flex items-center justify-center">
+                            <img src="{{ asset.logo }}" alt="{{ asset.name }}" class="w-full h-full object-contain">
+                        </div>
+
+                        <!-- Heart Wishlist Button -->
+                        <button @click.prevent="toggleWatchlist('{{ asset.symbol }}')" 
+                                class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 dark:bg-dark-900/80 backdrop-blur-sm hover:bg-white text-neutral-400 hover:text-[#FF385C] flex items-center justify-center transition-colors shadow-sm"
+                                title="Save to wishlist">
+                            <i class="far fa-heart text-sm"></i>
+                        </button>
+                        
+                        <!-- Market Badge -->
+                        <span class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/60 backdrop-blur-md text-white uppercase tracking-wider">
+                            {{ asset.market }}
+                        </span>
+                    </div>
+
+                    <!-- Asset Name, Rating & Sector -->
+                    <div class="p-5 space-y-1">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] text-neutral-400 block truncate">{{ asset.sector|default:asset.category|title }}</span>
+                            <div class="flex items-center gap-1 text-xs font-bold text-neutral-800 dark:text-neutral-200">
+                                <span class="text-amber-500">★</span>
+                                <span>{{ asset.rating.score|default:"4.8" }}</span>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'asset_detail' asset.symbol %}" class="block font-black text-base text-neutral-900 dark:text-white group-hover:text-[#FF385C] transition-colors truncate">
+                            {{ asset.symbol }}
+                        </a>
+                        <span class="text-xs text-neutral-500 dark:text-neutral-400 block truncate">{{ asset.name }}</span>
+
+                        <!-- Sparkline Preview -->
+                        <div class="pt-2 w-full h-9">
+                            <svg class="w-full h-full overflow-visible" viewBox="0 0 100 24">
+                                <path d="M 0,16 Q 25,{% if asset.change_percent >= 0 %}9{% else %}4{% endif %} 50,{% if asset.change_percent >= 0 %}11{% else %}18{% endif %} T 100,{% if asset.change_percent >= 0 %}3{% else %}21{% endif %}" 
+                                      fill="none" 
+                                      stroke="{% if asset.change_percent >= 0 %}#008A05{% else %}#C13515{% endif %}" 
+                                      stroke-width="2.2" 
+                                      stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Price and CTA -->
+                <div class="p-5 pt-3 border-t border-[#EBEBEB] dark:border-dark-750 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-neutral-400 block font-medium">Price</span>
+                        <div class="flex items-baseline gap-1">
+                            <span class="font-mono font-black text-sm text-neutral-900 dark:text-white" x-text="formatPrice({{ asset.price }})">
+                                ${{ asset.price }}
+                            </span>
+                            <span class="text-[10px] text-neutral-400">/ share</span>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'trade' %}?symbol={{ asset.symbol }}" 
+                       class="px-3.5 py-1.5 rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white font-bold text-xs shadow-brand-glow transition-all">
+                        Trade
+                    </a>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 4. INTERACTIVE CHART & TRENDING LIST       -->
     <!-- ========================================== -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Main Portfolio Trajectory Chart (2 Cols) -->
-        <div class="lg:col-span-2 bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm flex flex-col justify-between">
+        <div class="lg:col-span-2 bg-white dark:bg-dark-850 p-6 sm:p-8 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm flex flex-col justify-between">
             <div>
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
                         <div class="flex items-center gap-2">
-                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Portfolio Trajectory</h3>
-                            <span class="text-xs font-mono font-bold text-emerald-500">+22.12%</span>
+                            <h3 class="text-lg font-bold text-neutral-900 dark:text-white">Portfolio Trajectory</h3>
+                            <span class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full">+22.12%</span>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5">Intraday asset price movements and equity growth</p>
+                        <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1">Multi-asset valuation growth and performance tracking</p>
                     </div>
 
-                    <!-- Timeframe Segmented Switcher (Image 1 style: Week / Month / Year) -->
-                    <div class="flex bg-slate-100 dark:bg-dark-800 p-1 rounded-2xl border border-slate-200/60 dark:border-dark-750 self-start sm:self-auto">
+                    <!-- Timeframe Segmented Switcher -->
+                    <div class="flex bg-neutral-100 dark:bg-dark-800 p-1 rounded-full border border-neutral-200 dark:border-dark-700 self-start sm:self-auto">
                         <template x-for="tf in ['1D', '1W', '1M', '1Y', 'ALL']" :key="tf">
                             <button @click="setTimeframe(tf)" 
-                                    :class="activeTimeframe === tf ? 'bg-white dark:bg-dark-900 text-slate-900 dark:text-white shadow-sm font-bold' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
-                                    class="px-3 py-1 rounded-xl text-xs transition-all"
+                                    :class="activeTimeframe === tf ? 'bg-white dark:bg-dark-900 text-neutral-900 dark:text-white shadow-sm font-bold' : 'text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'"
+                                    class="px-3.5 py-1 rounded-full text-xs transition-all"
                                     x-text="tf"></button>
                         </template>
                     </div>
@@ -162,56 +260,56 @@
             </div>
 
             <!-- Chart Footer Metrics -->
-            <div class="pt-4 mt-4 border-t border-slate-100 dark:border-dark-800 grid grid-cols-3 gap-2 text-center text-xs">
+            <div class="pt-5 mt-4 border-t border-[#EBEBEB] dark:border-dark-750 grid grid-cols-3 gap-2 text-center text-xs">
                 <div>
-                    <span class="text-[10px] text-slate-400 uppercase font-semibold block">Period Low</span>
-                    <span class="font-mono font-bold text-slate-800 dark:text-slate-200" x-text="formatPrice(chartMin)">$21,500</span>
+                    <span class="text-[10px] text-neutral-400 uppercase font-bold block mb-0.5">Period Low</span>
+                    <span class="font-mono font-bold text-neutral-800 dark:text-neutral-200" x-text="formatPrice(chartMin)">$21,500</span>
                 </div>
                 <div>
-                    <span class="text-[10px] text-slate-400 uppercase font-semibold block">Period High</span>
-                    <span class="font-mono font-bold text-slate-800 dark:text-slate-200" x-text="formatPrice(chartMax)">$27,450</span>
+                    <span class="text-[10px] text-neutral-400 uppercase font-bold block mb-0.5">Period High</span>
+                    <span class="font-mono font-bold text-neutral-800 dark:text-neutral-200" x-text="formatPrice(chartMax)">$27,450</span>
                 </div>
                 <div>
-                    <span class="text-[10px] text-slate-400 uppercase font-semibold block">Period Alpha</span>
-                    <span class="font-mono font-bold text-emerald-500">+14.8% vs NSE</span>
+                    <span class="text-[10px] text-neutral-400 uppercase font-bold block mb-0.5">Benchmark Alpha</span>
+                    <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">+14.8% vs NSE</span>
                 </div>
             </div>
         </div>
 
-        <!-- Right Side: Watchlist / Market Movers (Image 2 style) -->
-        <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm flex flex-col justify-between">
+        <!-- Right Side: Trending Tickers with SVG Logos -->
+        <div class="bg-white dark:bg-dark-850 p-6 sm:p-7 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm flex flex-col justify-between">
             <div>
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-5">
                     <div class="flex items-center gap-2">
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Trending Tickers</h3>
-                        <span class="text-[10px] font-bold bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 px-2 py-0.5 rounded-full">Live</span>
+                        <h3 class="text-base font-bold text-neutral-900 dark:text-white">Trending Quotes</h3>
+                        <span class="text-[10px] font-bold bg-[#FFF0F3] text-[#FF385C] px-2.5 py-0.5 rounded-full">Live</span>
                     </div>
-                    <a href="{% url 'markets' %}" class="text-xs text-pesa-600 dark:text-pesa-400 font-semibold hover:underline">View All</a>
+                    <a href="{% url 'markets' %}" class="text-xs text-[#FF385C] font-semibold hover:underline">View All</a>
                 </div>
 
-                <!-- Trending / Watchlist Assets List with Sparklines! -->
-                <div class="space-y-2.5">
+                <!-- Trending Assets List with Real SVG Logos -->
+                <div class="space-y-3">
                     {% for asset in trending %}
                     <a href="{% url 'asset_detail' asset.symbol %}" 
-                       class="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-dark-800/80 transition-all border border-transparent hover:border-slate-200/80 dark:hover:border-dark-750 group">
+                       class="flex items-center justify-between p-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-dark-800/80 transition-all border border-transparent hover:border-[#EBEBEB] dark:hover:border-dark-700 group">
                         
-                        <!-- Symbol & Logo -->
+                        <!-- Symbol & Authentic Vector Logo -->
                         <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-dark-800 flex items-center justify-center font-bold text-xs text-slate-800 dark:text-slate-200 group-hover:bg-pesa-500 group-hover:text-white transition-colors">
-                                {{ asset.symbol }}
+                            <div class="w-10 h-10 rounded-2xl bg-white dark:bg-dark-750 border border-neutral-200 dark:border-dark-700 flex items-center justify-center p-1.5 flex-shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                                <img src="{{ asset.logo }}" alt="{{ asset.name }}" class="w-full h-full object-contain">
                             </div>
                             <div>
-                                <h4 class="font-bold text-xs text-slate-900 dark:text-white leading-tight group-hover:text-pesa-500 transition-colors">{{ asset.symbol }}</h4>
-                                <p class="text-[11px] text-slate-400 truncate max-w-[100px]">{{ asset.name }}</p>
+                                <h4 class="font-bold text-xs text-neutral-900 dark:text-white leading-tight group-hover:text-[#FF385C] transition-colors">{{ asset.symbol }}</h4>
+                                <p class="text-[11px] text-neutral-400 truncate max-w-[100px]">{{ asset.name }}</p>
                             </div>
                         </div>
 
-                        <!-- Mini SVG Sparkline! (Yahoo Finance / Image 2 style) -->
+                        <!-- Mini SVG Sparkline -->
                         <div class="hidden sm:block w-16 h-7">
                             <svg class="w-full h-full overflow-visible" viewBox="0 0 60 20">
                                 <path d="M 0,15 Q 15,{% if asset.change_percent >= 0 %}10{% else %}5{% endif %} 30,{% if asset.change_percent >= 0 %}8{% else %}14{% endif %} T 60,{% if asset.change_percent >= 0 %}2{% else %}18{% endif %}" 
                                       fill="none" 
-                                      stroke="{% if asset.change_percent >= 0 %}#10b981{% else %}#f43f5e{% endif %}" 
+                                      stroke="{% if asset.change_percent >= 0 %}#008A05{% else %}#C13515{% endif %}" 
                                       stroke-width="2" 
                                       stroke-linecap="round"/>
                             </svg>
@@ -219,10 +317,10 @@
 
                         <!-- Price & % Change -->
                         <div class="text-right">
-                            <span class="block font-mono font-bold text-xs text-slate-900 dark:text-white" x-text="formatPrice({{ asset.price }})">
+                            <span class="block font-mono font-bold text-xs text-neutral-900 dark:text-white" x-text="formatPrice({{ asset.price }})">
                                 ${{ asset.price }}
                             </span>
-                            <span class="inline-block text-[11px] font-semibold {% if asset.change_percent >= 0 %}text-emerald-500{% else %}text-rose-500{% endif %}">
+                            <span class="inline-block text-[11px] font-semibold {% if asset.change_percent >= 0 %}text-emerald-600 dark:text-emerald-400{% else %}text-rose-600 dark:text-rose-400{% endif %}">
                                 {% if asset.change_percent >= 0 %}+{% endif %}{{ asset.change_percent }}%
                             </span>
                         </div>
@@ -233,98 +331,96 @@
 
             <!-- Bottom CTA Button -->
             <a href="{% url 'markets' %}?category=gainers" 
-               class="mt-4 w-full py-2.5 rounded-2xl bg-slate-100 dark:bg-dark-800 hover:bg-slate-200 dark:hover:bg-dark-750 text-slate-700 dark:text-slate-300 text-center text-xs font-bold transition-colors block">
-                <i class="fas fa-fire text-amber-500 mr-1.5"></i> Explore Top Gainers Today
+               class="mt-4 w-full py-3 rounded-full bg-neutral-100 dark:bg-dark-800 hover:bg-neutral-200 dark:hover:bg-dark-750 text-neutral-800 dark:text-neutral-200 text-center text-xs font-bold transition-colors block">
+                <i class="fas fa-fire text-[#FF385C] mr-1.5"></i> Explore Top Gainers
             </a>
         </div>
 
     </div>
 
     <!-- ========================================== -->
-    <!-- 4. MODULAR FINANCIAL INSIGHTS WIDGETS      -->
-    <!-- (Inspired by Image 1 "Your Financial Insights") -->
+    <!-- 5. FINANCIAL INSIGHTS WIDGETS              -->
     <!-- ========================================== -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         {% for ins in insights %}
-        <div class="bg-gradient-to-br from-white to-slate-50 dark:from-dark-850 dark:to-dark-900 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm flex items-start gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-pesa-500/10 text-pesa-600 dark:text-pesa-400 flex items-center justify-center text-lg flex-shrink-0">
+        <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm flex items-start gap-4">
+            <div class="w-12 h-12 rounded-full bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 flex items-center justify-center text-lg flex-shrink-0 shadow-2xs">
                 <i class="fas {{ ins.icon }}"></i>
             </div>
             <div>
                 <div class="flex items-center gap-2">
-                    <h4 class="font-bold text-sm text-slate-900 dark:text-white">{{ ins.title }}</h4>
+                    <h4 class="font-bold text-sm text-neutral-900 dark:text-white">{{ ins.title }}</h4>
                     <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">{{ ins.value }}</span>
                 </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{{ ins.desc }}</p>
+                <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">{{ ins.desc }}</p>
             </div>
         </div>
         {% endfor %}
     </div>
 
     <!-- ========================================== -->
-    <!-- 5. RECENT ORDERS & TRANSACTIONS TABLE       -->
-    <!-- (Yahoo Finance Portfolio Activity)         -->
+    <!-- 6. RECENT ORDERS & TRANSACTIONS TABLE      -->
     <!-- ========================================== -->
-    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm overflow-hidden" x-data="{ orderTab: 'all' }">
+    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm overflow-hidden" x-data="{ orderTab: 'all' }">
         
         <!-- Table Header & Filter Tabs -->
-        <div class="p-5 border-b border-slate-100 dark:border-dark-750 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="p-6 border-b border-[#EBEBEB] dark:border-dark-750 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Recent Transactions</h3>
-                <p class="text-xs text-slate-400 mt-0.5">Execution history across simulated accounts and local brokers</p>
+                <h3 class="text-base font-bold text-neutral-900 dark:text-white">Recent Transactions</h3>
+                <p class="text-xs text-neutral-400 mt-0.5">Execution history across simulated accounts and local brokers</p>
             </div>
 
             <!-- Tab Pills -->
-            <div class="flex bg-slate-100 dark:bg-dark-800 p-1 rounded-2xl border border-slate-200/60 dark:border-dark-750 self-start sm:self-auto text-xs">
-                <button @click="orderTab = 'all'" :class="orderTab === 'all' ? 'bg-white dark:bg-dark-900 text-slate-900 dark:text-white font-bold shadow-2xs' : 'text-slate-500'" class="px-3.5 py-1.5 rounded-xl transition-all">All</button>
-                <button @click="orderTab = 'BUY'" :class="orderTab === 'BUY' ? 'bg-white dark:bg-dark-900 text-slate-900 dark:text-white font-bold shadow-2xs' : 'text-slate-500'" class="px-3.5 py-1.5 rounded-xl transition-all">Buys</button>
-                <button @click="orderTab = 'SELL'" :class="orderTab === 'SELL' ? 'bg-white dark:bg-dark-900 text-slate-900 dark:text-white font-bold shadow-2xs' : 'text-slate-500'" class="px-3.5 py-1.5 rounded-xl transition-all">Sells</button>
+            <div class="flex bg-neutral-100 dark:bg-dark-800 p-1 rounded-full border border-neutral-200 dark:border-dark-700 self-start sm:self-auto text-xs">
+                <button @click="orderTab = 'all'" :class="orderTab === 'all' ? 'bg-white dark:bg-dark-900 text-neutral-900 dark:text-white font-bold shadow-2xs' : 'text-neutral-500'" class="px-4 py-1.5 rounded-full transition-all">All</button>
+                <button @click="orderTab = 'BUY'" :class="orderTab === 'BUY' ? 'bg-white dark:bg-dark-900 text-neutral-900 dark:text-white font-bold shadow-2xs' : 'text-neutral-500'" class="px-4 py-1.5 rounded-full transition-all">Buys</button>
+                <button @click="orderTab = 'SELL'" :class="orderTab === 'SELL' ? 'bg-white dark:bg-dark-900 text-neutral-900 dark:text-white font-bold shadow-2xs' : 'text-neutral-500'" class="px-4 py-1.5 rounded-full transition-all">Sells</button>
             </div>
         </div>
 
-        <!-- Table Responsive -->
+        <!-- Table Responsive with Logos -->
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[650px] text-xs">
                 <thead>
-                    <tr class="bg-slate-50/70 dark:bg-dark-900/50 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-100 dark:border-dark-750 text-[10px]">
-                        <th class="px-6 py-3.5">Asset</th>
-                        <th class="px-6 py-3.5">Action</th>
-                        <th class="px-6 py-3.5">Quantity / Size</th>
-                        <th class="px-6 py-3.5">Execution Price</th>
-                        <th class="px-6 py-3.5">Total Value</th>
-                        <th class="px-6 py-3.5">Timestamp</th>
-                        <th class="px-6 py-3.5">Status</th>
+                    <tr class="bg-neutral-50 dark:bg-dark-900/50 text-neutral-400 uppercase tracking-wider font-semibold border-b border-[#EBEBEB] dark:border-dark-750 text-[10px]">
+                        <th class="px-6 py-4">Asset</th>
+                        <th class="px-6 py-4">Action</th>
+                        <th class="px-6 py-4">Quantity / Size</th>
+                        <th class="px-6 py-4">Execution Price</th>
+                        <th class="px-6 py-4">Total Value</th>
+                        <th class="px-6 py-4">Timestamp</th>
+                        <th class="px-6 py-4">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-dark-800">
+                <tbody class="divide-y divide-[#EBEBEB] dark:divide-dark-800">
                     {% for tx in portfolio.transactions %}
-                    <tr class="hover:bg-slate-50 dark:hover:bg-dark-800/50 transition-colors" x-show="orderTab === 'all' || orderTab === '{{ tx.type }}'">
+                    <tr class="hover:bg-neutral-50 dark:hover:bg-dark-800/50 transition-colors" x-show="orderTab === 'all' || orderTab === '{{ tx.type }}'">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-dark-800 flex items-center justify-center font-bold text-[11px] text-slate-700 dark:text-slate-300">
-                                    {{ tx.asset_symbol }}
+                                <div class="w-10 h-10 rounded-2xl bg-white dark:bg-dark-750 border border-neutral-200 dark:border-dark-700 flex items-center justify-center p-1.5 flex-shrink-0 shadow-2xs">
+                                    <img src="{{ tx.logo }}" alt="{{ tx.asset_name }}" class="w-full h-full object-contain">
                                 </div>
                                 <div>
-                                    <span class="font-bold text-slate-900 dark:text-white block">{{ tx.asset_name }}</span>
-                                    <span class="text-slate-400 text-[11px] font-mono">{{ tx.asset_symbol }}</span>
+                                    <span class="font-bold text-neutral-900 dark:text-white block">{{ tx.asset_name }}</span>
+                                    <span class="text-neutral-400 text-[11px] font-mono">{{ tx.asset_symbol }}</span>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            <span class="px-2.5 py-1 rounded-full font-bold text-[10px] uppercase {% if tx.type == 'BUY' %}bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400{% else %}bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400{% endif %}">
+                            <span class="px-3 py-1 rounded-full font-bold text-[10px] uppercase {% if 'BUY' in tx.type %}bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400{% else %}bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400{% endif %}">
                                 {{ tx.type }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 font-medium text-slate-800 dark:text-slate-200">
+                        <td class="px-6 py-4 font-medium text-neutral-800 dark:text-neutral-200">
                             {{ tx.shares }}
                         </td>
-                        <td class="px-6 py-4 font-mono text-slate-600 dark:text-slate-400">
+                        <td class="px-6 py-4 font-mono text-neutral-600 dark:text-neutral-400">
                             {{ tx.price }}
                         </td>
-                        <td class="px-6 py-4 font-mono font-bold text-slate-900 dark:text-white">
+                        <td class="px-6 py-4 font-mono font-bold text-neutral-900 dark:text-white">
                             {{ tx.total }}
                         </td>
-                        <td class="px-6 py-4 text-slate-400">
+                        <td class="px-6 py-4 text-neutral-400">
                             {{ tx.date }}
                         </td>
                         <td class="px-6 py-4">
@@ -338,8 +434,8 @@
             </table>
         </div>
 
-        <div class="p-3.5 bg-slate-50 dark:bg-dark-900/50 text-center border-t border-slate-100 dark:border-dark-750">
-            <a href="{% url 'portfolio' %}" class="text-xs font-bold text-pesa-600 dark:text-pesa-400 hover:underline">
+        <div class="p-4 bg-neutral-50 dark:bg-dark-900/50 text-center border-t border-[#EBEBEB] dark:border-dark-750">
+            <a href="{% url 'portfolio' %}" class="text-xs font-bold text-[#FF385C] hover:underline">
                 View Full Portfolio Breakdown & Tax Ledger &rarr;
             </a>
         </div>
@@ -376,6 +472,20 @@
                 });
             },
 
+            async toggleWatchlist(sym) {
+                try {
+                    const res = await fetch('/api/watchlist/toggle/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ symbol: sym })
+                    });
+                    const d = await res.json();
+                    if(d.success) {
+                        window.dispatchEvent(new CustomEvent('toast', { detail: d.in_watchlist ? 'Added ' + sym + ' to Wishlist' : 'Removed ' + sym }));
+                    }
+                } catch(e) { console.error(e); }
+            },
+
             setTimeframe(tf) {
                 this.activeTimeframe = tf;
                 const data = this.chartDataSeries[tf];
@@ -394,8 +504,8 @@
                 if (!ctx) return;
 
                 const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
-                gradient.addColorStop(0, 'rgba(16, 185, 129, 0.28)');
-                gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+                gradient.addColorStop(0, 'rgba(255, 56, 92, 0.25)');
+                gradient.addColorStop(1, 'rgba(255, 56, 92, 0.0)');
 
                 this.chartInstance = new Chart(ctx, {
                     type: 'line',
@@ -403,7 +513,7 @@
                         labels: this.chartLabels[this.activeTimeframe],
                         datasets: [{
                             data: this.chartDataSeries[this.activeTimeframe],
-                            borderColor: '#10b981',
+                            borderColor: '#FF385C',
                             borderWidth: 2.8,
                             backgroundColor: gradient,
                             fill: true,
@@ -411,7 +521,7 @@
                             pointRadius: 0,
                             pointHoverRadius: 6,
                             pointBackgroundColor: '#ffffff',
-                            pointBorderColor: '#10b981',
+                            pointBorderColor: '#FF385C',
                             pointBorderWidth: 2.5
                         }]
                     },
@@ -423,12 +533,12 @@
                             tooltip: {
                                 mode: 'index',
                                 intersect: false,
-                                backgroundColor: '#0f172a',
-                                titleColor: '#94a3b8',
+                                backgroundColor: '#222222',
+                                titleColor: '#A0A0A0',
                                 bodyColor: '#ffffff',
                                 bodyFont: { weight: 'bold', family: "'JetBrains Mono', monospace" },
                                 padding: 10,
-                                cornerRadius: 10,
+                                cornerRadius: 12,
                                 displayColors: false,
                                 callbacks: {
                                     label: (context) => '$' + context.parsed.y.toLocaleString(undefined, { minimumFractionDigits: 2 })
@@ -439,18 +549,18 @@
                             x: {
                                 grid: { display: false },
                                 ticks: {
-                                    color: '#94a3b8',
+                                    color: '#A0A0A0',
                                     font: { size: 11, family: "'Inter', sans-serif" }
                                 }
                             },
                             y: {
                                 grid: {
-                                    color: 'rgba(148, 163, 184, 0.1)',
+                                    color: 'rgba(156, 163, 175, 0.1)',
                                     drawBorder: false,
                                     borderDash: [4, 4]
                                 },
                                 ticks: {
-                                    color: '#94a3b8',
+                                    color: '#A0A0A0',
                                     font: { size: 11, family: "'Inter', sans-serif" },
                                     callback: (val) => '$' + (val / 1000).toFixed(1) + 'k'
                                 }
