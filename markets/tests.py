@@ -33,6 +33,9 @@ class PesaMarketsTests(TestCase):
             content = res.content.decode('utf-8').lower()
             self.assertNotIn("yahoo", content, f"Yahoo found in response for URL: {u}")
             self.assertNotIn("yahoo finance", content, f"Yahoo Finance found in response for URL: {u}")
+            self.assertNotIn("bloomberg", content, f"Bloomberg found in response for URL: {u}")
+            self.assertNotIn("saxo", content, f"Saxo found in response for URL: {u}")
+            self.assertNotIn("reuters", content, f"Reuters found in response for URL: {u}")
 
     def test_ai_option_removed_and_replaced_with_terminal(self):
         """Verify that the AI assistant premium option is removed and replaced with Pro Terminal."""
@@ -50,17 +53,17 @@ class PesaMarketsTests(TestCase):
         self.assertIn("Terminal Pro", content)
         self.assertIn("/terminal/", content)
 
-    def test_terminal_pro_page_renders_bloomberg_saxo_components(self):
+    def test_terminal_pro_page_renders_institutional_components(self):
         """Verify the Terminal Pro page renders with rich institutional components."""
         res = self.client.get(reverse('terminal'))
         self.assertEqual(res.status_code, 200)
         content = res.content.decode('utf-8')
 
-        # Check Bloomberg & SaxoTraderGO elements
-        self.assertIn("BLOOMBERG &bull; SAXOTRADERGO WORKSTATION", content)
+        # Check institutional workstation elements
+        self.assertIn("PESAMARKETS &bull; PRO WORKSTATION", content)
         self.assertIn("OVERVIEW & LEVEL 2 DEPTH", content)
         self.assertIn("VALUATION & STATEMENTS (FA)", content)
-        self.assertIn("SAXO TECHNICALS & SENTIMENT", content)
+        self.assertIn("TECHNICALS & SENTIMENT", content)
         self.assertIn("TIME & SALES / BLOCK TAPE", content)
         self.assertIn("MACRO CALENDAR & CBK/FED (ECO)", content)
         self.assertIn("SOVEREIGN YIELDS & CORR (YCRV)", content)
@@ -77,7 +80,7 @@ class PesaMarketsTests(TestCase):
             self.assertIn("asset", data)
             self.assertIn("level2", data)
             self.assertIn("valuation_fa", data)
-            self.assertIn("technicals_saxo", data)
+            self.assertIn("technicals", data)
             self.assertIn("block_data", data)
             self.assertIn("central_banks", data)
             self.assertIn("economic_calendar", data)
@@ -90,11 +93,11 @@ class PesaMarketsTests(TestCase):
             self.assertIn("spread_bps", data["level2"])
             self.assertIn("bid_pressure_pct", data["level2"])
 
-            # Check Saxo technicals
-            self.assertIn("rsi_14", data["technicals_saxo"])
-            self.assertIn("macd", data["technicals_saxo"])
-            self.assertIn("sentiment", data["technicals_saxo"])
-            self.assertIn("long_pct", data["technicals_saxo"]["sentiment"])
+            # Check technicals
+            self.assertIn("rsi_14", data["technicals"])
+            self.assertIn("macd", data["technicals"])
+            self.assertIn("sentiment", data["technicals"])
+            self.assertIn("long_pct", data["technicals"]["sentiment"])
 
     def test_bonds_page_renders_fixed_income_components(self):
         """Verify the dedicated Bonds & Treasury Bills Desk page renders with institutional data."""
@@ -240,3 +243,40 @@ class PesaMarketsTests(TestCase):
         self.assertTrue(data.get("success"))
         self.assertIn("CSD-OTC-", data["receipt"]["csd_reference"])
         self.assertIn("Secondary", data["receipt"]["channel"])
+
+    def test_true_dark_mode_and_logo_badge_styles(self):
+        """Verify true dark mode (pitch black, slate-950: #000000) and constant white logo badges."""
+        res = self.client.get(reverse('home'))
+        self.assertEqual(res.status_code, 200)
+        content = res.content.decode('utf-8')
+
+        # True dark mode configuration
+        self.assertIn("dark:bg-black", content)
+        self.assertIn("950: '#000000'", content)
+        self.assertIn(".logo-badge", content)
+        self.assertIn("background-color: #ffffff !important;", content)
+
+    def test_news_syndicated_agencies_and_api(self):
+        """Verify syndicated RSS news wire, agency attribution, and /api/news/ endpoint."""
+        # 1. Test HTML news page contains syndicated agency wire markers
+        res = self.client.get(reverse('news'))
+        self.assertEqual(res.status_code, 200)
+        content = res.content.decode('utf-8')
+        self.assertIn("Syndicated Agency Wire", content)
+        self.assertIn("PesaMarkets does not self-publish news", content)
+        self.assertIn("Read at Source", content)
+        self.assertIn("Sync RSS Feeds", content)
+
+        # 2. Test JSON API endpoint
+        api_res = self.client.get(reverse('api_news'))
+        self.assertEqual(api_res.status_code, 200)
+        api_data = json.loads(api_res.content.decode('utf-8'))
+        self.assertTrue(api_data.get("success"))
+        self.assertGreater(api_data.get("count", 0), 0)
+        
+        # Verify stories have required agency fields and valid external URLs
+        for story in api_data.get("stories", [])[:5]:
+            self.assertIn("source", story)
+            self.assertIn("url", story)
+            self.assertTrue(story["url"].startswith("http"))
+

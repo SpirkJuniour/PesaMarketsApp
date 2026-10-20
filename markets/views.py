@@ -2,6 +2,7 @@ import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from .services.news_service import get_agency_news, get_agency_news_for_asset, get_news_agencies
 from .data import (
     MARKET_INDICES,
     ASSETS,
@@ -43,7 +44,7 @@ def home(request):
         "top_gainers": top_gainers,
         "top_losers": top_losers,
         "trending": trending,
-        "news": FINANCIAL_NEWS[:4],
+        "news": get_agency_news(limit=4),
         "insights": insights,
         "assets": ASSETS,
         "rates": json.dumps(EXCHANGE_RATES),
@@ -101,9 +102,7 @@ def asset_detail(request, symbol):
         # Fallback to SCOM if not found
         asset = ASSETS.get("SCOM")
     
-    related_news = [n for n in FINANCIAL_NEWS if symbol_upper in n.get("tickers", [])]
-    if not related_news:
-        related_news = FINANCIAL_NEWS[:3]
+    related_news = get_agency_news_for_asset(symbol_upper, limit=3)
         
     context = {
         "indices": MARKET_INDICES,
@@ -185,20 +184,39 @@ def trade(request):
 
 def news(request):
     category = request.GET.get('category', 'all')
-    if category != 'all':
-        filtered = [n for n in FINANCIAL_NEWS if n['category'].lower() == category.lower()]
-    else:
-        filtered = FINANCIAL_NEWS
+    agency = request.GET.get('agency', 'all')
+    refresh = request.GET.get('refresh', '0') == '1'
+    
+    stories = get_agency_news(category=category, agency=agency, force_refresh=refresh)
+    hero_news = stories[0] if stories else None
+    available_agencies = get_news_agencies()
         
     context = {
         "indices": MARKET_INDICES,
-        "news_list": filtered,
+        "news_list": stories,
         "current_category": category,
-        "hero_news": FINANCIAL_NEWS[0] if FINANCIAL_NEWS else None,
-        "page_title": "Market News",
+        "current_agency": agency,
+        "available_agencies": available_agencies,
+        "hero_news": hero_news,
+        "page_title": "Market Intelligence & Agency Wire",
         "active_tab": "news"
     }
     return render(request, 'markets/news.html', context)
+
+def api_news(request):
+    """REST API endpoint returning syndicated news agency dispatches."""
+    category = request.GET.get('category', 'all')
+    agency = request.GET.get('agency', 'all')
+    refresh = request.GET.get('refresh', '0') == '1'
+    stories = get_agency_news(category=category, agency=agency, force_refresh=refresh)
+    return JsonResponse({
+        "status": "success",
+        "success": True,
+        "count": len(stories),
+        "category": category,
+        "agency": agency,
+        "stories": stories
+    })
 
 def settings_page(request):
     context = {

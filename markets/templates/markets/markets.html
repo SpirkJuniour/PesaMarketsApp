@@ -107,7 +107,7 @@
         {% if top_gainers %}
         <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-white dark:bg-dark-750 border border-neutral-200 dark:border-dark-700 flex items-center justify-center p-1.5 flex-shrink-0 shadow-2xs">
+                <div class="w-11 h-11 rounded-2xl bg-white border border-neutral-200 flex items-center justify-center p-1.5 flex-shrink-0 shadow-2xs logo-badge">
                     <img src="{{ top_gainers.0.logo }}" alt="{{ top_gainers.0.name }}" class="w-full h-full object-contain">
                 </div>
                 <div>
@@ -127,7 +127,7 @@
         {% if top_losers %}
         <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-white dark:bg-dark-750 border border-neutral-200 dark:border-dark-700 flex items-center justify-center p-1.5 flex-shrink-0 shadow-2xs">
+                <div class="w-11 h-11 rounded-2xl bg-white border border-neutral-200 flex items-center justify-center p-1.5 flex-shrink-0 shadow-2xs logo-badge">
                     <img src="{{ top_losers.0.logo }}" alt="{{ top_losers.0.name }}" class="w-full h-full object-contain">
                 </div>
                 <div>
@@ -147,7 +147,7 @@
         <!-- NSE 20 Index Snapshot -->
         <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-white dark:bg-dark-750 border border-neutral-200 dark:border-dark-700 flex items-center justify-center p-1.5 flex-shrink-0 shadow-2xs">
+                <div class="w-11 h-11 rounded-2xl bg-white border border-neutral-200 flex items-center justify-center p-1.5 flex-shrink-0 shadow-2xs logo-badge">
                     <img src="/static/logos/nse.svg" alt="NSE 20" class="w-full h-full object-contain">
                 </div>
                 <div>
@@ -176,7 +176,7 @@
                     <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
                     
                     <!-- Floating Company Official Logo Badge -->
-                    <div class="absolute bottom-3 left-3 w-12 h-12 rounded-2xl bg-white dark:bg-dark-850 p-2 border border-white/80 dark:border-dark-700 shadow-md flex items-center justify-center">
+                    <div class="absolute bottom-3 left-3 w-12 h-12 rounded-2xl bg-white p-2 border border-white/80 shadow-md flex items-center justify-center logo-badge">
                         <img src="{{ asset.logo }}" alt="{{ asset.name }}" class="w-full h-full object-contain">
                     </div>
 
@@ -291,7 +291,7 @@
                         <!-- Symbol & Authentic Logo -->
                         <td class="px-6 py-4">
                             <a href="{% url 'asset_detail' asset.symbol %}" class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-2xl bg-white dark:bg-dark-750 border border-neutral-200 dark:border-dark-700 flex items-center justify-center p-1.5 flex-shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                                <div class="w-10 h-10 rounded-2xl bg-white border border-neutral-200 flex items-center justify-center p-1.5 flex-shrink-0 shadow-2xs group-hover:scale-105 transition-transform logo-badge">
                                     <img src="{{ asset.logo }}" alt="{{ asset.name }}" class="w-full h-full object-contain">
                                 </div>
                                 <div>

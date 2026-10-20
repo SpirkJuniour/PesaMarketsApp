@@ -1349,7 +1349,7 @@ def get_bonds_data():
     }
 
 
-# Curated Institutional Financial News Stories
+# Curated Institutional Financial News Stories (Syndicated from Accredited News Agencies)
 FINANCIAL_NEWS = [
     {
         "id": 1,
@@ -1357,8 +1357,8 @@ FINANCIAL_NEWS = [
         "summary": "The Monetary Policy Committee retained the benchmark lending rate, citing foreign exchange stabilization and decelerating food and energy price pressures.",
         "content": "NAIROBI — The Central Bank of Kenya's Monetary Policy Committee (MPC) announced today that it will maintain the Central Bank Rate (CBR) unchanged at 12.75%. Central Bank Governor highlighted that overall inflation has stabilized well within the target range of 5.0% ± 2.5%, assisted by lower import fuel bills and resilient agricultural harvests. Commercial banking liquidity remains strong, and the Kenyan Shilling continues its stable performance against the US dollar.",
         "category": "East Africa",
-        "source": "Business Daily Africa",
-        "source_badge": "BDA",
+        "source": "Capital FM Kenya",
+        "source_badge": "Capital FM",
         "time_ago": "18 minutes ago",
         "read_time": "3 min read",
         "sentiment": "Bullish",
@@ -1371,8 +1371,8 @@ FINANCIAL_NEWS = [
         "summary": "East Africa's most valuable tech telco sees exponential merchant transaction flow, expanding operations across Ethiopia and regional corridors.",
         "content": "NAIROBI — Safaricom PLC (NSE: SCOM) released quarterly transaction telemetry showcasing double-digit growth in M-PESA merchant settlement volumes. The fintech subsidiary recorded 34% year-over-year gains in cross-border settlements, bolstered by direct integrations with global payment rails. Analysts from Renaissance Capital reaffirmed their 'Strong Buy' rating on Safaricom with a 12-month price objective of KES 18.20.",
         "category": "Equities",
-        "source": "Reuters Financial",
-        "source_badge": "Reuters",
+        "source": "Standard Media Kenya",
+        "source_badge": "Standard Media",
         "time_ago": "1 hour ago",
         "read_time": "4 min read",
         "sentiment": "Bullish",
@@ -1385,8 +1385,8 @@ FINANCIAL_NEWS = [
         "summary": "CEO Jensen Huang noted that production capacity for next-generation B200 AI clusters is sold out through mid-2027 amid cloud infrastructure buildouts.",
         "content": "SANTA CLARA, Calif. — NVIDIA Corporation (NASDAQ: NVDA) saw shares rally over 4% after leadership confirmed that hyperscale cloud providers—including Microsoft, Meta, and Alphabet—have expanded their capital deployment for Blackwell AI accelerator architectures. Analysts project datacenter revenues will maintain exceptional gross margins above 75% through the upcoming fiscal year.",
         "category": "Technology",
-        "source": "Bloomberg Terminal",
-        "source_badge": "Bloomberg",
+        "source": "CNBC",
+        "source_badge": "CNBC",
         "time_ago": "2 hours ago",
         "read_time": "5 min read",
         "sentiment": "Bullish",
@@ -1399,8 +1399,8 @@ FINANCIAL_NEWS = [
         "summary": "Digital asset markets experience a broad-based rally as institutional allocations hit new monthly highs ahead of global rate cut cycles.",
         "content": "NEW YORK — Bitcoin climbed past $64,800 today backed by renewed spot ETF inflows from institutional custody managers. Major investment houses recorded cumulative net purchases of 12,400 BTC over 48 hours. Altcoins also benefited, with Ethereum clearing $3,480 and Solana leaping 5.7% to $154.60.",
         "category": "Crypto",
-        "source": "Bloomberg Markets",
-        "source_badge": "Bloomberg",
+        "source": "CoinDesk",
+        "source_badge": "CoinDesk",
         "time_ago": "3 hours ago",
         "read_time": "3 min read",
         "sentiment": "Bullish",
@@ -1413,7 +1413,7 @@ FINANCIAL_NEWS = [
         "summary": "Wall Street responds favorably to updated autonomous vehicle manufacturing timeline and proprietary end-to-end neural network driving demonstrations.",
         "content": "AUSTIN, Texas — Tesla Inc. (NASDAQ: TSLA) shares gained 6.2% following the detailed rollout strategy for its driverless ride-hailing app in Texas and California. Management reiterated targets for volume Cybercab production beginning in 2026 with vehicle cost estimates under $30,000.",
         "category": "Automotive",
-        "source": "CNBC International",
+        "source": "CNBC",
         "source_badge": "CNBC",
         "time_ago": "4 hours ago",
         "read_time": "4 min read",
@@ -1427,8 +1427,8 @@ FINANCIAL_NEWS = [
         "summary": "Bullion prices touch $2,657 an ounce as investors seek structural diversification against sovereign debt expansion and currency realignments.",
         "content": "LONDON — Gold sustained record-high trading levels in COMEX and London OTC settlement sessions today. Official central bank buying led by emerging market monetary authorities accounted for over 480 metric tonnes of physical gold bullion purchases year-to-date, according to the World Gold Council.",
         "category": "Commodities",
-        "source": "Financial Times",
-        "source_badge": "FT",
+        "source": "MarketWatch",
+        "source_badge": "MarketWatch",
         "time_ago": "5 hours ago",
         "read_time": "3 min read",
         "sentiment": "Bullish",
@@ -1707,7 +1707,7 @@ for _sym, _a in ASSETS.items():
 
 
 # =====================================================================
-# BLOOMBERG & SAXOTRADERGO INSTITUTIONAL TERMINAL SERVICE
+# PESAMARKETS PRO INSTITUTIONAL TERMINAL SERVICE
 # =====================================================================
 
 CENTRAL_BANK_RATES = [
@@ -1753,9 +1753,9 @@ SOVEREIGN_YIELD_CURVES = {
 
 def get_terminal_data(symbol):
     """
-    Returns an information-dense institutional payload modeled after
-    Bloomberg Terminal (FA, DES, ECO, YCRV) and SaxoTraderGO (Depth L2,
-    Technicals, Client Sentiment, Block Tape).
+    Returns an information-dense institutional payload featuring
+    Financial Analysis (FA), Economic Calendar (ECO), Yield Curves (YCRV),
+    Level 2 Market Depth, Technical Indicators, Client Sentiment, and Block Tape.
     """
     symbol_clean = symbol.upper()
     asset = ASSETS.get(symbol_clean, ASSETS.get("SCOM"))
@@ -1838,7 +1838,7 @@ def get_terminal_data(symbol):
         "vwap": vwap
     }
 
-    # 2. Bloomberg Valuation & Financial Statements (FA / DES)
+    # 2. Fundamental Valuation & Financial Statements (FA / DES)
     pe_raw = asset.get("pe_ratio")
     try:
         pe_val = float(pe_raw) if pe_raw not in [None, "N/A", ""] else None
@@ -1916,11 +1916,11 @@ def get_terminal_data(symbol):
             "shares_out": "24.55B" if symbol_clean == "NVDA" else ("15.12B" if symbol_clean == "AAPL" else ("40.06B" if symbol_clean == "SCOM" else "3.77B"))
         }
 
-    # 3. SaxoTraderGO Technical Scanner & Client Sentiment
+    # 3. Technical Scanner & Client Sentiment
     rsi_val = 68.4 if symbol_clean in ["NVDA", "BTC", "GOLD"] else (58.2 if symbol_clean == "SCOM" else 52.8)
     rsi_status = "Overbought Momentum" if rsi_val > 70 else ("Bullish Expansion" if rsi_val > 55 else "Neutral")
     
-    technicals_saxo = {
+    technicals = {
         "rsi_14": rsi_val,
         "rsi_status": rsi_status,
         "macd": {
@@ -2008,7 +2008,7 @@ def get_terminal_data(symbol):
         "asset": asset,
         "level2": level2,
         "valuation_fa": fa,
-        "technicals_saxo": technicals_saxo,
+        "technicals": technicals,
         "block_data": block_data,
         "correlations": correlations,
         "central_banks": CENTRAL_BANK_RATES,
