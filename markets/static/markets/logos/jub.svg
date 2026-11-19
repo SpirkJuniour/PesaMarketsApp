@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <rect width="200" height="200" rx="36" fill="#A6192E"/>
+  <circle cx="100" cy="80" r="32" fill="none" stroke="#FFFFFF" stroke-width="5"/>
+  <polygon points="100,60 115,80 100,95 85,80" fill="#FFD700"/>
+  <text x="100" y="145" font-family="'Georgia', serif" font-size="20" font-weight="bold" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">JUBILEE</text>
+  <text x="100" y="162" font-family="'Arial', sans-serif" font-size="9" font-weight="600" fill="#FFD700" text-anchor="middle" letter-spacing="2">HOLDINGS</text>
+</svg>

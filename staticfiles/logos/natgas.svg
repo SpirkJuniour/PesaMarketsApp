@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <radialGradient id="ngBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#082b49"/>
+      <stop offset="100%" stop-color="#02101c"/>
+    </radialGradient>
+    <linearGradient id="gasFlame" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#0066ff"/>
+      <stop offset="50%" stop-color="#00d4ff"/>
+      <stop offset="100%" stop-color="#ffffff"/>
+    </linearGradient>
+    <linearGradient id="innerFlame" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#00f2fe"/>
+      <stop offset="100%" stop-color="#4facfe"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#ngBg)" stroke="#00d4ff" stroke-width="2.5"/>
+  <circle cx="60" cy="60" r="49" fill="none" stroke="#0066ff" stroke-width="1" stroke-dasharray="2,2"/>
+  <!-- Clean Natural Gas Flame -->
+  <path d="M60 24 C68 38 78 48 78 62 C78 74 70 82 60 82 C50 82 42 74 42 62 C42 48 52 38 60 24 Z" fill="url(#gasFlame)"/>
+  <path d="M60 42 C64 50 70 56 70 65 C70 72 65 77 60 77 C55 77 50 72 50 65 C50 56 56 50 60 42 Z" fill="url(#innerFlame)"/>
+  <circle cx="60" cy="66" r="3" fill="#ffffff"/>
+  <text x="60" y="102" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1.5">NATGAS</text>
+</svg>

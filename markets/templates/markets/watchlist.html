@@ -17,11 +17,19 @@
         </div>
 
         <div class="flex items-center gap-3">
+            {% if request.user.is_authenticated %}
             <button @click="addTickerModal = true" 
-                    class="px-4 py-2.5 rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white font-bold text-xs shadow-brand-glow transition-all flex items-center gap-2">
+                    class="px-4 py-2.5 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-bold text-xs shadow-brand-glow transition-all flex items-center gap-2">
                 <i class="fas fa-plus"></i>
                 <span>Add Symbol</span>
             </button>
+            {% else %}
+            <a href="{% url 'login' %}?next={% url 'watchlist' %}" 
+               class="px-4 py-2.5 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-bold text-xs shadow-brand-glow transition-all flex items-center gap-2">
+                <i class="fas fa-right-to-bracket text-xs"></i>
+                <span>Sign in to Add Assets</span>
+            </a>
+            {% endif %}
         </div>
     </div>
 
@@ -34,25 +42,33 @@
             </a>
             <a href="{% url 'watchlist' %}?tab=kenya" 
                class="px-4 py-2 rounded-full text-xs font-bold transition-all {% if active_watchlist_id == 'kenya' %}bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-sm{% else %}text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200 bg-neutral-100 dark:bg-dark-800{% endif %}">
-                <i class="fas fa-flag text-[#FF385C] mr-1"></i> Kenya NSE Bluechips
+                <i class="fas fa-flag text-[#4169E1] mr-1"></i> Kenya NSE Bluechips
             </a>
             <a href="{% url 'watchlist' %}?tab=tech" 
                class="px-4 py-2 rounded-full text-xs font-bold transition-all {% if active_watchlist_id == 'tech' %}bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-sm{% else %}text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200 bg-neutral-100 dark:bg-dark-800{% endif %}">
                 Tech Mega-Caps
             </a>
-            <a href="{% url 'watchlist' %}?tab=crypto" 
-               class="px-4 py-2 rounded-full text-xs font-bold transition-all {% if active_watchlist_id == 'crypto' %}bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-sm{% else %}text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200 bg-neutral-100 dark:bg-dark-800{% endif %}">
-                Crypto Giants
+            <a href="{% url 'watchlist' %}?tab=tbills" 
+               class="px-4 py-2 rounded-full text-xs font-bold transition-all {% if active_watchlist_id == 'tbills' %}bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-sm{% else %}text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200 bg-neutral-100 dark:bg-dark-800{% endif %}">
+                <i class="fas fa-file-invoice-dollar mr-1"></i> Treasury Bills
+            </a>
+            <a href="{% url 'watchlist' %}?tab=bonds" 
+               class="px-4 py-2 rounded-full text-xs font-bold transition-all {% if active_watchlist_id == 'bonds' %}bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-sm{% else %}text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200 bg-neutral-100 dark:bg-dark-800{% endif %}">
+                <i class="fas fa-landmark mr-1"></i> Sovereign Bonds
+            </a>
+            <a href="{% url 'watchlist' %}?tab=commodities" 
+               class="px-4 py-2 rounded-full text-xs font-bold transition-all {% if active_watchlist_id == 'commodities' %}bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-sm{% else %}text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200 bg-neutral-100 dark:bg-dark-800{% endif %}">
+                <i class="fas fa-cubes-stacked mr-1"></i> Commodities & Energy
             </a>
         </div>
 
         <!-- Table / Cards View Switcher -->
         <div class="hidden sm:flex bg-neutral-100 dark:bg-dark-800 p-1 rounded-full border border-neutral-200 dark:border-dark-700">
-            <button @click="viewMode = 'cards'" :class="viewMode === 'cards' ? 'bg-white dark:bg-dark-900 text-[#FF385C] font-bold shadow-2xs' : 'text-neutral-400'" class="px-3 py-1.5 rounded-full text-xs transition-colors flex items-center gap-1.5">
+            <button @click="viewMode = 'cards'" :class="viewMode === 'cards' ? 'bg-white dark:bg-dark-900 text-[#4169E1] font-bold shadow-2xs' : 'text-neutral-400'" class="px-3 py-1.5 rounded-full text-xs transition-colors flex items-center gap-1.5">
                 <i class="fas fa-grid-2 fa-th-large"></i>
                 <span>Cards</span>
             </button>
-            <button @click="viewMode = 'table'" :class="viewMode === 'table' ? 'bg-white dark:bg-dark-900 text-[#FF385C] font-bold shadow-2xs' : 'text-neutral-400'" class="px-3 py-1.5 rounded-full text-xs transition-colors flex items-center gap-1.5">
+            <button @click="viewMode = 'table'" :class="viewMode === 'table' ? 'bg-white dark:bg-dark-900 text-[#4169E1] font-bold shadow-2xs' : 'text-neutral-400'" class="px-3 py-1.5 rounded-full text-xs transition-colors flex items-center gap-1.5">
                 <i class="fas fa-list"></i>
                 <span>Table</span>
             </button>
@@ -62,13 +78,14 @@
     <!-- ========================================== -->
     <!-- 2. WATCHLIST STATS SUMMARY                 -->
     <!-- ========================================== -->
+    {% if watchlist_assets %}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm flex items-center justify-between">
             <div>
                 <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Total Tracked Assets</span>
                 <span class="block text-xl font-black text-neutral-900 dark:text-white mt-0.5">{{ watchlist_assets|length }} Assets</span>
             </div>
-            <div class="w-10 h-10 rounded-full bg-[#FFF0F3] text-[#FF385C] flex items-center justify-center font-bold text-sm shadow-2xs">
+            <div class="w-10 h-10 rounded-full bg-[#EBF0FF] text-[#4169E1] flex items-center justify-center font-bold text-sm shadow-2xs">
                 <i class="fas fa-heart"></i>
             </div>
         </div>
@@ -86,13 +103,38 @@
         <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm flex items-center justify-between">
             <div>
                 <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Market Breadth</span>
-                <span class="block text-xl font-black text-neutral-900 dark:text-white mt-0.5"><span class="text-emerald-600">5</span> Up &bull; <span class="text-rose-600">1</span> Down</span>
+                <span class="block text-xl font-black text-neutral-900 dark:text-white mt-0.5"><span class="text-emerald-600">5</span> Up &bull; <span class="text-rose-600 dark:text-rose-400">1</span> Down</span>
             </div>
             <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm shadow-2xs">
                 <i class="fas fa-arrows-up-down"></i>
             </div>
         </div>
     </div>
+    {% endif %}
+
+    {% if not request.user.is_authenticated and active_watchlist_id == 'default' %}
+    <!-- Guest Unauthenticated Wishlist Prompt -->
+    <div class="py-16 px-6 text-center bg-white dark:bg-dark-850 rounded-3xl border border-[#EBEBEB] dark:border-neutral-800 shadow-sm max-w-xl mx-auto my-8">
+        <div class="w-16 h-16 rounded-full bg-[#EBF0FF] dark:bg-[#4169E1]/15 text-[#4169E1] mx-auto flex items-center justify-center text-2xl mb-4 shadow-2xs">
+            <i class="fas fa-user-lock"></i>
+        </div>
+        <h3 class="text-xl font-black text-neutral-900 dark:text-white">Your Wishlist is Empty</h3>
+        <p class="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 mt-2 max-w-md mx-auto leading-relaxed">
+            You don't have an active account session. Sign in to your account to save assets, build custom market tracking lists, and monitor real-time price alerts.
+        </p>
+        <div class="flex items-center justify-center gap-3 mt-6">
+            <a href="{% url 'login' %}?next={% url 'watchlist' %}" 
+               class="px-6 py-2.5 rounded-full text-xs font-bold text-white bg-[#4169E1] hover:bg-[#3457C9] transition-all shadow-brand-glow flex items-center gap-2">
+                <i class="fas fa-right-to-bracket text-xs"></i>
+                <span>Sign in to View Wishlist</span>
+            </a>
+            <a href="{% url 'register' %}" 
+               class="px-6 py-2.5 rounded-full text-xs font-bold text-neutral-700 dark:text-neutral-200 bg-neutral-100 dark:bg-dark-800 hover:bg-neutral-200 dark:hover:bg-dark-750 transition-colors">
+                Create Free Account
+            </a>
+        </div>
+    </div>
+    {% else %}
 
     <!-- ========================================== -->
     <!-- 3. CARDS VIEW (Listing Cards Style)        -->
@@ -113,7 +155,7 @@
 
                     <!-- Heart Wishlist Toggle Button (Active in Wishlist) -->
                     <button @click.prevent="removeSymbol('{{ asset.symbol }}')" 
-                            class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 dark:bg-dark-900/80 backdrop-blur-sm hover:bg-[#FFF0F3] text-[#FF385C] flex items-center justify-center transition-colors shadow-sm"
+                            class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 dark:bg-dark-900/80 backdrop-blur-sm hover:bg-[#EBF0FF] text-[#4169E1] flex items-center justify-center transition-colors shadow-sm"
                             title="Remove from wishlist">
                         <i class="fas fa-heart text-sm"></i>
                     </button>
@@ -134,7 +176,7 @@
                         </div>
                     </div>
 
-                    <a href="{% url 'asset_detail' asset.symbol %}" class="block font-black text-base text-neutral-900 dark:text-white group-hover:text-[#FF385C] transition-colors truncate">
+                    <a href="{% url 'asset_detail' asset.symbol %}" class="block font-black text-base text-neutral-900 dark:text-white group-hover:text-[#4169E1] transition-colors truncate">
                         {{ asset.symbol }}
                     </a>
                     <span class="text-xs text-neutral-500 dark:text-neutral-400 block truncate">{{ asset.name }}</span>
@@ -168,7 +210,7 @@
                     <a href="{% url 'asset_detail' asset.symbol %}" class="px-3 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-neutral-800 dark:text-neutral-200 font-bold text-xs hover:bg-neutral-200 transition-colors">
                         View
                     </a>
-                    <a href="{% url 'trade' %}?symbol={{ asset.symbol }}" class="px-3.5 py-1.5 rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white font-bold text-xs shadow-brand-glow transition-all">
+                    <a href="{% url 'trade' %}?symbol={{ asset.symbol }}" class="px-3.5 py-1.5 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-bold text-xs shadow-brand-glow transition-all">
                         Trade
                     </a>
                 </div>
@@ -179,7 +221,7 @@
             <i class="far fa-heart text-3xl text-neutral-400 mb-3 block"></i>
             <h3 class="text-base font-bold text-neutral-900 dark:text-white">This wishlist is currently empty.</h3>
             <p class="text-xs text-neutral-400 mt-1">Add assets to start tracking their performance.</p>
-            <button @click="addTickerModal = true" class="mt-4 px-5 py-2.5 bg-[#FF385C] hover:bg-[#E00B41] text-white font-bold rounded-full text-xs shadow-brand-glow">Add First Asset</button>
+            <button @click="addTickerModal = true" class="mt-4 px-5 py-2.5 bg-[#4169E1] hover:bg-[#3457C9] text-white font-bold rounded-full text-xs shadow-brand-glow">Add First Asset</button>
         </div>
         {% endfor %}
     </div>
@@ -211,7 +253,7 @@
                                     <img src="{{ asset.logo }}" alt="{{ asset.name }}" class="w-full h-full object-contain">
                                 </div>
                                 <div>
-                                    <span class="font-extrabold text-sm text-neutral-900 dark:text-white group-hover:text-[#FF385C] transition-colors block">{{ asset.symbol }}</span>
+                                    <span class="font-extrabold text-sm text-neutral-900 dark:text-white group-hover:text-[#4169E1] transition-colors block">{{ asset.symbol }}</span>
                                     <span class="text-neutral-400 text-[11px] block truncate max-w-[150px]">{{ asset.name }}</span>
                                 </div>
                             </a>
@@ -249,7 +291,7 @@
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-2">
-                                <a href="{% url 'trade' %}?symbol={{ asset.symbol }}" class="px-3.5 py-1.5 rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white font-bold text-xs transition-colors shadow-brand-glow">
+                                <a href="{% url 'trade' %}?symbol={{ asset.symbol }}" class="px-3.5 py-1.5 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-bold text-xs transition-colors shadow-brand-glow">
                                     Trade
                                 </a>
                                 <button @click="removeSymbol('{{ asset.symbol }}')" class="p-1.5 text-neutral-400 hover:text-rose-500 transition-colors" title="Remove from list">
@@ -263,7 +305,7 @@
                         <td colspan="8" class="text-center py-12 text-neutral-400">
                             <i class="far fa-heart text-2xl mb-2"></i>
                             <p class="font-medium">This wishlist is currently empty.</p>
-                            <button @click="addTickerModal = true" class="mt-3 px-4 py-2 bg-[#FF385C] text-white font-bold rounded-full text-xs shadow-brand-glow">Add First Asset</button>
+                            <button @click="addTickerModal = true" class="mt-3 px-4 py-2 bg-[#4169E1] text-white font-bold rounded-full text-xs shadow-brand-glow">Add First Asset</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -271,12 +313,13 @@
             </table>
         </div>
     </div>
+    {% endif %}
 
     <!-- ========================================== -->
     <!-- 5. ADD TICKER MODAL                        -->
     <!-- ========================================== -->
     <div x-show="addTickerModal" x-cloak
-         class="fixed inset-0 z-50 bg-neutral-900/60 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+         class="fixed inset-0 z-50 bg-neutral-900/60 dark:bg-[#18181B]/70 backdrop-blur-sm flex items-center justify-center p-4">
         <div @click.outside="addTickerModal = false"
              class="w-full max-w-md bg-white dark:bg-dark-850 rounded-3xl shadow-card-hover border border-[#DDDDDD] dark:border-dark-750 p-6">
             <div class="flex items-center justify-between mb-4">
@@ -300,7 +343,7 @@
                             <span class="text-[11px] text-neutral-400 block truncate max-w-[140px]">{{ a.name }}</span>
                         </div>
                     </div>
-                    <button @click="addSymbol('{{ a.symbol }}')" class="px-3.5 py-1.5 rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white font-bold text-xs shadow-brand-glow">
+                    <button @click="addSymbol('{{ a.symbol }}')" class="px-3.5 py-1.5 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-bold text-xs shadow-brand-glow">
                         Add
                     </button>
                 </div>
@@ -320,7 +363,10 @@
                 try {
                     const res = await fetch('/api/watchlist/toggle/', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}'
+                        },
                         body: JSON.stringify({ symbol: sym, watchlist: '{{ active_watchlist_id }}' })
                     });
                     const d = await res.json();
@@ -334,7 +380,10 @@
                 try {
                     const res = await fetch('/api/watchlist/toggle/', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}'
+                        },
                         body: JSON.stringify({ symbol: sym, watchlist: '{{ active_watchlist_id }}' })
                     });
                     const d = await res.json();

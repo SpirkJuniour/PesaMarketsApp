@@ -1,21 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" class="dark" x-data="themeManager()" :class="{ 'dark': darkMode }">
+<html lang="en" class="dark" x-data="themeManager()">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="dark light">
+    <meta name="color-scheme" content="dark">
     <title>{% if page_title %}{{ page_title }} | {% endif %}PesaMarkets - Financial Intelligence & Trading</title>
     
-    <!-- Instant Anti-Flicker Theme Initializer -->
+    <!-- Enforce Permanent Institutional Dark Mode -->
     <script>
         (function() {
-            const saved = localStorage.getItem('pesa_theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (saved === 'light') {
-                document.documentElement.classList.remove('dark');
-            } else if (saved === 'dark' || prefersDark || !saved) {
-                document.documentElement.classList.add('dark');
-            }
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('pesa_theme', 'dark');
         })();
     </script>
     
@@ -42,39 +37,53 @@
                         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
                     },
-                    colors: {
+                     colors: {
+                        primary: {
+                            DEFAULT: '#4169E1',
+                            hover: '#3457C9',
+                            50: '#EBF0FF',
+                            100: '#D6E0FF',
+                            200: '#B3C7FF',
+                            300: '#8AABFF',
+                            400: '#6188F0',
+                            500: '#4169E1',
+                            600: '#3457C9',
+                            700: '#2B3D8F',
+                            800: '#1E3080',
+                            900: '#162470',
+                        },
                         brand: {
-                            50: '#fff1f2',
-                            100: '#ffe4e6',
-                            200: '#fecdd3',
-                            300: '#fda4af',
-                            400: '#fb7185',
-                            500: '#FF385C',
-                            600: '#E00B41',
-                            700: '#BE123C',
-                            800: '#9F1239',
-                            900: '#881337',
-                            DEFAULT: '#FF385C',
-                            hover: '#E00B41',
+                            50: '#EBF0FF',
+                            100: '#D6E0FF',
+                            200: '#B3C7FF',
+                            300: '#8AABFF',
+                            400: '#6188F0',
+                            500: '#4169E1',
+                            600: '#3457C9',
+                            700: '#2B3D8F',
+                            800: '#1E3080',
+                            900: '#162470',
+                            DEFAULT: '#4169E1',
+                            hover: '#3457C9',
                         },
                         coral: {
-                            50: '#fff1f2',
-                            100: '#ffe4e6',
-                            200: '#fecdd3',
-                            500: '#FF385C',
-                            600: '#E00B41',
+                            50: '#EBF0FF',
+                            100: '#D6E0FF',
+                            200: '#B3C7FF',
+                            500: '#4169E1',
+                            600: '#3457C9',
                         },
                         pesa: {
-                            50: '#fff1f2',
-                            100: '#ffe4e6',
-                            200: '#fecdd3',
-                            300: '#fda4af',
-                            400: '#fb7185',
-                            500: '#FF385C',
-                            600: '#E00B41',
-                            700: '#BE123C',
-                            800: '#9F1239',
-                            900: '#881337',
+                            50: '#EBF0FF',
+                            100: '#D6E0FF',
+                            200: '#B3C7FF',
+                            300: '#8AABFF',
+                            400: '#6188F0',
+                            500: '#4169E1',
+                            600: '#3457C9',
+                            700: '#2B3D8F',
+                            800: '#1E3080',
+                            900: '#162470',
                         },
                         neutral: {
                             50: '#F7F7F7',
@@ -91,13 +100,13 @@
                             950: '#000000',
                         },
                         dark: {
-                            950: '#000000',
-                            900: '#000000',
-                            850: '#0c0c0c',
-                            800: '#141414',
-                            750: '#1f1f1f',
-                            700: '#292929',
-                            600: '#3d3d3d',
+                            950: '#0D0D0D',
+                            900: '#121214',
+                            850: '#18181B',
+                            800: '#1E1E22',
+                            750: '#252529',
+                            700: '#2E2E33',
+                            600: '#3D3D42',
                         },
                         slate: {
                             50: '#f9f9f9',
@@ -112,7 +121,7 @@
                             800: '#1c1c1c',
                             850: '#141414',
                             900: '#0a0a0a',
-                            950: '#000000',
+                            950: '#18181B',
                         },
                         up: {
                             light: '#008A05',
@@ -126,10 +135,12 @@
                         }
                     },
                     boxShadow: {
+                        '2xs': '0 1px 1px rgba(0,0,0,0.04)',
+                        'xs': '0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)',
                         'pill': '0 1px 2px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05)',
                         'card': '0 6px 16px rgba(0,0,0,0.08)',
                         'card-hover': '0 12px 28px rgba(0,0,0,0.12)',
-                        'brand-glow': '0 4px 18px -2px rgba(255, 56, 92, 0.35)',
+                        'brand-glow': '0 4px 18px -2px rgba(65, 105, 225, 0.35)',
                     }
                 }
             }
@@ -160,6 +171,24 @@
         .ticker-scroll {
             -ms-overflow-style: none;
             scrollbar-width: none;
+        }
+
+        .custom-sidebar-scroll::-webkit-scrollbar,
+        .custom-dock-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-sidebar-scroll::-webkit-scrollbar-track,
+        .custom-dock-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-sidebar-scroll::-webkit-scrollbar-thumb,
+        .custom-dock-scroll::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.2);
+            border-radius: 9999px;
+        }
+        .custom-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+        .custom-dock-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.45);
         }
 
         /* Infinite Marquee Ticker Tape Animation */
@@ -205,20 +234,24 @@
         }
     </style>
 </head>
-<body class="bg-white dark:bg-black text-neutral-800 dark:text-neutral-100 font-sans antialiased selection:bg-[#FF385C] selection:text-white min-h-screen flex flex-col transition-colors duration-200">
+<body class="bg-white dark:bg-[#121214] text-neutral-800 dark:text-neutral-100 font-sans antialiased selection:bg-[#4169E1] selection:text-white min-h-screen flex flex-col transition-colors duration-200">
 
     <!-- Global App State Manager via Alpine.js -->
-    <div class="flex-1 flex flex-col h-screen overflow-hidden" 
+    <div class="min-h-screen flex flex-col relative" 
+         @toast.window="showToast($event.detail)"
+         @open-admin-dashboard.window="adminDashboardOpen = true"
+         @close-admin-dashboard.window="adminDashboardOpen = false"
          x-data="{ 
             sidebarOpen: false, 
             searchOpen: false, 
+            adminDashboardOpen: false,
             searchQuery: '', 
             searchResults: [], 
             searchLoading: false,
             toastMessage: '',
             toastVisible: false,
             activeCurrency: localStorage.getItem('pesa_currency') || 'USD',
-            currencyRates: { 'USD': 1.0, 'KES': 130.0, 'EUR': 0.92, 'GBP': 0.77 },
+            currencyRates: { 'USD': 1.0, 'KES': 130.0, 'EUR': 0.92, 'GBP': 0.77, 'JPY': 152.0 },
             
             showToast(msg) {
                 this.toastMessage = msg;
@@ -238,8 +271,13 @@
                 const converted = usdAmount * rate;
                 const sym = this.activeCurrency === 'USD' ? '$' : 
                             this.activeCurrency === 'KES' ? 'KES ' : 
-                            this.activeCurrency === 'EUR' ? '€' : '£';
-                return sym + converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            this.activeCurrency === 'EUR' ? '€' : 
+                            this.activeCurrency === 'GBP' ? '£' : 
+                            this.activeCurrency === 'JPY' ? '¥' : '$';
+                return sym + converted.toLocaleString(undefined, { 
+                    minimumFractionDigits: this.activeCurrency === 'JPY' ? 0 : 2, 
+                    maximumFractionDigits: this.activeCurrency === 'JPY' ? 0 : 2 
+                });
             },
 
             async performSearch() {
@@ -261,38 +299,40 @@
          }"
          @keydown.window.ctrl.k.prevent="searchOpen = true"
          @keydown.window.meta.k.prevent="searchOpen = true"
-         @keydown.escape="searchOpen = false">
+         @keydown.escape="searchOpen = false"
+         @toast.window="showToast($event.detail)"
+         x-init="window.showToast = (msg) => showToast(msg)">
 
         <!-- ========================================== -->
         <!-- 1. LIVE MARKET INDICES TICKER TAPE RIBBON  -->
         <!-- (Continuous Auto-Scrolling Marquee)        -->
         <!-- ========================================== -->
-        <div class="bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-[#EBEBEB] dark:border-neutral-800 z-40 text-xs py-2 flex items-center select-none overflow-hidden relative">
+        <div class="bg-white/95 dark:bg-[#121214]/95 backdrop-blur-md border-b border-[#EBEBEB] dark:border-neutral-800 z-30 text-xs py-2 flex items-center select-none overflow-hidden relative sticky top-0 md:ml-64">
             
             <!-- Pinned Static Live Badge on Left -->
-            <div class="flex items-center gap-1.5 pl-4 pr-4 py-0.5 bg-white dark:bg-black z-30 flex-shrink-0 border-r border-[#EBEBEB] dark:border-neutral-800 shadow-xs">
-                <span class="w-2 h-2 rounded-full bg-[#FF385C] animate-pulse"></span>
+            <div class="flex items-center gap-1.5 pl-4 pr-4 py-0.5 bg-white dark:bg-[#121214] z-30 flex-shrink-0 border-r border-[#EBEBEB] dark:border-neutral-800 shadow-xs">
+                <span class="w-2 h-2 rounded-full bg-[#4169E1] animate-pulse"></span>
                 <span class="text-neutral-500 dark:text-neutral-400 font-extrabold uppercase tracking-wider text-[10px]">MARKETS</span>
             </div>
             
             <!-- Continuous Marquee Track -->
             <div class="flex-1 overflow-hidden relative">
                 <!-- Right Edge Fade Gradient -->
-                <div class="absolute right-0 inset-y-0 w-12 bg-gradient-to-l from-white dark:from-black to-transparent pointer-events-none z-20"></div>
+                <div class="absolute right-0 inset-y-0 w-12 bg-gradient-to-l from-white dark:from-[#121214] to-transparent pointer-events-none z-20"></div>
                 <!-- Left Edge Fade Gradient -->
-                <div class="absolute left-0 inset-y-0 w-8 bg-gradient-to-r from-white dark:from-black to-transparent pointer-events-none z-20"></div>
+                <div class="absolute left-0 inset-y-0 w-8 bg-gradient-to-r from-white dark:from-[#121214] to-transparent pointer-events-none z-20"></div>
 
                 <div class="ticker-marquee-wrapper flex items-center cursor-pointer">
                     <!-- Track Instance 1 -->
                     <div class="flex items-center gap-5 pr-5 flex-shrink-0">
                         {% if indices %}
                             {% for idx in indices %}
-                            <a href="{% if idx.symbol == '^NSE20' %}{% url 'markets' %}?category=nse{% elif idx.symbol == 'BTC-USD' %}{% url 'asset_detail' 'BTC' %}{% elif idx.symbol == 'ETH-USD' %}{% url 'asset_detail' 'ETH' %}{% elif idx.symbol == 'SCOM' %}{% url 'asset_detail' 'SCOM' %}{% elif idx.symbol == 'NVDA' %}{% url 'asset_detail' 'NVDA' %}{% elif idx.symbol == 'AAPL' %}{% url 'asset_detail' 'AAPL' %}{% elif idx.symbol == 'SOL' %}{% url 'asset_detail' 'SOL' %}{% else %}{% url 'markets' %}{% endif %}" 
+                            <a href="{% if idx.symbol == '^NSE20' %}{% url 'markets' %}?category=kenya{% elif idx.symbol == '^FTSE' %}{% url 'markets' %}?category=uk{% elif idx.symbol == '^N225' %}{% url 'markets' %}?category=japan{% elif idx.symbol == 'US10Y' %}{% url 'asset_detail' 'UST10Y' %}{% elif idx.symbol == 'UK10Y' %}{% url 'asset_detail' 'UKG10Y' %}{% elif idx.symbol == 'JP10Y' %}{% url 'asset_detail' 'JGB10Y' %}{% elif idx.symbol == 'KE91' %}{% url 'asset_detail' 'T91' %}{% elif idx.symbol == 'GC=F' %}{% url 'asset_detail' 'GOLD' %}{% else %}{% url 'markets' %}{% endif %}" 
                                class="flex items-center gap-2 hover:bg-neutral-100 dark:hover:bg-dark-800/80 px-2.5 py-1 rounded-full transition-all flex-shrink-0 group">
                                 {% if idx.logo %}
                                 <img src="{{ idx.logo }}" alt="{{ idx.name }}" class="w-4 h-4 object-contain rounded-full bg-white p-0.5 border border-neutral-200">
                                 {% endif %}
-                                <span class="font-bold text-neutral-800 dark:text-neutral-200 group-hover:text-[#FF385C] transition-colors text-xs">{{ idx.name }}</span>
+                                <span class="font-bold text-neutral-800 dark:text-neutral-200 group-hover:text-[#4169E1] transition-colors text-xs">{{ idx.name }}</span>
                                 <span class="font-mono text-neutral-900 dark:text-white font-medium text-xs">{{ idx.price|floatformat:2 }}</span>
                                 <span class="inline-flex items-center font-bold text-[10px] {% if idx.is_positive %}text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40{% else %}text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40{% endif %} px-1.5 py-0.5 rounded-full">
                                     {% if idx.is_positive %}+{% endif %}{{ idx.change_percent }}%
@@ -306,12 +346,12 @@
                     <div class="flex items-center gap-5 pr-5 flex-shrink-0" aria-hidden="true">
                         {% if indices %}
                             {% for idx in indices %}
-                            <a href="{% if idx.symbol == '^NSE20' %}{% url 'markets' %}?category=nse{% elif idx.symbol == 'BTC-USD' %}{% url 'asset_detail' 'BTC' %}{% elif idx.symbol == 'ETH-USD' %}{% url 'asset_detail' 'ETH' %}{% elif idx.symbol == 'SCOM' %}{% url 'asset_detail' 'SCOM' %}{% elif idx.symbol == 'NVDA' %}{% url 'asset_detail' 'NVDA' %}{% elif idx.symbol == 'AAPL' %}{% url 'asset_detail' 'AAPL' %}{% elif idx.symbol == 'SOL' %}{% url 'asset_detail' 'SOL' %}{% else %}{% url 'markets' %}{% endif %}" 
+                            <a href="{% if idx.symbol == '^NSE20' %}{% url 'markets' %}?category=kenya{% elif idx.symbol == '^FTSE' %}{% url 'markets' %}?category=uk{% elif idx.symbol == '^N225' %}{% url 'markets' %}?category=japan{% elif idx.symbol == 'US10Y' %}{% url 'asset_detail' 'UST10Y' %}{% elif idx.symbol == 'UK10Y' %}{% url 'asset_detail' 'UKG10Y' %}{% elif idx.symbol == 'JP10Y' %}{% url 'asset_detail' 'JGB10Y' %}{% elif idx.symbol == 'KE91' %}{% url 'asset_detail' 'T91' %}{% elif idx.symbol == 'GC=F' %}{% url 'asset_detail' 'GOLD' %}{% else %}{% url 'markets' %}{% endif %}" 
                                class="flex items-center gap-2 hover:bg-neutral-100 dark:hover:bg-dark-800/80 px-2.5 py-1 rounded-full transition-all flex-shrink-0 group">
                                 {% if idx.logo %}
                                 <img src="{{ idx.logo }}" alt="{{ idx.name }}" class="w-4 h-4 object-contain rounded-full bg-white p-0.5 border border-neutral-200">
                                 {% endif %}
-                                <span class="font-bold text-neutral-800 dark:text-neutral-200 group-hover:text-[#FF385C] transition-colors text-xs">{{ idx.name }}</span>
+                                <span class="font-bold text-neutral-800 dark:text-neutral-200 group-hover:text-[#4169E1] transition-colors text-xs">{{ idx.name }}</span>
                                 <span class="font-mono text-neutral-900 dark:text-white font-medium text-xs">{{ idx.price|floatformat:2 }}</span>
                                 <span class="inline-flex items-center font-bold text-[10px] {% if idx.is_positive %}text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40{% else %}text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40{% endif %} px-1.5 py-0.5 rounded-full">
                                     {% if idx.is_positive %}+{% endif %}{{ idx.change_percent }}%
@@ -325,26 +365,28 @@
 
         </div>
 
-        <div class="flex flex-1 overflow-hidden relative">
+        <div class="flex flex-1 min-h-screen relative">
             
-            <!-- ========================================== -->
-            <!-- 2. DESKTOP & TABLET SIDEBAR NAVIGATION     -->
-            <!-- ========================================== -->
+            <!-- Mobile Sidebar Backdrop -->
+            <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false"
+                 class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm md:hidden"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"></div>
+
             <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" 
-                   class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-black border-r border-[#EBEBEB] dark:border-neutral-800 transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0 flex flex-col flex-shrink-0">
+                   class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-[#121214] border-r border-[#EBEBEB] dark:border-neutral-800 transition-transform duration-300 ease-in-out md:translate-x-0 flex flex-col flex-shrink-0">
                 
                 <!-- Logo & Brand -->
-                <div class="h-20 flex items-center justify-between px-6 border-b border-[#EBEBEB] dark:border-neutral-800">
-                    <a href="{% url 'home' %}" class="flex items-center gap-3 group">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#FF385C] to-[#E61E4D] flex items-center justify-center text-white shadow-brand-glow group-hover:scale-105 transition-transform">
-                            <i class="fas fa-chart-line text-sm"></i>
-                        </div>
-                        <div>
-                            <span class="text-lg font-extrabold tracking-tight text-neutral-900 dark:text-white flex items-center">
-                                Pesa<span class="text-[#FF385C]">Markets</span>
-                            </span>
-                            <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 -mt-1">Financial Marketplace</span>
-                        </div>
+                <div class="h-20 flex items-center justify-between px-6 border-b border-[#EBEBEB] dark:border-neutral-800 flex-shrink-0">
+                    <a href="{% url 'home' %}" class="flex flex-col justify-center group">
+                        <span class="text-2xl font-black tracking-tight text-neutral-900 dark:text-white flex items-center">
+                            Pesa<span class="text-[#4169E1]">Markets</span>
+                        </span>
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 -mt-0.5">Financial Marketplace</span>
                     </a>
                     
                     <button @click="sidebarOpen = false" class="md:hidden text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200">
@@ -353,74 +395,92 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <nav class="flex-1 overflow-y-auto px-4 py-5 space-y-1.5">
+                <nav class="flex-1 overflow-y-auto px-4 py-5 space-y-1.5 custom-sidebar-scroll">
                     <div class="px-4 pb-2 text-[11px] font-bold uppercase tracking-wider text-neutral-400">Main Menu</div>
                     
                     <a href="{% url 'home' %}" 
-                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'home' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'home' %}bg-[#EBF0FF] text-[#4169E1] dark:bg-[#4169E1]/15 dark:text-[#4169E1] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
                         <div class="w-5 text-center"><i class="fas fa-compass"></i></div>
                         <span>Explore</span>
                     </a>
 
                     <a href="{% url 'markets' %}" 
-                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'markets' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'markets' %}bg-[#EBF0FF] text-[#4169E1] dark:bg-[#4169E1]/15 dark:text-[#4169E1] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
                         <div class="w-5 text-center"><i class="fas fa-layer-group"></i></div>
                         <span>Markets & Listings</span>
                     </a>
 
                     <a href="{% url 'watchlist' %}" 
-                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'watchlist' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'watchlist' %}bg-[#EBF0FF] text-[#4169E1] dark:bg-[#4169E1]/15 dark:text-[#4169E1] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
                         <div class="w-5 text-center"><i class="far fa-heart"></i></div>
                         <span>Wishlists</span>
                     </a>
 
                     <a href="{% url 'portfolio' %}" 
-                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'portfolio' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'portfolio' %}bg-[#EBF0FF] text-[#4169E1] dark:bg-[#4169E1]/15 dark:text-[#4169E1] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
                         <div class="w-5 text-center"><i class="fas fa-wallet"></i></div>
                         <span>My Portfolio</span>
                     </a>
 
                     <a href="{% url 'trade' %}" 
-                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'trade' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'trade' %}bg-[#EBF0FF] text-[#4169E1] dark:bg-[#4169E1]/15 dark:text-[#4169E1] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
                         <div class="w-5 text-center"><i class="fas fa-arrow-right-arrow-left"></i></div>
                         <span>Trade Desk</span>
                     </a>
 
                     <a href="{% url 'bonds' %}" 
-                       class="flex items-center justify-between px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'bonds' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                       class="flex items-center justify-between px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'bonds' %}bg-[#EBF0FF] text-[#4169E1] dark:bg-[#4169E1]/15 dark:text-[#4169E1] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
                         <span class="flex items-center gap-3.5">
-                            <div class="w-5 text-center"><i class="fas fa-landmark text-[#FF385C]"></i></div>
+                            <div class="w-5 text-center"><i class="fas fa-landmark text-[#4169E1]"></i></div>
                             <span>Bonds & T-Bills</span>
                         </span>
                         <span class="text-[9px] font-extrabold uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full">17.8%</span>
                     </a>
 
                     <a href="{% url 'news' %}" 
-                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'news' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'news' %}bg-[#EBF0FF] text-[#4169E1] dark:bg-[#4169E1]/15 dark:text-[#4169E1] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
                         <div class="w-5 text-center"><i class="far fa-newspaper"></i></div>
                         <span>Market Insights</span>
+                    </a>
+
+                    <a href="{% url 'earnings' %}" 
+                       class="flex items-center justify-between px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'earnings' %}bg-[#EBF0FF] text-[#4169E1] dark:bg-[#4169E1]/15 dark:text-[#4169E1] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                        <span class="flex items-center gap-3.5">
+                            <div class="w-5 text-center"><i class="fas fa-file-invoice-dollar text-[#4169E1]"></i></div>
+                            <span>Earnings & Filings</span>
+                        </span>
+                        <span class="text-[9px] font-black uppercase bg-sky-500/15 text-sky-600 dark:text-sky-400 px-2 py-0.5 rounded-full">SEC</span>
+                    </a>
+
+                    <a href="{% url 'events_calendar' %}" 
+                       class="flex items-center justify-between px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'events' %}bg-[#EBF0FF] text-[#4169E1] dark:bg-[#4169E1]/15 dark:text-[#4169E1] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                        <span class="flex items-center gap-3.5">
+                            <div class="w-5 text-center"><i class="far fa-calendar-check text-[#4169E1]"></i></div>
+                            <span>Events & Calendar</span>
+                        </span>
+                        <span class="text-[9px] font-extrabold uppercase bg-amber-500/15 text-amber-500 px-2 py-0.5 rounded-full">LIVE</span>
                     </a>
 
                     <div class="pt-5 px-4 pb-2 text-[11px] font-bold uppercase tracking-wider text-neutral-400">Tools & Account</div>
 
                     <!-- Pro Terminal -->
                     <a href="{% url 'terminal' %}" 
-                       class="w-full flex items-center justify-between px-4 py-2.5 rounded-full text-xs font-bold transition-all {% if active_tab == 'terminal' %}bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-md{% else %}bg-neutral-100 dark:bg-dark-800 text-neutral-800 dark:text-neutral-200 hover:border-[#FF385C]/40 hover:text-[#FF385C]{% endif %} border border-[#DDDDDD] dark:border-neutral-800">
+                       class="w-full flex items-center justify-between px-4 py-2.5 rounded-full text-xs font-bold transition-all {% if active_tab == 'terminal' %}bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-md{% else %}bg-neutral-100 dark:bg-dark-800 text-neutral-800 dark:text-neutral-200 hover:border-[#4169E1]/40 hover:text-[#4169E1]{% endif %} border border-[#DDDDDD] dark:border-neutral-800">
                         <span class="flex items-center gap-2.5">
-                            <i class="fas fa-terminal text-[#FF385C] text-xs"></i>
+                            <i class="fas fa-terminal text-[#4169E1] text-xs"></i>
                             <span>Terminal Pro</span>
                         </span>
-                        <span class="text-[9px] font-black bg-[#FF385C] text-white px-2 py-0.5 rounded-full uppercase tracking-wider">PRO</span>
+                        <span class="text-[9px] font-black bg-[#4169E1] text-white px-2 py-0.5 rounded-full uppercase tracking-wider">PRO</span>
                     </a>
 
                     <a href="{% url 'settings' %}" 
-                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'settings' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'settings' %}bg-[#EBF0FF] text-[#4169E1] dark:bg-[#4169E1]/15 dark:text-[#4169E1] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
                         <div class="w-5 text-center"><i class="fas fa-sliders-h"></i></div>
                         <span>Settings</span>
                     </a>
 
                     <a href="{% url 'support' %}" 
-                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'support' %}bg-[#FFF0F3] text-[#FF385C] dark:bg-[#FF385C]/15 dark:text-[#FF385C] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-full font-medium text-sm transition-all {% if active_tab == 'support' %}bg-[#EBF0FF] text-[#4169E1] dark:bg-[#4169E1]/15 dark:text-[#4169E1] font-bold shadow-xs{% else %}text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-dark-800/80{% endif %}">
                         <div class="w-5 text-center"><i class="far fa-circle-question"></i></div>
                         <span>Help Center</span>
                     </a>
@@ -428,39 +488,49 @@
 
                 <!-- Sidebar Footer Widget: Buying Power -->
                 <div class="p-4 border-t border-[#EBEBEB] dark:border-neutral-800">
+                    {% if request.user.is_authenticated %}
                     <div class="bg-neutral-50 dark:bg-dark-850 p-4 rounded-3xl border border-[#DDDDDD] dark:border-neutral-800">
                         <div class="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 mb-1">
                             <span>Buying Power</span>
                             <span class="font-bold text-emerald-600 dark:text-emerald-400">Available</span>
                         </div>
-                        <div class="text-xl font-extrabold font-mono text-neutral-900 dark:text-white mb-3" x-text="formatPrice(5212.17)">
-                            $5,212.17
+                        <div class="text-xl font-extrabold font-mono text-neutral-900 dark:text-white mb-3" x-text="formatPrice({{ request.user.portfolios.first.cash_balance_usd|default:request.user.profile.cash_balance_usd|default:0.0 }})">
+                            ${{ request.user.portfolios.first.cash_balance_usd|default:request.user.profile.cash_balance_usd|default:"0.00" }}
                         </div>
-                        <a href="{% url 'trade' %}" class="block w-full py-2.5 text-center text-xs font-bold text-white bg-[#FF385C] hover:bg-[#E00B41] rounded-full transition-all shadow-brand-glow">
+                        <a href="{% url 'trade' %}" class="block w-full py-2.5 text-center text-xs font-bold text-white bg-[#4169E1] hover:bg-[#3457C9] rounded-full transition-all shadow-brand-glow">
                             <i class="fas fa-plus mr-1"></i> Quick Deposit / Trade
                         </a>
                     </div>
+                    {% else %}
+                    <div class="bg-neutral-50 dark:bg-dark-850 p-4 rounded-3xl border border-[#DDDDDD] dark:border-neutral-800 text-center">
+                        <div class="w-8 h-8 rounded-full bg-[#EBF0FF] dark:bg-[#4169E1]/15 text-[#4169E1] mx-auto flex items-center justify-center text-xs mb-2 shadow-2xs">
+                            <i class="fas fa-user-lock"></i>
+                        </div>
+                        <h4 class="text-xs font-bold text-neutral-900 dark:text-white">Guest Account</h4>
+                        <p class="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1 mb-3">Sign in to view buying power and access live execution.</p>
+                        <a href="{% url 'login' %}" class="block w-full py-2 text-center text-xs font-bold text-white bg-[#4169E1] hover:bg-[#3457C9] rounded-full transition-all shadow-brand-glow">
+                            Sign in
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
             </aside>
 
             <!-- ========================================== -->
             <!-- 3. TOP APP HEADER WITH FLOATING SEARCH PILL-->
             <!-- ========================================== -->
-            <div class="flex-1 flex flex-col h-full overflow-hidden">
+            <div class="flex-1 flex flex-col min-w-0 md:ml-64">
                 
-                <header class="h-20 bg-white dark:bg-black border-b border-[#EBEBEB] dark:border-neutral-800 px-4 md:px-8 flex items-center justify-between z-30 flex-shrink-0">
+                <header class="h-20 bg-white/95 dark:bg-[#121214]/95 backdrop-blur-md border-b border-[#EBEBEB] dark:border-neutral-800 px-4 md:px-8 flex items-center justify-between z-40 flex-shrink-0 sticky top-[37px]">
                     <!-- Left: Mobile Hamburger & Search Trigger -->
                     <div class="flex items-center gap-3">
                         <button @click="sidebarOpen = true" class="md:hidden text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white p-2">
                             <i class="fas fa-bars text-lg"></i>
                         </button>
                         
-                        <!-- Mobile Logo Icon -->
-                        <a href="{% url 'home' %}" class="md:hidden flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-[#FF385C] flex items-center justify-center text-white shadow-sm">
-                                <i class="fas fa-chart-line text-xs"></i>
-                            </div>
-                            <span class="font-extrabold text-base tracking-tight text-neutral-900 dark:text-white">Pesa<span class="text-[#FF385C]">Markets</span></span>
+                        <!-- Mobile Logo -->
+                        <a href="{% url 'home' %}" class="md:hidden flex items-center">
+                            <span class="font-black text-xl tracking-tight text-neutral-900 dark:text-white">Pesa<span class="text-[#4169E1]">Markets</span></span>
                         </a>
                     </div>
 
@@ -468,11 +538,11 @@
                     <div class="hidden sm:flex items-center justify-center flex-1 max-w-xl mx-4">
                         <button @click="searchOpen = true" 
                                 class="flex items-center divide-x divide-[#EBEBEB] dark:divide-dark-750 bg-white dark:bg-dark-850 hover:bg-neutral-50 dark:hover:bg-dark-800 border border-[#DDDDDD] dark:border-dark-750 shadow-pill hover:shadow-card transition-all duration-200 rounded-full py-2 px-3 group">
-                            <span class="px-3.5 text-xs font-bold text-neutral-800 dark:text-neutral-100 group-hover:text-[#FF385C] transition-colors">Any Market</span>
-                            <span class="px-3.5 text-xs font-bold text-neutral-800 dark:text-neutral-100 group-hover:text-[#FF385C] transition-colors">All Assets</span>
+                            <span class="px-3.5 text-xs font-bold text-neutral-800 dark:text-neutral-100 group-hover:text-[#4169E1] transition-colors">Any Market</span>
+                            <span class="px-3.5 text-xs font-bold text-neutral-800 dark:text-neutral-100 group-hover:text-[#4169E1] transition-colors">All Assets</span>
                             <span class="px-3.5 text-xs text-neutral-400 font-normal">Search quotes...</span>
                             <div class="pl-2">
-                                <div class="w-8 h-8 rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white flex items-center justify-center shadow-brand-glow transition-transform group-hover:scale-105">
+                                <div class="w-8 h-8 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white flex items-center justify-center shadow-brand-glow transition-transform group-hover:scale-105">
                                     <i class="fas fa-search text-xs"></i>
                                 </div>
                             </div>
@@ -482,11 +552,16 @@
                     <!-- Right Header Utilities: Currency, Theme Toggle, Notifications, User Pill -->
                     <div class="flex items-center gap-2.5 sm:gap-3">
                         
+                        <!-- Mobile Search Button -->
+                        <button @click="searchOpen = true" class="sm:hidden w-9 h-9 rounded-full bg-white dark:bg-dark-850 hover:bg-neutral-100 dark:hover:bg-dark-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center transition-colors border border-[#DDDDDD] dark:border-dark-750 shadow-2xs" aria-label="Search">
+                            <i class="fas fa-search text-sm"></i>
+                        </button>
+                        
                         <!-- Currency Selector Dropdown Pill -->
                         <div class="relative" x-data="{ currOpen: false }">
                             <button @click="currOpen = !currOpen" 
                                     class="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-white dark:bg-dark-850 hover:bg-neutral-100 dark:hover:bg-dark-800 text-neutral-800 dark:text-neutral-200 border border-[#DDDDDD] dark:border-dark-750 transition-colors shadow-2xs">
-                                <i class="fas fa-globe text-[#FF385C]"></i>
+                                <i class="fas fa-globe text-[#4169E1]"></i>
                                 <span x-text="activeCurrency">USD</span>
                                 <i class="fas fa-chevron-down text-[9px] text-neutral-400 ml-0.5"></i>
                             </button>
@@ -495,36 +570,33 @@
                                  class="absolute right-0 mt-2 w-40 bg-white dark:bg-dark-850 rounded-2xl shadow-card border border-[#EBEBEB] dark:border-dark-750 py-1.5 z-50">
                                 <button @click="setCurrency('USD'); currOpen = false" class="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-dark-800 flex items-center justify-between">
                                     <span>USD ($)</span>
-                                    <span x-show="activeCurrency === 'USD'" class="text-[#FF385C]"><i class="fas fa-check"></i></span>
+                                    <span x-show="activeCurrency === 'USD'" class="text-[#4169E1]"><i class="fas fa-check"></i></span>
                                 </button>
                                 <button @click="setCurrency('KES'); currOpen = false" class="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-dark-800 flex items-center justify-between">
                                     <span>KES (Shilling)</span>
-                                    <span x-show="activeCurrency === 'KES'" class="text-[#FF385C]"><i class="fas fa-check"></i></span>
+                                    <span x-show="activeCurrency === 'KES'" class="text-[#4169E1]"><i class="fas fa-check"></i></span>
                                 </button>
                                 <button @click="setCurrency('EUR'); currOpen = false" class="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-dark-800 flex items-center justify-between">
                                     <span>EUR (€)</span>
-                                    <span x-show="activeCurrency === 'EUR'" class="text-[#FF385C]"><i class="fas fa-check"></i></span>
+                                    <span x-show="activeCurrency === 'EUR'" class="text-[#4169E1]"><i class="fas fa-check"></i></span>
                                 </button>
                                 <button @click="setCurrency('GBP'); currOpen = false" class="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-dark-800 flex items-center justify-between">
                                     <span>GBP (£)</span>
-                                    <span x-show="activeCurrency === 'GBP'" class="text-[#FF385C]"><i class="fas fa-check"></i></span>
+                                    <span x-show="activeCurrency === 'GBP'" class="text-[#4169E1]"><i class="fas fa-check"></i></span>
+                                </button>
+                                <button @click="setCurrency('JPY'); currOpen = false" class="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-dark-800 flex items-center justify-between">
+                                    <span>JPY (¥)</span>
+                                    <span x-show="activeCurrency === 'JPY'" class="text-[#4169E1]"><i class="fas fa-check"></i></span>
                                 </button>
                             </div>
                         </div>
-
-                        <!-- Dark / Light Mode Toggle Button -->
-                        <button @click="toggleTheme()" 
-                                class="w-9 h-9 rounded-full bg-white dark:bg-dark-850 hover:bg-neutral-100 dark:hover:bg-dark-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center transition-colors border border-[#DDDDDD] dark:border-dark-750 shadow-2xs" 
-                                :title="darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
-                            <i :class="darkMode ? 'fas fa-sun text-amber-400' : 'fas fa-moon text-indigo-500'"></i>
-                        </button>
 
                         <!-- Notification Dropdown -->
                         <div class="relative" x-data="{ notifOpen: false }">
                             <button @click="notifOpen = !notifOpen" 
                                     class="w-9 h-9 rounded-full bg-white dark:bg-dark-850 hover:bg-neutral-100 dark:hover:bg-dark-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center transition-colors border border-[#DDDDDD] dark:border-dark-750 relative shadow-2xs">
                                 <i class="far fa-bell"></i>
-                                <span class="absolute top-2 right-2 w-2 h-2 bg-[#FF385C] rounded-full ring-2 ring-white dark:ring-dark-900"></span>
+                                <span class="absolute top-2 right-2 w-2 h-2 bg-[#4169E1] rounded-full ring-2 ring-white dark:ring-dark-900"></span>
                             </button>
                             
                             <div x-show="notifOpen" @click.outside="notifOpen = false" x-cloak
@@ -532,9 +604,9 @@
                                 <div class="px-5 py-3.5 border-b border-[#EBEBEB] dark:border-dark-750 flex items-center justify-between bg-neutral-50 dark:bg-dark-900/50">
                                     <div class="font-bold text-sm text-neutral-900 dark:text-white flex items-center gap-2">
                                         <span>Market Alerts</span>
-                                        <span class="text-[10px] bg-[#FFF0F3] text-[#FF385C] font-bold px-2 py-0.5 rounded-full">3 New</span>
+                                        <span class="text-[10px] bg-[#EBF0FF] text-[#4169E1] font-bold px-2 py-0.5 rounded-full">3 New</span>
                                     </div>
-                                    <button class="text-xs text-[#FF385C] hover:underline font-semibold">Mark all read</button>
+                                    <button class="text-xs text-[#4169E1] hover:underline font-semibold">Mark all read</button>
                                 </div>
                                 <div class="max-h-80 overflow-y-auto divide-y divide-[#EBEBEB] dark:divide-dark-800">
                                     <a href="{% url 'asset_detail' 'SCOM' %}" class="block p-4 hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors">
@@ -549,14 +621,14 @@
                                             </div>
                                         </div>
                                     </a>
-                                    <a href="{% url 'asset_detail' 'BTC' %}" class="block p-4 hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors">
+                                    <a href="{% url 'asset_detail' 'UST10Y' %}" class="block p-4 hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors">
                                         <div class="flex gap-3">
                                             <div class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-xs">
-                                                <i class="fas fa-bell"></i>
+                                                <i class="fas fa-landmark"></i>
                                             </div>
                                             <div>
-                                                <p class="text-xs font-bold text-neutral-900 dark:text-white">Bitcoin Breaks Above $64,800</p>
-                                                <p class="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">Price target alert reached for your portfolio holding.</p>
+                                                <p class="text-xs font-bold text-neutral-900 dark:text-white">10-Year US Treasury Note Yield Steady at 4.35%</p>
+                                                <p class="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">Primary dealer auction completed with 2.7x bid-to-cover ratio.</p>
                                                 <span class="text-[10px] text-neutral-400 mt-1 block">1 hour ago</span>
                                             </div>
                                         </div>
@@ -565,42 +637,125 @@
                             </div>
                         </div>
 
-                        <!-- Iconic User Profile Pill: Hamburger + Avatar -->
-                        <div class="relative" x-data="{ userOpen: false }">
-                            <button @click="userOpen = !userOpen" 
-                                    class="flex items-center gap-2.5 p-1 pl-3.5 pr-1.5 rounded-full border border-[#DDDDDD] dark:border-dark-750 hover:shadow-pill bg-white dark:bg-dark-850 transition-all">
-                                <i class="fas fa-bars text-xs text-neutral-600 dark:text-neutral-300"></i>
-                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" 
-                                     alt="Richard Cooper" 
-                                     class="w-8 h-8 rounded-full object-cover">
-                            </button>
+                        <!-- Mail Pill Button (Screenshot 4) -->
+                        <a href="{% url 'support' %}" 
+                           class="w-11 h-9 rounded-full border-2 border-[#38bdf8] text-[#38bdf8] bg-transparent hover:bg-[#38bdf8]/10 flex items-center justify-center transition-all shadow-2xs" 
+                           title="Messages & Inbox">
+                            <i class="fas fa-envelope text-xs"></i>
+                        </a>
 
-                            <div x-show="userOpen" @click.outside="userOpen = false" x-cloak
-                                 class="absolute right-0 mt-2 w-60 bg-white dark:bg-dark-850 rounded-3xl shadow-card-hover border border-[#EBEBEB] dark:border-dark-750 py-2.5 z-50">
-                                <div class="px-5 py-3 border-b border-[#EBEBEB] dark:border-dark-750">
-                                    <p class="text-xs font-bold text-neutral-900 dark:text-white">Richard Cooper</p>
-                                    <p class="text-[11px] text-neutral-400 truncate">r.cooper@pesamarkets.com</p>
-                                    <span class="inline-block mt-1.5 text-[10px] font-bold bg-[#FFF0F3] text-[#FF385C] px-2.5 py-0.5 rounded-full">Terminal Pro Tier</span>
+                        <!-- User Profile / Auth Pill (Screenshot 4 style) -->
+                        <div class="relative flex items-center gap-2" x-data="{ userOpen: false }" @click.outside="userOpen = false">
+                            {% if request.user.is_authenticated %}
+                                <button type="button" 
+                                        id="user-profile-menu-button"
+                                        @click.stop="userOpen = !userOpen" 
+                                        class="flex items-center gap-2.5 p-1 pl-3 pr-1.5 rounded-full border border-[#DDDDDD] dark:border-dark-750 hover:shadow-pill bg-white dark:bg-dark-850 transition-all focus:outline-none focus:ring-2 focus:ring-[#4169E1]/30 cursor-pointer"
+                                        aria-label="User navigation and admin menu">
+                                    <i class="fas fa-bars text-xs text-neutral-600 dark:text-neutral-300"></i>
+                                    {% if request.user.profile.avatar_url %}
+                                    <img src="{{ request.user.profile.avatar_url }}" 
+                                         alt="{{ request.user.username }}" 
+                                         class="w-8 h-8 rounded-full object-cover">
+                                    {% else %}
+                                    <div class="w-8 h-8 rounded-full bg-[#4169E1] text-white flex items-center justify-center font-bold text-xs uppercase">
+                                        {{ request.user.username|slice:":2" }}
+                                    </div>
+                                    {% endif %}
+                                </button>
+
+                                <div x-show="userOpen" x-cloak
+                                     x-transition:enter="transition ease-out duration-150"
+                                     x-transition:enter-start="opacity-0 transform scale-95 -translate-y-1"
+                                     x-transition:enter-end="opacity-100 transform scale-100 translate-y-0"
+                                     x-transition:leave="transition ease-in duration-100"
+                                     x-transition:leave-start="opacity-100 transform scale-100 translate-y-0"
+                                     x-transition:leave-end="opacity-0 transform scale-95 -translate-y-1"
+                                     class="absolute right-0 mt-2 top-full w-72 bg-white dark:bg-dark-850 rounded-3xl shadow-card-hover border border-[#EBEBEB] dark:border-dark-750 py-2.5 z-[60]">
+                                    <div class="px-5 py-3 border-b border-[#EBEBEB] dark:border-dark-750">
+                                        <div class="flex items-center justify-between">
+                                            <p class="text-xs font-bold text-neutral-900 dark:text-white">{{ request.user.get_full_name|default:request.user.username }}</p>
+                                            {% if request.user.is_superuser or request.user.is_staff or request.user.username == 'admin' %}
+                                            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-500 border border-rose-500/20">Admin</span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="text-[11px] text-neutral-400 truncate">{{ request.user.email }}</p>
+                                        <span class="inline-block mt-1.5 text-[10px] font-bold bg-[#EBF0FF] text-[#4169E1] dark:bg-[#4169E1]/15 px-2.5 py-0.5 rounded-full">
+                                            {{ request.user.profile.tier|default:"Terminal Pro Tier" }}
+                                        </span>
+                                    </div>
+
+                                    {% if request.user.is_superuser or request.user.is_staff or request.user.username == 'admin' %}
+                                    <!-- Embedded Admin Dashboard Trigger Option -->
+                                    <div class="p-2 border-b border-[#EBEBEB] dark:border-dark-750 bg-[#EBF0FF]/40 dark:bg-[#4169E1]/10">
+                                        <button type="button" 
+                                                @click="userOpen = false; adminDashboardOpen = true; $dispatch('open-admin-dashboard')"
+                                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-[#4169E1] to-[#2B3D8F] text-white font-extrabold text-xs shadow-brand-glow hover:shadow-lg hover:brightness-105 transition-all text-left group">
+                                            <span class="flex items-center gap-2">
+                                                <i class="fas fa-gauge-high text-xs group-hover:scale-110 transition-transform"></i>
+                                                <span>Admin Dashboard</span>
+                                            </span>
+                                            <span class="text-[9px] font-black uppercase bg-white/20 text-white px-2 py-0.5 rounded-full tracking-wider animate-pulse">Live</span>
+                                        </button>
+                                        <a href="{% url 'admin_dashboard' %}" class="block text-center text-[10px] text-[#4169E1] dark:text-[#8AABFF] hover:underline font-bold mt-1.5">
+                                            Open Fullscreen Dashboard &rarr;
+                                        </a>
+                                    </div>
+                                    {% endif %}
+
+                                    <a href="{% url 'terminal' %}" class="block px-5 py-2.5 text-xs font-bold text-[#4169E1] hover:bg-[#EBF0FF] dark:hover:bg-[#4169E1]/10"><i class="fas fa-terminal mr-2"></i> Terminal Pro</a>
+                                    <a href="{% url 'profile' %}" class="block px-5 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-dark-800"><i class="far fa-user mr-2 text-neutral-400"></i> Profile & KYC</a>
+                                    <a href="{% url 'portfolio' %}" class="block px-5 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-dark-800"><i class="fas fa-wallet mr-2 text-neutral-400"></i> Holdings & Tax</a>
+                                    <a href="{% url 'settings' %}" class="block px-5 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-dark-800"><i class="fas fa-sliders-h mr-2 text-neutral-400"></i> Settings</a>
+                                    <hr class="my-1.5 border-[#EBEBEB] dark:border-dark-750">
+                                    <a href="{% url 'logout' %}" class="block px-5 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20"><i class="fas fa-arrow-right-from-bracket mr-2"></i> Sign Out</a>
                                 </div>
-                                <a href="{% url 'terminal' %}" class="block px-5 py-2.5 text-xs font-bold text-[#FF385C] hover:bg-[#FFF0F3] dark:hover:bg-[#FF385C]/10"><i class="fas fa-terminal mr-2"></i> Terminal Pro</a>
-                                <a href="{% url 'profile' %}" class="block px-5 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-dark-800"><i class="far fa-user mr-2 text-neutral-400"></i> Profile & KYC</a>
-                                <a href="{% url 'portfolio' %}" class="block px-5 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-dark-800"><i class="fas fa-wallet mr-2 text-neutral-400"></i> Holdings & Tax</a>
-                                <a href="{% url 'settings' %}" class="block px-5 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-dark-800"><i class="fas fa-sliders-h mr-2 text-neutral-400"></i> Settings</a>
-                                <hr class="my-1.5 border-[#EBEBEB] dark:border-dark-750">
-                                <a href="#" class="block px-5 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20"><i class="fas fa-arrow-right-from-bracket mr-2"></i> Sign Out</a>
-                            </div>
+                            {% else %}
+                                <a href="{% url 'login' %}" 
+                                   class="px-5 py-2 rounded-full text-xs sm:text-sm font-bold border border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-500 text-neutral-800 dark:text-white bg-white dark:bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all shadow-2xs">
+                                    Sign in
+                                </a>
+                            {% endif %}
                         </div>
 
                     </div>
                 </header>
 
                 <!-- ========================================== -->
-                <!-- 4. MAIN SCROLLABLE CONTENT BODY            -->
+                <!-- 4. MAIN SCROLLABLE CONTENT BODY & DOCK     -->
                 <!-- ========================================== -->
-                <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-[#F7F7F7] dark:bg-black pb-24 md:pb-8">
-                    {% block content %}
-                    {% endblock %}
-                </main>
+                <div class="flex-1 flex min-w-0 relative">
+                    <main class="flex-1 p-4 md:p-6 lg:p-8 bg-[#F7F7F7] dark:bg-[#121214] pb-24 md:pb-8 min-w-0">
+                        <!-- Django System Notification Messages Banner -->
+                        {% if messages %}
+                        <div class="max-w-4xl mx-auto mb-5 space-y-2">
+                            {% for message in messages %}
+                            <div class="flex items-center justify-between p-3.5 px-4 rounded-2xl text-xs font-bold shadow-xs transition-all
+                                {% if message.tags == 'error' %}bg-rose-50 border border-rose-200 text-rose-800 dark:bg-rose-950/40 dark:border-rose-900/60 dark:text-rose-300
+                                {% elif message.tags == 'success' %}bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-900/60 dark:text-emerald-300
+                                {% elif message.tags == 'warning' %}bg-amber-50 border border-amber-200 text-amber-800 dark:bg-amber-950/40 dark:border-amber-900/60 dark:text-amber-300
+                                {% else %}bg-blue-50 border border-blue-200 text-blue-800 dark:bg-blue-950/40 dark:border-blue-900/60 dark:text-blue-300{% endif %}"
+                                x-data="{ showMsg: true }" x-show="showMsg">
+                                <div class="flex items-center gap-2.5">
+                                    <i class="fas {% if message.tags == 'error' %}fa-circle-exclamation text-rose-500{% elif message.tags == 'success' %}fa-circle-check text-emerald-500{% elif message.tags == 'warning' %}fa-triangle-exclamation text-amber-500{% else %}fa-circle-info text-blue-500{% endif %} text-sm"></i>
+                                    <span>{{ message }}</span>
+                                </div>
+                                <button @click="showMsg = false" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1">
+                                    <i class="fas fa-times text-xs"></i>
+                                </button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% block content %}
+                        {% endblock %}
+                    </main>
+
+                    {% if not request.resolver_match or request.resolver_match.url_name not in 'login,register,verify_otp,resend_otp,password_change,oauth_select_account' %}
+                        {% include 'markets/components/market_dock.html' %}
+                    {% endif %}
+                </div>
 
             </div>
         </div>
@@ -608,28 +763,28 @@
         <!-- ========================================== -->
         <!-- 5. MOBILE BOTTOM NAVIGATION                -->
         <!-- ========================================== -->
-        <nav class="md:hidden fixed bottom-0 inset-x-0 bg-white/95 dark:bg-black/95 backdrop-blur-lg border-t border-[#EBEBEB] dark:border-neutral-800 px-4 py-2 flex items-center justify-around z-40">
-            <a href="{% url 'home' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'home' %}text-[#FF385C] font-bold{% else %}text-neutral-400{% endif %}">
+        <nav class="md:hidden fixed bottom-0 inset-x-0 bg-white/95 dark:bg-[#121214]/95 backdrop-blur-lg border-t border-[#EBEBEB] dark:border-neutral-800 px-4 py-2 flex items-center justify-around z-40">
+            <a href="{% url 'home' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'home' %}text-[#4169E1] font-bold{% else %}text-neutral-400{% endif %}">
                 <i class="fas fa-compass text-lg"></i>
                 <span>Explore</span>
             </a>
             
-            <a href="{% url 'markets' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'markets' %}text-[#FF385C] font-bold{% else %}text-neutral-400{% endif %}">
+            <a href="{% url 'markets' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'markets' %}text-[#4169E1] font-bold{% else %}text-neutral-400{% endif %}">
                 <i class="fas fa-layer-group text-lg"></i>
                 <span>Listings</span>
             </a>
 
             <!-- Central Floating Trade / Swap Pill Button -->
-            <a href="{% url 'trade' %}" class="-mt-5 w-12 h-12 rounded-full bg-gradient-to-tr from-[#FF385C] to-[#E61E4D] text-white flex items-center justify-center shadow-brand-glow hover:scale-105 active:scale-95 transition-transform">
+            <a href="{% url 'trade' %}" class="-mt-5 w-12 h-12 rounded-full bg-gradient-to-tr from-[#4169E1] to-[#2D4AAF] text-white flex items-center justify-center shadow-brand-glow hover:scale-105 active:scale-95 transition-transform">
                 <i class="fas fa-arrow-right-arrow-left text-base"></i>
             </a>
 
-            <a href="{% url 'watchlist' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'watchlist' %}text-[#FF385C] font-bold{% else %}text-neutral-400{% endif %}">
+            <a href="{% url 'watchlist' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'watchlist' %}text-[#4169E1] font-bold{% else %}text-neutral-400{% endif %}">
                 <i class="far fa-heart text-lg"></i>
                 <span>Wishlist</span>
             </a>
 
-            <a href="{% url 'portfolio' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'portfolio' %}text-[#FF385C] font-bold{% else %}text-neutral-400{% endif %}">
+            <a href="{% url 'portfolio' %}" class="flex flex-col items-center gap-1 text-[11px] font-medium {% if active_tab == 'portfolio' %}text-[#4169E1] font-bold{% else %}text-neutral-400{% endif %}">
                 <i class="fas fa-wallet text-lg"></i>
                 <span>Portfolio</span>
             </a>
@@ -639,19 +794,19 @@
         <!-- 6. FLOATING SEARCH MODAL DIALOG            -->
         <!-- ========================================== -->
         <div x-show="searchOpen" x-cloak
-             class="fixed inset-0 z-50 bg-black/60 dark:bg-black/85 backdrop-blur-sm flex items-start justify-center pt-16 px-4">
+             class="fixed inset-0 z-50 bg-black/60 dark:bg-[#121214]/85 backdrop-blur-sm flex items-start justify-center pt-16 px-4">
             <div @click.outside="searchOpen = false" 
                  class="w-full max-w-2xl bg-white dark:bg-dark-850 rounded-3xl shadow-card-hover border border-[#DDDDDD] dark:border-neutral-800 overflow-hidden transform transition-all">
                 
                 <!-- Search Input Bar -->
                 <div class="p-4 border-b border-[#EBEBEB] dark:border-neutral-800 flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full bg-[#FF385C] flex items-center justify-center text-white flex-shrink-0">
+                    <div class="w-9 h-9 rounded-full bg-[#4169E1] flex items-center justify-center text-white flex-shrink-0">
                         <i class="fas fa-search text-xs"></i>
                     </div>
                     <input type="text" 
                            x-model="searchQuery" 
                            @input.debounce.250ms="performSearch()"
-                           placeholder="Search stocks, bonds, treasury bills, crypto (e.g. SCOM, T91, IFB10Y, AAPL, BTC)..."
+                           placeholder="Search stocks, sovereign bonds, treasury bills (e.g. SCOM, UST10Y, UKG10Y, JGB10Y, T91, AAPL)..."
                            class="w-full bg-transparent border-none outline-none text-base font-medium text-neutral-900 dark:text-white placeholder-neutral-400"
                            x-ref="searchInput"
                            x-init="$watch('searchOpen', value => { if(value) setTimeout(() => $refs.searchInput.focus(), 50) })">
@@ -662,7 +817,7 @@
                 <div class="max-h-96 overflow-y-auto p-3">
                     <template x-if="searchLoading">
                         <div class="p-8 text-center text-neutral-400 text-sm">
-                            <i class="fas fa-spinner fa-spin mr-2 text-[#FF385C]"></i> Searching market quotes...
+                            <i class="fas fa-spinner fa-spin mr-2 text-[#4169E1]"></i> Searching market quotes...
                         </div>
                     </template>
 
@@ -683,7 +838,7 @@
                                         </div>
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <span class="font-bold text-sm text-neutral-900 dark:text-white group-hover:text-[#FF385C] transition-colors" x-text="item.symbol"></span>
+                                                <span class="font-bold text-sm text-neutral-900 dark:text-white group-hover:text-[#4169E1] transition-colors" x-text="item.symbol"></span>
                                                 <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-dark-700 text-neutral-500" x-text="item.market"></span>
                                             </div>
                                             <span class="text-xs text-neutral-500 dark:text-neutral-400" x-text="item.name"></span>
@@ -703,12 +858,12 @@
                         <div class="p-4">
                             <p class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-3">Trending Opportunities</p>
                             <div class="flex flex-wrap gap-2">
-                                <a href="{% url 'asset_detail' 'SCOM' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#FF385C] hover:text-white transition-colors">SCOM (Safaricom)</a>
-                                <a href="{% url 'asset_detail' 'IFB10Y' %}" class="px-3.5 py-1.5 rounded-full bg-[#FFF0F3] text-[#FF385C] border border-[#FF385C]/20 text-xs font-bold hover:bg-[#FF385C] hover:text-white transition-colors">IFB10Y (17.85% Bond)</a>
-                                <a href="{% url 'asset_detail' 'T91' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#FF385C] hover:text-white transition-colors">T91 (91D T-Bill)</a>
-                                <a href="{% url 'asset_detail' 'AAPL' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#FF385C] hover:text-white transition-colors">AAPL (Apple)</a>
-                                <a href="{% url 'asset_detail' 'NVDA' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#FF385C] hover:text-white transition-colors">NVDA (NVIDIA)</a>
-                                <a href="{% url 'asset_detail' 'BTC' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#FF385C] hover:text-white transition-colors">BTC (Bitcoin)</a>
+                                <a href="{% url 'asset_detail' 'SCOM' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#4169E1] hover:text-white transition-colors">SCOM (Safaricom)</a>
+                                <a href="{% url 'asset_detail' 'IFB10Y' %}" class="px-3.5 py-1.5 rounded-full bg-[#EBF0FF] text-[#4169E1] border border-[#4169E1]/20 text-xs font-bold hover:bg-[#4169E1] hover:text-white transition-colors">IFB10Y (17.85% Bond)</a>
+                                <a href="{% url 'asset_detail' 'T91' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#4169E1] hover:text-white transition-colors">T91 (91D T-Bill)</a>
+                                <a href="{% url 'asset_detail' 'AAPL' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#4169E1] hover:text-white transition-colors">AAPL (Apple)</a>
+                                <a href="{% url 'asset_detail' 'NVDA' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#4169E1] hover:text-white transition-colors">NVDA (NVIDIA)</a>
+                                <a href="{% url 'asset_detail' 'UST10Y' %}" class="px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-xs font-bold hover:bg-[#4169E1] hover:text-white transition-colors">UST10Y (US 10Y Note)</a>
                             </div>
                         </div>
                     </template>
@@ -727,9 +882,303 @@
              x-transition:leave-start="opacity-100 transform translate-y-0"
              x-transition:leave-end="opacity-0 transform translate-y-4"
              class="fixed bottom-20 md:bottom-6 right-6 z-50 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 px-5 py-3 rounded-full shadow-card-hover flex items-center gap-3 text-xs font-bold">
-            <i class="fas fa-check-circle text-[#FF385C] text-base"></i>
+            <i class="fas fa-check-circle text-[#4169E1] text-base"></i>
             <span x-text="toastMessage">Action completed successfully</span>
         </div>
+
+        <!-- ========================================== -->
+        <!-- 8. EMBEDDED REALTIME ADMIN DASHBOARD MODAL  -->
+        <!-- ========================================== -->
+        {% if request.user.is_superuser or request.user.is_staff or request.user.username == 'admin' %}
+        <div x-show="adminDashboardOpen" x-cloak
+             x-data="embeddedAdminDashboard()"
+             @open-admin-dashboard.window="openDashboard()"
+             x-init="$watch('adminDashboardOpen', val => { if (val) { openDashboard(); } else { stopPolling(); } })"
+             class="fixed inset-0 z-50 bg-black/75 dark:bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto"
+             @keydown.escape.window="closeDashboard()">
+
+            <div @click.outside="closeDashboard()"
+                 class="relative w-full max-w-6xl max-h-[92vh] flex flex-col bg-white dark:bg-dark-900 border border-[#DDDDDD] dark:border-dark-750 rounded-3xl shadow-card-hover overflow-hidden transition-all my-auto">
+                
+                <!-- Modal Top Header Bar -->
+                <div class="px-5 py-4 border-b border-[#EBEBEB] dark:border-dark-750 bg-[#F7F7F7]/90 dark:bg-dark-850/90 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#4169E1] to-[#2B3D8F] text-white flex items-center justify-center shadow-brand-glow">
+                            <i class="fas fa-gauge-high text-base"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-base sm:text-lg font-black text-neutral-900 dark:text-white tracking-tight">Admin Dashboard</h2>
+                                <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-500 border border-rose-500/30 flex items-center gap-1">
+                                    <i class="fas fa-shield-halved"></i> Master Control
+                                </span>
+                                <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Live Realtime
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-neutral-500 dark:text-neutral-400">
+                                Live user monitoring, active trading accounts, verification audits, and lifecycle management.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" 
+                                @click="fetchUsers()" 
+                                class="px-3 py-1.5 rounded-full text-xs font-bold border border-[#DDDDDD] dark:border-dark-750 bg-white dark:bg-dark-800 hover:bg-neutral-50 dark:hover:bg-dark-750 text-neutral-800 dark:text-neutral-200 shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer">
+                            <i class="fas fa-rotate text-xs text-[#4169E1]" :class="{ 'fa-spin': loading }"></i>
+                            <span class="hidden sm:inline">Refresh Feed</span>
+                        </button>
+                        <a href="{% url 'admin_dashboard' %}" 
+                           class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#EBF0FF] dark:bg-[#4169E1]/20 text-[#4169E1] dark:text-[#8AABFF] hover:bg-[#4169E1] hover:text-white transition-all flex items-center gap-1.5">
+                            <i class="fas fa-arrow-up-right-from-square text-xs"></i>
+                            <span class="hidden sm:inline">Fullscreen View</span>
+                        </a>
+                        <button type="button" 
+                                @click="closeDashboard()" 
+                                class="w-9 h-9 rounded-full bg-neutral-200 dark:bg-dark-800 hover:bg-neutral-300 dark:hover:bg-dark-700 text-neutral-600 dark:text-neutral-300 flex items-center justify-center transition-colors cursor-pointer"
+                                aria-label="Close Admin Dashboard">
+                            <i class="fas fa-times text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Metric Stats Row -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 p-4 border-b border-[#EBEBEB] dark:border-dark-750 bg-white dark:bg-dark-850 flex-shrink-0">
+                    <div class="p-2.5 rounded-2xl bg-neutral-50 dark:bg-dark-800 border border-neutral-200/70 dark:border-dark-700">
+                        <span class="text-[9px] font-black uppercase tracking-wider text-neutral-400 block">Total Users</span>
+                        <div class="text-lg font-black text-neutral-900 dark:text-white font-mono mt-0.5" x-text="stats.total">0</div>
+                    </div>
+                    <div class="p-2.5 rounded-2xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20">
+                        <span class="text-[9px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">Active</span>
+                        <div class="text-lg font-black text-emerald-600 dark:text-emerald-400 font-mono mt-0.5" x-text="stats.active">0</div>
+                    </div>
+                    <div class="p-2.5 rounded-2xl bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/20">
+                        <span class="text-[9px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400 block">Suspended</span>
+                        <div class="text-lg font-black text-rose-600 dark:text-rose-400 font-mono mt-0.5" x-text="stats.inactive">0</div>
+                    </div>
+                    <div class="p-2.5 rounded-2xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20">
+                        <span class="text-[9px] font-black uppercase tracking-wider text-amber-500 block">Flagged</span>
+                        <div class="text-lg font-black text-amber-500 font-mono mt-0.5" x-text="stats.flagged">0</div>
+                    </div>
+                    <div class="p-2.5 rounded-2xl bg-sky-500/5 dark:bg-sky-500/10 border border-sky-500/20">
+                        <span class="text-[9px] font-black uppercase tracking-wider text-sky-500 block">Verified</span>
+                        <div class="text-lg font-black text-sky-500 font-mono mt-0.5" x-text="stats.verified">0</div>
+                    </div>
+                    <div class="p-2.5 rounded-2xl bg-[#4169E1]/5 dark:bg-[#4169E1]/10 border border-[#4169E1]/20">
+                        <span class="text-[9px] font-black uppercase tracking-wider text-[#4169E1] dark:text-[#8AABFF] block">Terminal Pro</span>
+                        <div class="text-lg font-black text-[#4169E1] dark:text-[#8AABFF] font-mono mt-0.5" x-text="stats.pro">0</div>
+                    </div>
+                </div>
+
+                <!-- Filters & Search Toolbar -->
+                <div class="px-5 py-3 border-b border-[#EBEBEB] dark:border-dark-750 bg-[#F7F7F7]/60 dark:bg-dark-850/60 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
+                    <!-- Filter Pills -->
+                    <div class="flex items-center gap-1.5 overflow-x-auto text-xs font-bold">
+                        <button type="button" @click="setFilter('all')" :class="activeFilter === 'all' ? 'bg-[#4169E1] text-white shadow-xs' : 'bg-white dark:bg-dark-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-dark-700'" class="px-3 py-1 rounded-full transition-all cursor-pointer">All (<span x-text="stats.total"></span>)</button>
+                        <button type="button" @click="setFilter('active')" :class="activeFilter === 'active' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white dark:bg-dark-800 text-emerald-600 border border-emerald-500/30'" class="px-3 py-1 rounded-full transition-all cursor-pointer">Active (<span x-text="stats.active"></span>)</button>
+                        <button type="button" @click="setFilter('suspended')" :class="activeFilter === 'suspended' ? 'bg-rose-600 text-white shadow-xs' : 'bg-white dark:bg-dark-800 text-rose-600 border border-rose-500/30'" class="px-3 py-1 rounded-full transition-all cursor-pointer">Suspended (<span x-text="stats.inactive"></span>)</button>
+                        <button type="button" @click="setFilter('flagged')" :class="activeFilter === 'flagged' ? 'bg-amber-600 text-white shadow-xs' : 'bg-white dark:bg-dark-800 text-amber-500 border border-amber-500/30'" class="px-3 py-1 rounded-full transition-all cursor-pointer">Flagged (<span x-text="stats.flagged"></span>)</button>
+                        <button type="button" @click="setFilter('verified')" :class="activeFilter === 'verified' ? 'bg-sky-600 text-white shadow-xs' : 'bg-white dark:bg-dark-800 text-sky-500 border border-sky-500/30'" class="px-3 py-1 rounded-full transition-all cursor-pointer">Verified (<span x-text="stats.verified"></span>)</button>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative w-full sm:w-64">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-xs text-neutral-400"></i>
+                        <input type="text" 
+                               x-model="searchQuery" 
+                               @input.debounce.300ms="fetchUsers()" 
+                               placeholder="Search username, email, phone..." 
+                               class="w-full pl-8 pr-8 py-1.5 rounded-full text-xs bg-white dark:bg-dark-800 border border-[#DDDDDD] dark:border-dark-700 text-neutral-900 dark:text-white focus:outline-none focus:border-[#4169E1]">
+                        <button type="button" x-show="searchQuery" @click="searchQuery = ''; fetchUsers()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main User Table Body (Scrollable) -->
+                <div class="flex-1 overflow-y-auto p-4 custom-dock-scroll">
+                    <!-- Loading state -->
+                    <div x-show="loading && users.length === 0" class="py-16 text-center">
+                        <i class="fas fa-circle-notch fa-spin text-2xl text-[#4169E1] mb-2"></i>
+                        <p class="text-xs text-neutral-500">Loading live user accounts...</p>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div x-show="!loading && users.length === 0" class="py-16 text-center">
+                        <i class="fas fa-users-slash text-3xl text-neutral-300 dark:text-neutral-600 mb-2"></i>
+                        <p class="text-sm font-bold text-neutral-700 dark:text-neutral-300">No users found</p>
+                        <p class="text-xs text-neutral-400 mt-1">Try adjusting your filter or search query.</p>
+                    </div>
+
+                    <!-- Users Table -->
+                    <div x-show="users.length > 0" class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="border-b border-[#EBEBEB] dark:border-dark-750 text-[10px] font-black uppercase text-neutral-400 tracking-wider">
+                                    <th class="py-2.5 px-3">Trader</th>
+                                    <th class="py-2.5 px-3">Contact & Verification</th>
+                                    <th class="py-2.5 px-3">Status</th>
+                                    <th class="py-2.5 px-3">Tier</th>
+                                    <th class="py-2.5 px-3">Joined / Last Seen</th>
+                                    <th class="py-2.5 px-3 text-right">Admin Controls</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#EBEBEB] dark:divide-dark-750 font-medium">
+                                <template x-for="u in users" :key="u.id">
+                                    <tr class="hover:bg-neutral-50/70 dark:hover:bg-dark-800/60 transition-colors">
+                                        <!-- Trader Column -->
+                                        <td class="py-3 px-3">
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="relative flex-shrink-0">
+                                                    <img :src="u.avatar_url" :alt="u.username" class="w-8 h-8 rounded-full object-cover border border-neutral-200 dark:border-dark-700">
+                                                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-dark-900"
+                                                          :class="u.is_active ? 'bg-emerald-500' : 'bg-rose-500'"></span>
+                                                </div>
+                                                <div>
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span class="font-bold text-neutral-900 dark:text-white" x-text="'@' + u.username"></span>
+                                                        <template x-if="u.is_admin">
+                                                            <span class="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-rose-500/10 text-rose-500 border border-rose-500/20">Admin</span>
+                                                        </template>
+                                                    </div>
+                                                    <span class="text-[11px] text-neutral-400" x-text="u.full_name"></span>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <!-- Contact & Verification Column -->
+                                        <td class="py-3 px-3">
+                                            <div class="space-y-0.5">
+                                                <div class="flex items-center gap-1.5">
+                                                    <i class="far fa-envelope text-[10px] text-neutral-400"></i>
+                                                    <span class="text-neutral-700 dark:text-neutral-300 font-mono text-[11px]" x-text="u.email"></span>
+                                                    <template x-if="u.email_verified">
+                                                        <span class="text-emerald-500 text-[10px]" title="Email Verified"><i class="fas fa-check-circle"></i></span>
+                                                    </template>
+                                                </div>
+                                                <div class="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400 text-[11px]">
+                                                    <i class="fas fa-phone text-[10px] text-neutral-400"></i>
+                                                    <span class="font-mono" x-text="u.phone || 'No phone'"></span>
+                                                    <template x-if="u.phone && u.phone_verified">
+                                                        <span class="text-emerald-500 text-[10px]" title="Phone Verified"><i class="fas fa-check-circle"></i></span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <!-- Status Column -->
+                                        <td class="py-3 px-3">
+                                            <div class="flex flex-col gap-1 items-start">
+                                                <template x-if="u.is_active">
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+                                                    </span>
+                                                </template>
+                                                <template x-if="!u.is_active">
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Suspended
+                                                    </span>
+                                                </template>
+                                                <template x-if="u.is_flagged">
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30" :title="u.flag_reason || 'Flagged for review'">
+                                                        <i class="fas fa-flag text-[8px]"></i> Flagged
+                                                    </span>
+                                                </template>
+                                            </div>
+                                        </td>
+
+                                        <!-- Tier Column -->
+                                        <td class="py-3 px-3">
+                                            <button type="button" 
+                                                    @click="triggerAction(u.id, 'toggle_tier')" 
+                                                    class="px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors flex items-center gap-1 cursor-pointer"
+                                                    :class="u.tier.includes('Pro') ? 'bg-[#4169E1]/15 text-[#4169E1] dark:text-[#8AABFF] border-[#4169E1]/30 hover:bg-[#4169E1]/25' : 'bg-neutral-100 dark:bg-dark-800 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-dark-700 hover:bg-neutral-200'">
+                                                <i class="fas fa-gem text-[9px]"></i>
+                                                <span x-text="u.tier"></span>
+                                            </button>
+                                        </td>
+
+                                        <!-- Joined / Last Login Column -->
+                                        <td class="py-3 px-3 text-neutral-500 dark:text-neutral-400 text-[11px]">
+                                            <div>Joined: <span class="font-mono text-neutral-700 dark:text-neutral-300" x-text="u.date_joined"></span></div>
+                                            <div>Last: <span class="font-mono text-neutral-700 dark:text-neutral-300" x-text="u.last_login"></span></div>
+                                        </td>
+
+                                        <!-- Admin Actions Column -->
+                                        <td class="py-3 px-3 text-right">
+                                            <div class="flex items-center justify-end gap-1.5">
+                                                <!-- Suspend / Activate Button -->
+                                                <template x-if="u.is_active">
+                                                    <button type="button" 
+                                                            @click="triggerAction(u.id, 'suspend')" 
+                                                            :disabled="u.is_admin"
+                                                            class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                                                            title="Suspend Account Access">
+                                                        <i class="fas fa-user-slash mr-1"></i> Suspend
+                                                    </button>
+                                                </template>
+                                                <template x-if="!u.is_active">
+                                                    <button type="button" 
+                                                            @click="triggerAction(u.id, 'activate')" 
+                                                            class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-600 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 transition-colors cursor-pointer"
+                                                            title="Reactivate Account">
+                                                        <i class="fas fa-user-check mr-1"></i> Activate
+                                                    </button>
+                                                </template>
+
+                                                <!-- Flag / Unflag Button -->
+                                                <template x-if="!u.is_flagged">
+                                                    <button type="button" 
+                                                            @click="promptFlag(u)" 
+                                                            class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50 transition-colors cursor-pointer"
+                                                            title="Flag Account for Risk Review">
+                                                        <i class="fas fa-flag mr-1"></i> Flag
+                                                    </button>
+                                                </template>
+                                                <template x-if="u.is_flagged">
+                                                    <button type="button" 
+                                                            @click="triggerAction(u.id, 'unflag')" 
+                                                            class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-neutral-100 hover:bg-neutral-200 text-neutral-700 dark:bg-dark-800 dark:hover:bg-dark-750 dark:text-neutral-300 border border-neutral-300 dark:border-dark-700 transition-colors cursor-pointer"
+                                                            title="Remove Risk Flag">
+                                                        <i class="fas fa-flag-checkered mr-1"></i> Clear Flag
+                                                    </button>
+                                                </template>
+
+                                                <!-- Delete Button -->
+                                                <button type="button" 
+                                                        @click="confirmDelete(u)" 
+                                                        :disabled="u.is_admin"
+                                                        class="p-1.5 rounded-lg text-neutral-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                                                        title="Delete Account Permanently">
+                                                    <i class="fas fa-trash-can text-xs"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Modal Footer Status Bar -->
+                <div class="px-5 py-3 border-t border-[#EBEBEB] dark:border-dark-750 bg-[#F7F7F7]/90 dark:bg-dark-850/90 flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 flex-shrink-0">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-[11px]">Realtime Polling Active &bull; Showing <span class="font-bold text-neutral-800 dark:text-white" x-text="users.length"></span> of <span class="font-bold text-neutral-800 dark:text-white" x-text="stats.total"></span> users</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button type="button" 
+                                @click="closeDashboard()" 
+                                class="px-4 py-1.5 rounded-full text-xs font-bold border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-dark-800 text-neutral-700 dark:text-neutral-300 transition-colors cursor-pointer">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
     </div>
 
@@ -737,18 +1186,113 @@
     <script>
         function themeManager() {
             return {
-                darkMode: document.documentElement.classList.contains('dark'),
-                toggleTheme() {
-                    this.darkMode = !this.darkMode;
-                    localStorage.setItem('pesa_theme', this.darkMode ? 'dark' : 'light');
-                    if (this.darkMode) {
-                        document.documentElement.classList.add('dark');
-                    } else {
-                        document.documentElement.classList.remove('dark');
+                darkMode: true
+            };
+        }
+
+        {% if request.user.is_superuser or request.user.is_staff or request.user.username == 'admin' %}
+        function embeddedAdminDashboard() {
+            return {
+                users: [],
+                stats: { total: 0, active: 0, inactive: 0, flagged: 0, verified: 0, pro: 0 },
+                loading: false,
+                searchQuery: '',
+                activeFilter: 'all',
+                pollTimer: null,
+
+                openDashboard() {
+                    this.fetchUsers();
+                    this.startPolling();
+                },
+
+                closeDashboard() {
+                    this.stopPolling();
+                    window.dispatchEvent(new CustomEvent('close-admin-dashboard'));
+                },
+
+                startPolling() {
+                    this.stopPolling();
+                    this.pollTimer = setInterval(() => {
+                        this.fetchUsers(true);
+                    }, 10000);
+                },
+
+                stopPolling() {
+                    if (this.pollTimer) {
+                        clearInterval(this.pollTimer);
+                        this.pollTimer = null;
+                    }
+                },
+
+                setFilter(filter) {
+                    this.activeFilter = filter;
+                    this.fetchUsers();
+                },
+
+                getCSRF() {
+                    const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+                    return cookie ? decodeURIComponent(cookie.split('=')[1]) : '';
+                },
+
+                async fetchUsers(silent = false) {
+                    if (!silent) this.loading = true;
+                    try {
+                        const params = new URLSearchParams();
+                        if (this.searchQuery.trim()) params.append('q', this.searchQuery.trim());
+                        if (this.activeFilter && this.activeFilter !== 'all') params.append('status', this.activeFilter);
+                        
+                        const res = await fetch('/api/admin/users/?' + params.toString(), {
+                            headers: { 'Accept': 'application/json' }
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            this.users = data.users || [];
+                            this.stats = data.stats || this.stats;
+                        }
+                    } catch (e) {
+                        console.error('Embedded Admin API error:', e);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async triggerAction(userId, action, reason = '') {
+                    try {
+                        const res = await fetch('/api/admin/users/' + userId + '/action/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': this.getCSRF()
+                            },
+                            body: JSON.stringify({ action: action, reason: reason })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            window.dispatchEvent(new CustomEvent('toast', { detail: data.message }));
+                            this.fetchUsers(true);
+                        } else {
+                            alert(data.error || 'Action could not be executed.');
+                        }
+                    } catch (e) {
+                        alert('Network error while processing admin action.');
+                    }
+                },
+
+                promptFlag(user) {
+                    const reason = prompt('Enter compliance flag reason for @' + user.username + ':', 'Account flagged for administrative compliance check');
+                    if (reason !== null && reason.trim()) {
+                        this.triggerAction(user.id, 'flag', reason.trim());
+                    }
+                },
+
+                confirmDelete(user) {
+                    if (confirm('CAUTION: Are you sure you want to permanently delete user @' + user.username + '? This action cannot be undone.')) {
+                        this.triggerAction(user.id, 'delete');
                     }
                 }
-            }
+            };
         }
+        {% endif %}
     </script>
 </body>
 </html>

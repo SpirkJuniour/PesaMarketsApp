@@ -1,0 +1,17 @@
+{
+    "python.terminal.useEnvFile": true,
+    "search.exclude": {
+        "**/venv": true,
+        "**/.venv": true,
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/staticfiles": true,
+        "**/.git": true
+    },
+    "files.watcherExclude": {
+        "**/venv/**": true,
+        "**/.venv/**": true,
+        "**/__pycache__/**": true,
+        "**/staticfiles/**": true
+    }
+}

@@ -7,7 +7,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <div class="flex items-center gap-2">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary/10 text-primary">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#4169E1]/10 text-[#4169E1]">
                     <i class="fas fa-bolt mr-1"></i> Instant Execution
                 </span>
                 <span class="text-xs text-slate-400">&bull; Zero Commission</span>
@@ -16,7 +16,7 @@
                 Order Desk & Execution
             </h1>
             <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                Execute live simulated market & limit orders with institutional real-time routing.
+                Execute market & limit orders with institutional real-time routing.
             </p>
         </div>
 
@@ -25,7 +25,7 @@
             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Select Asset:</span>
             <div class="relative">
                 <select @change="changeAsset($event.target.value)" 
-                        class="appearance-none bg-white dark:bg-dark-850 border border-slate-200 dark:border-dark-750 text-slate-900 dark:text-white rounded-full pl-4 pr-10 py-2.5 text-xs font-bold shadow-xs outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        class="appearance-none bg-white dark:bg-dark-850 border border-slate-200 dark:border-dark-750 text-slate-900 dark:text-white rounded-full pl-4 pr-10 py-2.5 text-xs font-bold shadow-xs outline-none focus:ring-2 focus:ring-[#4169E1] focus:border-[#4169E1] transition-all">
                     {% for a in all_assets %}
                     <option value="{{ a.symbol }}" {% if a.symbol == asset.symbol %}selected{% endif %}>
                         {{ a.symbol }} &bull; {{ a.name }} ({{ a.currency }} {{ a.price }})
@@ -85,31 +85,31 @@
                     <!-- Graph Type Selector -->
                     <div class="flex items-center gap-1.5 flex-wrap">
                         <button type="button" @click="setChartType('candlestick')"
-                                :class="chartType === 'candlestick' ? 'bg-primary text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
+                                :class="chartType === 'candlestick' ? 'bg-[#4169E1] text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
                                 class="px-3 py-1 rounded-full text-[11px] transition-all flex items-center gap-1" title="Candlestick">
                             <i class="fas fa-chart-column text-[10px]"></i>
                             <span>Candles</span>
                         </button>
                         <button type="button" @click="setChartType('line')"
-                                :class="chartType === 'line' ? 'bg-primary text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
+                                :class="chartType === 'line' ? 'bg-[#4169E1] text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
                                 class="px-3 py-1 rounded-full text-[11px] transition-all flex items-center gap-1" title="Linear Line">
                             <i class="fas fa-chart-line text-[10px]"></i>
                             <span>Linear</span>
                         </button>
                         <button type="button" @click="setChartType('area')"
-                                :class="chartType === 'area' ? 'bg-primary text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
+                                :class="chartType === 'area' ? 'bg-[#4169E1] text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
                                 class="px-3 py-1 rounded-full text-[11px] transition-all flex items-center gap-1" title="Area">
                             <i class="fas fa-chart-area text-[10px]"></i>
                             <span>Area</span>
                         </button>
                         <button type="button" @click="setChartType('ohlc')"
-                                :class="chartType === 'ohlc' ? 'bg-primary text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
+                                :class="chartType === 'ohlc' ? 'bg-[#4169E1] text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
                                 class="px-3 py-1 rounded-full text-[11px] transition-all flex items-center gap-1" title="OHLC Bar">
                             <i class="fas fa-bars-staggered text-[10px]"></i>
                             <span>OHLC</span>
                         </button>
                         <button type="button" @click="setChartType('baseline')"
-                                :class="chartType === 'baseline' ? 'bg-primary text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
+                                :class="chartType === 'baseline' ? 'bg-[#4169E1] text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750'"
                                 class="px-3 py-1 rounded-full text-[11px] transition-all flex items-center gap-1" title="Baseline">
                             <i class="fas fa-balance-scale text-[10px]"></i>
                             <span>Baseline</span>
@@ -120,7 +120,7 @@
                     <div class="flex items-center gap-2">
                         <div class="flex items-center gap-1 bg-slate-100 dark:bg-dark-800 p-0.5 rounded-full border border-slate-200/60 dark:border-dark-750 text-[10px]">
                             <button type="button" @click="toggleVolume()"
-                                    :class="showVolume ? 'bg-white dark:bg-dark-900 text-primary font-bold shadow-xs' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'"
+                                    :class="showVolume ? 'bg-white dark:bg-dark-900 text-[#4169E1] font-bold shadow-xs' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'"
                                     class="px-2.5 py-0.5 rounded-full transition-all">Vol</button>
                             <button type="button" @click="toggleSMA()"
                                     :class="showSMA ? 'bg-white dark:bg-dark-900 text-amber-500 font-bold shadow-xs' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'"
@@ -183,7 +183,7 @@
                     <a href="{% url 'terminal' %}?symbol={{ asset.symbol }}" class="font-bold text-amber-500 hover:underline flex items-center gap-1">
                         <i class="fas fa-terminal text-[10px]"></i> Terminal Pro &rarr;
                     </a>
-                    <a href="{% url 'asset_detail' asset.symbol %}" class="font-bold text-primary hover:underline">
+                    <a href="{% url 'asset_detail' asset.symbol %}" class="font-bold text-[#4169E1] hover:underline">
                         Profile &rarr;
                     </a>
                 </div>
@@ -191,12 +191,13 @@
         </div>
 
         <!-- Right: Order Ticket & Interactive Execution (5 Cols) -->
-        <div class="lg:col-span-5 bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-xs flex flex-col justify-between">
+        <div class="lg:col-span-5 bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-xs flex flex-col justify-between relative overflow-hidden">
+            {% if request.user.is_authenticated %}
             <div>
                 <!-- Buy / Sell Order Toggle Switch (Pill Style) -->
                 <div class="grid grid-cols-2 p-1.5 rounded-full bg-slate-100 dark:bg-dark-800 mb-5 border border-slate-200/60 dark:border-dark-750">
                     <button @click="side = 'BUY'" 
-                            :class="side === 'BUY' ? 'bg-primary text-white font-black shadow-md' : 'text-slate-500 font-bold hover:text-slate-800 dark:hover:text-white'"
+                            :class="side === 'BUY' ? 'bg-[#4169E1] text-white font-black shadow-md' : 'text-slate-500 font-bold hover:text-slate-800 dark:hover:text-white'"
                             class="py-2.5 text-xs rounded-full transition-all flex items-center justify-center gap-1.5">
                         <i class="fas fa-plus text-[10px]" x-show="side === 'BUY'"></i>
                         <span>BUY {{ asset.symbol }}</span>
@@ -219,7 +220,7 @@
                         </select>
                     </div>
                     <div class="text-slate-500 font-medium">
-                        Buying Power: <span class="font-mono font-bold text-slate-800 dark:text-slate-200" x-text="formatPrice(5212.17)">$5,212.17</span>
+                        Buying Power: <span class="font-mono font-bold text-slate-800 dark:text-slate-200" x-text="formatPrice({{ portfolio.cash_balance_usd|default:0.0 }})">${{ portfolio.cash_balance_usd|default:"0.00" }}</span>
                     </div>
                 </div>
 
@@ -247,7 +248,7 @@
                 <div class="bg-slate-50 dark:bg-dark-800/80 p-5 rounded-3xl border border-slate-200/60 dark:border-dark-750 mb-5">
                     <div class="flex justify-between items-center mb-2 text-xs">
                         <span class="font-bold text-slate-400 uppercase tracking-wider text-[10px]" x-text="isBond ? 'Order Units (Lots)' : 'Order Quantity'">Order Quantity</span>
-                        <span class="font-bold text-primary" 
+                        <span class="font-bold text-[#4169E1]" 
                               x-text="isBond ? ('Price: ' + currentPrice + '% of Par') : ('Price: ' + currentPrice + ' ' + assetCurrency)"></span>
                     </div>
 
@@ -273,10 +274,10 @@
 
                     <!-- Shortcut Percentage Buttons -->
                     <div class="grid grid-cols-4 gap-2 mt-4 pt-3 border-t border-slate-200/60 dark:border-dark-700 text-xs">
-                        <button @click="setQuantityPercent(0.25)" class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-primary hover:text-white border border-slate-200/60 dark:border-dark-600 transition-all text-xs">25%</button>
-                        <button @click="setQuantityPercent(0.50)" class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-primary hover:text-white border border-slate-200/60 dark:border-dark-600 transition-all text-xs">50%</button>
-                        <button @click="setQuantityPercent(0.75)" class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-primary hover:text-white border border-slate-200/60 dark:border-dark-600 transition-all text-xs">75%</button>
-                        <button @click="setQuantityPercent(1.00)" class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-primary hover:text-white border border-slate-200/60 dark:border-dark-600 transition-all text-xs">MAX</button>
+                        <button @click="setQuantityPercent(0.25)" class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-[#3457C9] hover:text-white border border-slate-200/60 dark:border-dark-600 transition-all text-xs">25%</button>
+                        <button @click="setQuantityPercent(0.50)" class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-[#3457C9] hover:text-white border border-slate-200/60 dark:border-dark-600 transition-all text-xs">50%</button>
+                        <button @click="setQuantityPercent(0.75)" class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-[#3457C9] hover:text-white border border-slate-200/60 dark:border-dark-600 transition-all text-xs">75%</button>
+                        <button @click="setQuantityPercent(1.00)" class="py-1.5 rounded-full bg-white dark:bg-dark-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-[#3457C9] hover:text-white border border-slate-200/60 dark:border-dark-600 transition-all text-xs">MAX</button>
                     </div>
                 </div>
 
@@ -297,7 +298,7 @@
                     </div>
                     <div class="pt-3 border-t border-slate-100 dark:border-dark-800 flex justify-between text-sm font-bold text-slate-900 dark:text-white">
                         <span>Total Estimated Cost:</span>
-                        <span class="font-mono text-base font-black text-primary" 
+                        <span class="font-mono text-base font-black text-[#4169E1]" 
                               x-text="isBond ? ('KES ' + (quantity * unitFaceValue * (currentPrice / 100.0)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})) : (assetCurrency + ' ' + (quantity * currentPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}))">KES 0.00</span>
                     </div>
                 </div>
@@ -307,7 +308,7 @@
             <div>
                 <button @click="executeTrade()" 
                         :disabled="quantity <= 0 || isExecuting"
-                        :class="side === 'BUY' ? 'bg-primary hover:bg-[#E00B41] shadow-primary/25' : 'bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 shadow-slate-900/25'"
+                        :class="side === 'BUY' ? 'bg-[#4169E1] hover:bg-[#3457C9] shadow-[#4169E1]/25' : 'bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 shadow-slate-900/25'"
                         class="w-full py-4 rounded-full text-white font-extrabold text-sm shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
                     <template x-if="!isExecuting">
                         <span class="flex items-center gap-2">
@@ -321,15 +322,38 @@
                         </span>
                     </template>
                 </button>
-                <p class="text-[11px] text-center text-slate-400 mt-2.5">Zero-slippage simulated execution via PesaMarkets Engine.</p>
+                <p class="text-[11px] text-center text-slate-400 mt-2.5">Institutional execution via PesaMarkets Liquidity Engine.</p>
             </div>
+            {% else %}
+            <!-- Unauthenticated Gated State -->
+            <div class="flex-1 flex flex-col items-center justify-center text-center p-6 py-12 my-auto">
+                <div class="w-16 h-16 rounded-3xl bg-[#4169E1]/10 text-[#4169E1] border border-[#4169E1]/20 flex items-center justify-center text-2xl mb-4 shadow-lg shadow-[#4169E1]/10">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 mb-3 uppercase tracking-wider">
+                    <i class="fas fa-lock mr-1.5"></i> Guest Mode &bull; Sign in to trade
+                </span>
+                <h3 class="text-xl font-black text-slate-900 dark:text-white mb-2">Order Execution Gated</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mb-6 leading-relaxed">
+                    Real-time market graphs, quotes, and technical indicators are fully unlocked for all users. Live market and limit order execution requires a verified account. Sign in to place orders, allocate lots, and record transactions to your personal ledger.
+                </p>
+                <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}" 
+                   class="w-full max-w-xs py-3.5 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-extrabold text-xs shadow-lg shadow-[#4169E1]/25 hover:shadow-brand-glow active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                    <i class="fas fa-arrow-right-to-bracket"></i>
+                    <span>Sign In to Place Order</span>
+                </a>
+                <p class="text-[11px] text-center text-slate-400 mt-4">
+                    New to PesaMarkets? The single sign-in flow automatically guides you through instant account registration.
+                </p>
+            </div>
+            {% endif %}
         </div>
 
     </div>
 
     <!-- Success Order Confirmation Modal -->
     <div x-show="orderReceiptModal" x-cloak
-         class="fixed inset-0 z-50 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+         class="fixed inset-0 z-50 bg-slate-900/60 dark:bg-[#18181B]/70 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="w-full max-w-md bg-white dark:bg-dark-850 rounded-3xl shadow-2xl border border-slate-200 dark:border-dark-750 p-6 text-center">
             <div class="w-16 h-16 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center mx-auto text-2xl mb-4">
                 <i class="fas fa-check"></i>
@@ -356,7 +380,7 @@
                 <button @click="orderReceiptModal = false" class="flex-1 py-3 rounded-full bg-slate-100 dark:bg-dark-800 font-bold text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-dark-750 transition-colors">
                     Done
                 </button>
-                <a href="{% url 'portfolio' %}" class="flex-1 py-3 rounded-full bg-primary text-white font-bold text-xs hover:bg-[#E00B41] transition-colors shadow-xs">
+                <a href="{% url 'portfolio' %}" class="flex-1 py-3 rounded-full bg-[#4169E1] text-white font-bold text-xs hover:bg-[#3457C9] transition-colors shadow-xs">
                     View Portfolio
                 </a>
             </div>
@@ -422,12 +446,97 @@
                 observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
             },
 
+            getChartData(tf) {
+                if (!this.assetData) return [];
+                const raw = this.assetData.ohlc;
+                if (!raw) return [];
+
+                // If already structured by timeframe object
+                if (!Array.isArray(raw) && raw[tf] && raw[tf].length > 0) {
+                    return this.ensureSma(raw[tf]);
+                }
+
+                // If raw is an array of candle objects
+                const candles = Array.isArray(raw) ? raw : (raw['ALL'] || raw['1M'] || Object.values(raw)[0] || []);
+                if (!candles || candles.length === 0) return [];
+
+                let filtered = [];
+                const n = candles.length;
+                if (tf === '1D') {
+                    // Generate 12 realistic intraday candles ending at latest close
+                    const latest = candles[n - 1] || { close: this.currentPrice, open: this.currentPrice };
+                    const basePrice = Number(latest.close) || Number(this.currentPrice) || 100;
+                    const hours = ['09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:30', '14:00', '14:30', '15:15', '16:00'];
+                    const seed = (basePrice * 10) % 7;
+                    let curr = +(basePrice * 0.994).toFixed(2);
+                    filtered = hours.map((h, i) => {
+                        const wave = Math.sin((i + seed) * 1.2) * 0.005 + (i / hours.length) * 0.006;
+                        const o = +(curr).toFixed(2);
+                        const c = +(basePrice * 0.994 + wave * basePrice).toFixed(2);
+                        const hi = +(Math.max(o, c) + Math.abs(Math.sin(i * 1.7)) * 0.003 * basePrice).toFixed(2);
+                        const lo = +(Math.min(o, c) - Math.abs(Math.cos(i * 1.7)) * 0.003 * basePrice).toFixed(2);
+                        curr = c;
+                        return {
+                            time: h,
+                            open: o,
+                            high: hi,
+                            low: lo,
+                            close: c,
+                            volume: Math.floor(18000 + Math.abs(Math.sin(i * 1.4)) * 52000),
+                            is_bullish: c >= o
+                        };
+                    });
+                } else if (tf === '1W') {
+                    const slice = candles.slice(-7);
+                    filtered = slice.map((c, i) => {
+                        const ts = typeof c.time === 'number' ? c.time : (1731500000 + i * 86400);
+                        const d = new Date(ts * 1000);
+                        const label = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+                        return { ...c, time: label, is_bullish: c.close >= c.open };
+                    });
+                } else if (tf === '1M') {
+                    const slice = candles.slice(-25);
+                    filtered = slice.map((c, i) => {
+                        const ts = typeof c.time === 'number' ? c.time : (1730000000 + i * 86400);
+                        const d = new Date(ts * 1000);
+                        const label = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                        return { ...c, time: label, is_bullish: c.close >= c.open };
+                    });
+                } else if (tf === '1Y') {
+                    filtered = candles.map((c, i) => {
+                        const ts = typeof c.time === 'number' ? c.time : (1700000000 + i * 86400 * 12);
+                        const d = new Date(ts * 1000);
+                        const label = d.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
+                        return { ...c, time: label, is_bullish: c.close >= c.open };
+                    });
+                } else {
+                    // ALL
+                    filtered = candles.map((c, i) => {
+                        const ts = typeof c.time === 'number' ? c.time : (1680000000 + i * 86400 * 20);
+                        const d = new Date(ts * 1000);
+                        const label = d.toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+                        return { ...c, time: label, is_bullish: c.close >= c.open };
+                    });
+                }
+
+                return this.ensureSma(filtered);
+            },
+
+            ensureSma(data) {
+                const arr = [...data];
+                for (let i = 0; i < arr.length; i++) {
+                    const window = arr.slice(Math.max(0, i - 4), i + 1);
+                    const avg = window.reduce((sum, item) => sum + Number(item.close), 0) / window.length;
+                    arr[i].sma = +avg.toFixed(2);
+                }
+                return arr;
+            },
+
             setupChart() {
                 const canvas = document.getElementById('tradeChartCanvas');
                 if (!canvas || !this.assetData) return;
 
-                const ohlcSeries = this.assetData.ohlc || {};
-                const currentData = ohlcSeries[this.activeTimeframe] || [];
+                const currentData = this.getChartData(this.activeTimeframe);
 
                 this.chartEngine = new FinancialChartEngine(canvas, {
                     data: currentData,
@@ -450,8 +559,7 @@
             setTimeframe(tf) {
                 this.activeTimeframe = tf;
                 if (!this.chartEngine || !this.assetData) return;
-                const ohlcSeries = this.assetData.ohlc || {};
-                const data = ohlcSeries[tf] || [];
+                const data = this.getChartData(tf);
                 this.chartEngine.setData(data);
                 this.resetHudToLatest();
             },
@@ -480,21 +588,20 @@
 
                 this.hudData = {
                     time: candle.time,
-                    open: candle.open.toFixed(2),
-                    high: candle.high.toFixed(2),
-                    low: candle.low.toFixed(2),
-                    close: candle.close.toFixed(2),
+                    open: Number(candle.open).toFixed(2),
+                    high: Number(candle.high).toFixed(2),
+                    low: Number(candle.low).toFixed(2),
+                    close: Number(candle.close).toFixed(2),
                     changeText: `${sign}${diff.toFixed(2)} (${sign}${pct.toFixed(2)}%)`,
                     isPositive: diff >= 0,
                     volume: this.formatVolume(candle.volume),
-                    sma: candle.sma !== undefined ? candle.sma.toFixed(2) : '--'
+                    sma: candle.sma !== undefined ? Number(candle.sma).toFixed(2) : '--'
                 };
             },
 
             resetHudToLatest() {
                 if (!this.assetData) return;
-                const ohlcSeries = this.assetData.ohlc || {};
-                const data = ohlcSeries[this.activeTimeframe] || [];
+                const data = this.getChartData(this.activeTimeframe);
                 if (data.length > 0) {
                     const last = data[data.length - 1];
                     const prev = data.length > 1 ? data[data.length - 2] : null;
@@ -519,13 +626,18 @@
             },
 
             setQuantityPercent(pct) {
-                // Approximate quantity from cash balance ($5212)
-                const budget = 5212.17 * pct;
-                const priceInUsd = this.assetCurrency === 'KES' ? this.currentPrice / 130.0 : this.currentPrice;
+                const userCash = {{ portfolio.cash_balance_usd|default:0.0 }};
+                const budget = userCash > 0 ? (userCash * pct) : (1000.0 * pct);
+                const fxMap = { 'USD': 1.0, 'KES': 130.0, 'GBP': 0.77, 'JPY': 152.0, 'EUR': 0.92 };
+                const priceInUsd = this.currentPrice / (fxMap[this.assetCurrency] || 1.0);
                 this.quantity = Math.max(1, Math.floor(budget / priceInUsd));
             },
 
             async executeTrade() {
+                {% if not request.user.is_authenticated %}
+                window.location.href = "{% url 'login' %}?next=" + encodeURIComponent(window.location.pathname + window.location.search);
+                return;
+                {% endif %}
                 if(this.quantity <= 0) return;
                 this.isExecuting = true;
 
@@ -545,6 +657,11 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
+                    if (res.status === 401) {
+                        const d = await res.json().catch(() => ({}));
+                        window.location.href = d.login_url || "{% url 'login' %}?next=" + encodeURIComponent(window.location.pathname + window.location.search);
+                        return;
+                    }
                     const d = await res.json();
                     if(d.success) {
                         this.receiptMessage = d.message;

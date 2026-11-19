@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-md mx-auto py-6 sm:py-10" x-data="otpManager()">
+
+    <!-- OTP Card Container -->
+    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-[#DDDDDD] dark:border-dark-750 p-7 sm:p-9 shadow-card relative overflow-hidden">
+        
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 mx-auto mb-3.5 rounded-full bg-gradient-to-tr from-[#4169E1] to-[#2D4AAF] flex items-center justify-center text-white shadow-brand-glow animate-pulse">
+                <i class="fas fa-shield-halved text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-black text-neutral-900 dark:text-white tracking-tight">Two-Factor Authentication</h1>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed">
+                Enter the 6-digit security code sent to 
+                <span class="font-bold text-neutral-900 dark:text-white font-mono">{{ masked_email }}</span>{% if has_phone %} and SMS to <span class="font-bold text-neutral-900 dark:text-white font-mono">{{ masked_phone }}</span>{% endif %}.
+            </p>
+        </div>
+
+        <!-- Security Dispatch Notice -->
+        <div class="mb-5 p-3.5 rounded-2xl bg-neutral-50 dark:bg-dark-800/80 border border-neutral-200 dark:border-dark-750 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-[#4169E1]/10 text-[#4169E1] flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-envelope-open-text text-sm"></i>
+            </div>
+            <div class="text-left">
+                <div class="text-xs font-bold text-neutral-800 dark:text-neutral-200">Security Code Dispatched from {{ sender_email }}</div>
+                <div class="text-[11px] text-neutral-500 dark:text-neutral-400">Please check your inbox (and spam/junk folder). Code expires in 10 minutes.</div>
+            </div>
+        </div>
+
+        <!-- OTP Verification Form -->
+        <form method="POST" action="{% url 'verify_otp' %}" id="otpForm" class="space-y-5">
+            {% csrf_token %}
+            {% if request.GET.next %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+            {% endif %}
+
+            {% if form.errors %}
+            <div class="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs text-center">
+                <div class="font-bold flex items-center justify-center gap-1.5 mb-1">
+                    <i class="fas fa-exclamation-circle"></i> Verification Error
+                </div>
+                <ul class="list-none space-y-0.5 text-[11px]">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Expiry countdown badge -->
+            <div class="flex items-center justify-center gap-1.5 text-[11px] font-mono text-neutral-400 dark:text-neutral-500 mb-3">
+                <i class="far fa-clock text-[10px]"></i>
+                <span>Expires in <span class="font-bold text-neutral-700 dark:text-neutral-300" x-text="formatExpiry()">10:00</span></span>
+            </div>
+
+            <div>
+                <label for="otp_code" class="block text-center text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-2">
+                    Enter 6-Digit Verification Code
+                </label>
+                <div class="flex justify-center">
+                    <input type="text" 
+                           id="otp_code" 
+                           name="otp_code" 
+                           x-model="otpCode" 
+                           x-ref="otpInput"
+                           @input="handleInput($event)"
+                           @paste="handlePaste($event)"
+                           inputmode="numeric"
+                           autocomplete="one-time-code"
+                           maxlength="6" 
+                           required 
+                           autofocus
+                           placeholder="••••••"
+                           class="w-60 text-center text-3xl font-black font-mono tracking-[0.3em] py-3.5 px-4 rounded-2xl bg-neutral-50 dark:bg-dark-800 border-2 border-[#DDDDDD] dark:border-dark-700 text-neutral-900 dark:text-white focus:outline-none focus:border-[#4169E1] focus:ring-4 focus:ring-[#4169E1]/15 transition-all">
+                </div>
+                <p class="text-center text-[10px] text-neutral-400 mt-2">
+                    Tip: Instant auto-verification as soon as 6 digits are typed or pasted.
+                </p>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" 
+                        :disabled="isSubmitting || otpCode.length < 6"
+                        class="w-full py-3.5 px-4 rounded-full bg-[#4169E1] hover:bg-[#3457C9] disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xs shadow-brand-glow hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                    <template x-if="!isSubmitting">
+                        <span class="flex items-center gap-2">
+                            <i class="fas fa-lock-open text-xs"></i>
+                            <span>Verify Code & Complete Sign In</span>
+                        </span>
+                    </template>
+                    <template x-if="isSubmitting">
+                        <span class="flex items-center gap-2">
+                            <i class="fas fa-circle-notch fa-spin text-xs"></i>
+                            <span>Verifying Code...</span>
+                        </span>
+                    </template>
+                </button>
+            </div>
+        </form>
+
+        <!-- Resend and Actions -->
+        <div class="mt-6 pt-5 border-t border-[#EBEBEB] dark:border-dark-750 flex items-center justify-between text-xs">
+            <div>
+                <template x-if="resendCooldown > 0">
+                    <span class="text-neutral-400 flex items-center gap-1.5 text-xs font-semibold select-none">
+                        <i class="fas fa-rotate text-[10px]"></i>
+                        <span>Resend in <span class="font-mono font-bold text-neutral-700 dark:text-neutral-300" x-text="resendCooldown">30</span>s</span>
+                    </span>
+                </template>
+                <template x-if="resendCooldown <= 0">
+                    <a href="{% url 'resend_otp' %}" class="font-bold text-[#4169E1] hover:underline flex items-center gap-1">
+                        <i class="fas fa-rotate text-[10px]"></i> Resend New Code
+                    </a>
+                </template>
+            </div>
+
+            <a href="{% url 'login' %}" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200">
+                Sign in with another account
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function otpManager() {
+        return {
+            otpCode: '',
+            isSubmitting: false,
+            expirySeconds: 600,
+            resendCooldown: 30,
+            timerInterval: null,
+
+            init() {
+                this.$nextTick(() => {
+                    if (this.$refs.otpInput) {
+                        this.$refs.otpInput.focus();
+                    }
+                });
+                this.timerInterval = setInterval(() => {
+                    if (this.expirySeconds > 0) this.expirySeconds--;
+                    if (this.resendCooldown > 0) this.resendCooldown--;
+                }, 1000);
+            },
+
+            formatExpiry() {
+                const m = Math.floor(this.expirySeconds / 60);
+                const s = this.expirySeconds % 60;
+                return `${m}:${s < 10 ? '0' : ''}${s}`;
+            },
+
+            handleInput(e) {
+                let clean = this.otpCode.replace(/\D/g, '').slice(0, 6);
+                this.otpCode = clean;
+                if (clean.length === 6 && !this.isSubmitting) {
+                    this.submitForm();
+                }
+            },
+
+            handlePaste(e) {
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+                const clean = text.replace(/\D/g, '').slice(0, 6);
+                if (clean) {
+                    this.otpCode = clean;
+                    if (clean.length === 6 && !this.isSubmitting) {
+                        this.submitForm();
+                    }
+                }
+            },
+
+            submitForm() {
+                if (this.otpCode.length === 6 && !this.isSubmitting) {
+                    this.isSubmitting = true;
+                    this.$nextTick(() => {
+                        const form = document.getElementById('otpForm');
+                        if (form) form.submit();
+                    });
+                }
+            }
+        };
+    }
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+</script>
+{% endblock %}

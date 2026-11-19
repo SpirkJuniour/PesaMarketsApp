@@ -1,81 +1,154 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-6" x-data="{ saved: false }">
+<div class="max-w-4xl mx-auto space-y-6">
     
     <div>
         <div class="flex items-center gap-2 mb-1">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary/10 text-primary">
-                <i class="fas fa-id-card mr-1"></i> Identity & Verification
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#EBF0FF] text-[#4169E1] dark:bg-[#4169E1]/15">
+                <i class="fas fa-id-card mr-1"></i> Verified Account Identity
             </span>
         </div>
-        <h1 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+        <h1 class="text-2xl md:text-3xl font-black text-neutral-900 dark:text-white tracking-tight">
             User Account & Verification
         </h1>
-        <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+        <p class="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
             Manage trader credentials, security keys, and portfolio entitlements.
         </p>
     </div>
 
     <!-- Profile Header Card -->
-    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 p-6 md:p-8 shadow-xs flex flex-col sm:flex-row items-center sm:items-start gap-6">
+    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-[#DDDDDD] dark:border-dark-750 p-6 md:p-8 shadow-xs flex flex-col sm:flex-row items-center sm:items-start gap-6">
         <div class="relative">
-            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" 
-                 class="w-24 h-24 rounded-full object-cover ring-4 ring-primary/20 shadow-md">
-            <button class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs shadow-md hover:bg-[#E00B41] transition-colors">
-                <i class="fas fa-camera"></i>
-            </button>
+            {% if profile.avatar_url %}
+            <img src="{{ profile.avatar_url }}" 
+                 alt="{{ current_user.username }}"
+                 class="w-24 h-24 rounded-full object-cover ring-4 ring-[#4169E1]/20 shadow-md">
+            {% else %}
+            <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-[#4169E1] to-[#2D4AAF] text-white flex items-center justify-center font-black text-2xl uppercase shadow-brand-glow">
+                {{ current_user.username|slice:":2" }}
+            </div>
+            {% endif %}
+            <div class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#4169E1] text-white flex items-center justify-center text-xs shadow-md">
+                <i class="fas fa-user-check"></i>
+            </div>
         </div>
 
         <div class="flex-1 text-center sm:text-left">
             <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
-                <h2 class="text-xl font-black text-slate-900 dark:text-white">Richard Cooper</h2>
+                <h2 class="text-xl font-black text-neutral-900 dark:text-white">
+                    {{ current_user.get_full_name|default:current_user.username }}
+                </h2>
+                {% if profile.kyc_verified %}
                 <span class="inline-flex items-center gap-1 text-[11px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 px-3 py-0.5 rounded-full self-center sm:self-auto">
                     <i class="fas fa-check-circle text-[10px]"></i> Verified Investor (KYC Level 2)
                 </span>
+                {% else %}
+                <span class="inline-flex items-center gap-1 text-[11px] font-bold bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 px-3 py-0.5 rounded-full self-center sm:self-auto">
+                    <i class="fas fa-clock text-[10px]"></i> Pending KYC Review
+                </span>
+                {% endif %}
             </div>
-            <p class="text-xs text-slate-400">r.cooper@pesamarkets.com &bull; Member since 2024 &bull; Account #PM-89214</p>
+            <p class="text-xs text-neutral-400">
+                {{ current_user.email }} &bull; Username: <span class="font-mono text-neutral-700 dark:text-neutral-300 font-bold">@{{ current_user.username }}</span> &bull; Member since {{ current_user.date_joined|date:"M Y" }}
+            </p>
             
             <div class="mt-4 flex flex-wrap gap-2 justify-center sm:justify-start text-xs font-semibold">
-                <span class="px-3.5 py-1 rounded-full bg-slate-100 dark:bg-dark-800 text-slate-700 dark:text-slate-300">
-                    <i class="fas fa-award text-amber-500 mr-1.5"></i> PesaMarkets Pro Trader
+                <span class="px-3.5 py-1 rounded-full bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300">
+                    <i class="fas fa-award text-amber-500 mr-1.5"></i> {{ profile.tier|default:"Terminal Pro Tier" }}
                 </span>
-                <span class="px-3.5 py-1 rounded-full bg-slate-100 dark:bg-dark-800 text-slate-700 dark:text-slate-300">
-                    <i class="fas fa-shield-halved text-blue-500 mr-1.5"></i> 2FA Enabled
+                <span class="px-3.5 py-1 rounded-full {% if profile.otp_enabled %}bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400{% else %}bg-neutral-100 dark:bg-dark-800 text-neutral-500{% endif %}">
+                    <i class="fas fa-shield-halved mr-1.5"></i> 2FA / OTP {% if profile.otp_enabled %}Active{% else %}Inactive{% endif %}
+                </span>
+                <span class="px-3.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-mono">
+                    <i class="fas fa-wallet mr-1.5"></i> {% if request.user.is_authenticated %}${{ profile.cash_balance_usd|floatformat:2 }} USD{% else %}$0.00 USD{% endif %}
+                </span>
+                <span class="px-3.5 py-1 rounded-full bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 flex items-center gap-1.5">
+                    {% if profile.auth_provider == 'google' %}
+                        <svg class="w-3.5 h-3.5 inline-block" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span>Google Linked</span>
+                    {% elif profile.auth_provider == 'apple' %}
+                        <i class="fab fa-apple text-xs"></i>
+                        <span>Apple ID Linked</span>
+                    {% else %}
+                        <i class="fas fa-envelope text-xs text-neutral-400"></i>
+                        <span>Credentials & OTP</span>
+                    {% endif %}
                 </span>
             </div>
         </div>
     </div>
 
     <!-- Personal Details Form -->
-    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 p-6 md:p-8 shadow-xs">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-6">Personal & Contact Information</h3>
+    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-[#DDDDDD] dark:border-dark-750 p-6 md:p-8 shadow-xs">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-400">Personal & Contact Information</h3>
+            <span class="text-[10px] text-neutral-400 font-medium">Verified Account Profile</span>
+        </div>
         
-        <form @submit.prevent="saved = true; showToast('Profile updated successfully!'); setTimeout(() => saved = false, 3000)" class="space-y-4">
+        <form method="POST" action="{% url 'profile' %}" class="space-y-4">
+            {% csrf_token %}
+
+            {% if user_form.errors or details_form.errors %}
+            <div class="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs">
+                <div class="font-bold flex items-center gap-1.5 mb-1">
+                    <i class="fas fa-exclamation-circle"></i> Profile Validation Errors
+                </div>
+                <ul class="list-disc pl-4 space-y-0.5 text-[11px]">
+                    {% for error in user_form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+                    {% for error in details_form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+                    {% for field in user_form %}{% for error in field.errors %}<li><strong>{{ field.label }}:</strong> {{ error }}</li>{% endfor %}{% endfor %}
+                    {% for field in details_form %}{% for error in field.errors %}<li><strong>{{ field.label }}:</strong> {{ error }}</li>{% endfor %}{% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">First Name</label>
-                    <input type="text" value="Richard" class="w-full bg-slate-50 dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-full px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                    <label for="first_name" class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1.5">First Name</label>
+                    <input type="text" id="first_name" name="first_name" value="{{ current_user.first_name }}" class="w-full bg-neutral-50 dark:bg-dark-800 border border-[#DDDDDD] dark:border-dark-700 rounded-full px-4 py-2.5 text-xs font-semibold text-neutral-900 dark:text-white outline-none focus:ring-2 focus:ring-[#4169E1]">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Last Name</label>
-                    <input type="text" value="Cooper" class="w-full bg-slate-50 dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-full px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                    <label for="last_name" class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1.5">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" value="{{ current_user.last_name }}" class="w-full bg-neutral-50 dark:bg-dark-800 border border-[#DDDDDD] dark:border-dark-700 rounded-full px-4 py-2.5 text-xs font-semibold text-neutral-900 dark:text-white outline-none focus:ring-2 focus:ring-[#4169E1]">
                 </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
-                    <input type="email" value="r.cooper@pesamarkets.com" class="w-full bg-slate-50 dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-full px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                    <label for="email" class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1.5">Email Address</label>
+                    <input type="email" id="email" name="email" value="{{ current_user.email }}" class="w-full bg-neutral-50 dark:bg-dark-800 border border-[#DDDDDD] dark:border-dark-700 rounded-full px-4 py-2.5 text-xs font-semibold text-neutral-900 dark:text-white outline-none focus:ring-2 focus:ring-[#4169E1]">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Phone (M-PESA Registered)</label>
-                    <input type="text" value="+254 712 345 678" class="w-full bg-slate-50 dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-full px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                    <label for="phone" class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1.5">Phone (M-PESA & OTP Target)</label>
+                    <input type="text" id="phone" name="phone" value="{{ profile.phone_number }}" class="w-full bg-neutral-50 dark:bg-dark-800 border border-[#DDDDDD] dark:border-dark-700 rounded-full px-4 py-2.5 text-xs font-semibold text-neutral-900 dark:text-white outline-none focus:ring-2 focus:ring-[#4169E1]">
                 </div>
             </div>
 
-            <div class="pt-4 flex justify-end">
-                <button type="submit" class="px-6 py-3 rounded-full bg-primary hover:bg-[#E00B41] text-white font-extrabold text-xs shadow-md shadow-primary/25 transition-all">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="preferred_currency" class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1.5">Preferred Currency</label>
+                    <select id="preferred_currency" name="preferred_currency" class="w-full bg-neutral-50 dark:bg-dark-800 border border-[#DDDDDD] dark:border-dark-700 rounded-full px-4 py-2.5 text-xs font-semibold text-neutral-900 dark:text-white outline-none focus:ring-2 focus:ring-[#4169E1]">
+                        <option value="USD" {% if profile.preferred_currency == 'USD' %}selected{% endif %}>USD - US Dollar</option>
+                        <option value="KES" {% if profile.preferred_currency == 'KES' %}selected{% endif %}>KES - Kenya Shilling</option>
+                        <option value="GBP" {% if profile.preferred_currency == 'GBP' %}selected{% endif %}>GBP - British Pound</option>
+                        <option value="JPY" {% if profile.preferred_currency == 'JPY' %}selected{% endif %}>JPY - Japanese Yen</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="bio" class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1.5">Trader Bio / Strategy</label>
+                    <input type="text" id="bio" name="bio" value="{{ profile.bio|default:'' }}" placeholder="Growth equities & Treasury bonds investor" class="w-full bg-neutral-50 dark:bg-dark-800 border border-[#DDDDDD] dark:border-dark-700 rounded-full px-4 py-2.5 text-xs font-semibold text-neutral-900 dark:text-white outline-none focus:ring-2 focus:ring-[#4169E1]">
+                </div>
+            </div>
+
+            <div class="pt-4 flex justify-between items-center">
+                <span class="text-xs text-neutral-400">All modifications are securely saved</span>
+                <button type="submit" class="px-6 py-3 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-extrabold text-xs shadow-brand-glow transition-all">
                     Save Changes
                 </button>
             </div>

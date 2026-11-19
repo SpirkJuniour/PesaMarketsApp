@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <rect width="200" height="200" rx="36" fill="#002B49"/>
+  <circle cx="100" cy="80" r="30" fill="none" stroke="#F37021" stroke-width="7"/>
+  <circle cx="100" cy="80" r="16" fill="#FFFFFF"/>
+  <text x="100" y="145" font-family="'Arial Black', sans-serif" font-size="22" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">CENTUM</text>
+</svg>

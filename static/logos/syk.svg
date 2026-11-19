@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <rect width="200" height="200" rx="36" fill="#1B1B1B"/>
+  <text x="100" y="115" font-family="'Helvetica Neue', Arial, sans-serif" font-size="36" font-weight="900" fill="#ECA100" text-anchor="middle" letter-spacing="1">stryker</text>
+  <line x1="45" y1="130" x2="155" y2="130" stroke="#ECA100" stroke-width="4" stroke-linecap="round"/>
+</svg>

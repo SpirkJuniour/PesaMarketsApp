@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <rect width="200" height="200" rx="36" fill="#FFFFFF"/>
+  <!-- Scallop Shell Outer Red Outline -->
+  <path d="M100 35 C130 35 160 55 165 95 C170 135 150 160 120 165 L80 165 C50 160 30 135 35 95 C40 55 70 35 100 35 Z" fill="#FBCE07" stroke="#DD1D21" stroke-width="10"/>
+  <!-- Rays inside -->
+  <path d="M100 50 L100 160 M75 60 L88 160 M125 60 L112 160 M55 85 L78 160 M145 85 L122 160" stroke="#DD1D21" stroke-width="6" stroke-linecap="round"/>
+</svg>

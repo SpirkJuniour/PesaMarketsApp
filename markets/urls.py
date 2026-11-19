@@ -2,6 +2,18 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Authentication & OTP
+    path('login/', views.login_view, name='login'),
+    path('verify-otp/', views.verify_otp_view, name='verify_otp'),
+    path('resend-otp/', views.resend_otp_view, name='resend_otp'),
+    path('register/', views.register_view, name='register'),
+    path('logout/', views.logout_view, name='logout'),
+    path('password-change/', views.password_change_view, name='password_change'),
+    path('auth/google/', views.oauth_google_login, name='oauth_google'),
+    path('auth/apple/', views.oauth_apple_login, name='oauth_apple'),
+    path('auth/select-account/<str:provider>/', views.oauth_select_account_view, name='oauth_select_account'),
+    path('auth/callback/<str:provider>/', views.oauth_callback, name='oauth_callback'),
+
     # Web Pages
     path('', views.home, name='home'),
     path('markets/', views.markets_list, name='markets'),
@@ -11,17 +23,33 @@ urlpatterns = [
     path('trade/', views.trade, name='trade'),
     path('bonds/', views.bonds_page, name='bonds'),
     path('news/', views.news, name='news'),
+    path('news/<int:story_id>/', views.news_article_detail, name='news_article_detail'),
+    path('earnings/', views.earnings_calendar, name='earnings'),
+    path('earnings/<str:filing_id>/', views.earnings_filing_detail, name='earnings_filing_detail'),
+    path('earnings/<str:filing_id>/download/<str:file_type>/', views.earnings_download_file, name='earnings_download_file'),
+    path('events/', views.events_calendar, name='events_calendar'),
     path('settings/', views.settings_page, name='settings'),
     path('support/', views.support, name='support'),
     path('profile/', views.profile, name='profile'),
     path('terminal/', views.terminal, name='terminal'),
+    path('admin-dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
 
     # REST APIs
+    path('api/admin/users/', views.api_admin_users, name='api_admin_users'),
+    path('api/admin/users/<int:user_id>/action/', views.api_admin_user_action, name='api_admin_user_action'),
     path('api/terminal/<str:symbol>/', views.api_terminal_data, name='api_terminal_data'),
     path('api/search/', views.api_search, name='api_search'),
     path('api/quote/<str:symbol>/', views.api_quote, name='api_quote'),
     path('api/trade/execute/', views.api_trade_execute, name='api_trade_execute'),
     path('api/bonds/buy/', views.api_bonds_buy, name='api_bonds_buy'),
     path('api/news/', views.api_news, name='api_news'),
+    path('api/earnings/', views.api_earnings, name='api_earnings'),
+    path('api/events/', views.api_events, name='api_events'),
+    path('api/events/remind/', views.api_set_event_reminder, name='api_set_event_reminder'),
+    path('api/events/my-reminders/', views.api_my_event_reminders, name='api_my_event_reminders'),
     path('api/watchlist/toggle/', views.api_watchlist_toggle, name='api_watchlist_toggle'),
+    path('api/portfolio/transfer/', views.api_cash_transfer, name='api_cash_transfer'),
+    path('api/markets/top50/', views.api_top50, name='api_top50'),
+    path('api/markets/rebalance/', views.api_rebalance_top50, name='api_rebalance_top50'),
+    path('api/subscription/upgrade/', views.api_upgrade_subscription, name='api_upgrade_subscription'),
 ]

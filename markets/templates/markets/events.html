@@ -1,0 +1,822 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6" x-data="eventsCalendarController()">
+
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#4169E1]/15 text-[#4169E1] border border-[#4169E1]/30">
+                    <i class="far fa-calendar-check"></i>
+                    <span>Real-Time Market Calendar</span>
+                </span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-neutral-100 dark:bg-dark-800 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Live Wire Feeds</span>
+                </span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-black text-neutral-900 dark:text-white tracking-tight">
+                Upcoming Macro & Earnings Events
+            </h1>
+            <p class="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-1 max-w-2xl leading-relaxed">
+                Official corporate earnings reports for listed equities, macroeconomic releases, central bank rate decisions, and debt auctions. Set automated email reminders delivered to your registered inbox.
+            </p>
+        </div>
+
+        <!-- Registered User Email Banner & Active Reminders Toggle -->
+        <div class="flex items-center gap-3 flex-wrap">
+            {% if request.user.is_authenticated and request.user.email %}
+            <div class="px-3.5 py-2 rounded-2xl bg-white dark:bg-dark-850 border border-neutral-200 dark:border-neutral-800 shadow-2xs text-xs flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-[#4169E1]/15 text-[#4169E1] flex items-center justify-center font-bold">
+                    <i class="fas fa-envelope text-[11px]"></i>
+                </div>
+                <div>
+                    <div class="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Registered Email</div>
+                    <div class="font-bold text-neutral-900 dark:text-white font-mono text-[11px]">{{ request.user.email }}</div>
+                </div>
+            {% endif %}
+
+            <button @click="showRemindersDrawer = !showRemindersDrawer" 
+                    class="px-4 py-2 rounded-full text-xs font-bold bg-[#4169E1] hover:bg-[#3457C9] text-white transition-all shadow-brand-glow flex items-center gap-2">
+                <i class="fas fa-bell text-xs"></i>
+                <span>My Reminders (<span x-text="remindedIds.length">0</span>)</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Institutional Metric Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <div class="p-4 rounded-3xl bg-white dark:bg-dark-850 border border-neutral-200 dark:border-neutral-800 shadow-2xs">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-neutral-400">Total Events</span>
+                <div class="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xs">
+                    <i class="fas fa-list-check"></i>
+                </div>
+            </div>
+            <div class="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white" x-text="combinedList.length">0</div>
+            <div class="text-[10px] text-neutral-400 mt-0.5">Macro data + Listed earnings</div>
+        </div>
+
+        <div class="p-4 rounded-3xl bg-white dark:bg-dark-850 border border-neutral-200 dark:border-neutral-800 shadow-2xs">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-neutral-400">Listed Earnings</span>
+                <div class="w-7 h-7 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-xs">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+            </div>
+            <div class="text-xl sm:text-2xl font-black text-emerald-500" x-text="earningsList.length">0</div>
+            <div class="text-[10px] text-neutral-400 mt-0.5">
+                <span x-text="countEarningsBySession('BMO')">0</span> BMO &bull; <span x-text="countEarningsBySession('AMC')">0</span> AMC
+            </div>
+        </div>
+
+        <div class="p-4 rounded-3xl bg-white dark:bg-dark-850 border border-neutral-200 dark:border-neutral-800 shadow-2xs">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-neutral-400">Central Bank & Debt</span>
+                <div class="w-7 h-7 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center text-xs">
+                    <i class="fas fa-landmark"></i>
+                </div>
+            </div>
+            <div class="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white" x-text="macroList.length">0</div>
+            <div class="text-[10px] text-neutral-400 mt-0.5">CBK, Fed, BoE & BoJ Auctions</div>
+        </div>
+
+        <div class="p-4 rounded-3xl bg-white dark:bg-dark-850 border border-neutral-200 dark:border-neutral-800 shadow-2xs">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-neutral-400">Active Reminders</span>
+                <div class="w-7 h-7 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-xs">
+                    <i class="fas fa-bell"></i>
+                </div>
+            </div>
+            <div class="text-xl sm:text-2xl font-black text-amber-500" x-text="remindedIds.length">0</div>
+            <div class="text-[10px] text-neutral-400 mt-0.5">Email alert notifications</div>
+        </div>
+    </div>
+
+    <!-- Filter Control Center -->
+    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-4 sm:p-5 shadow-xs space-y-4">
+        
+        <!-- Primary Category Tabs: Corporate Earnings vs Macro vs All -->
+        <div class="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-neutral-100 dark:border-neutral-800">
+            <div class="inline-flex p-1 rounded-2xl bg-neutral-100 dark:bg-dark-800 border border-neutral-200/80 dark:border-neutral-750 text-xs">
+                <button @click="viewMode = 'earnings'" 
+                        :class="viewMode === 'earnings' ? 'bg-[#4169E1] text-white shadow-xs font-black' : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white font-bold'"
+                        class="px-4 py-2 rounded-xl transition-all flex items-center gap-2">
+                    <i class="fas fa-file-invoice-dollar text-xs"></i>
+                    <span>Corporate Earnings (<span x-text="earningsList.length">0</span>)</span>
+                </button>
+                <button @click="viewMode = 'macro'" 
+                        :class="viewMode === 'macro' ? 'bg-[#4169E1] text-white shadow-xs font-black' : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white font-bold'"
+                        class="px-4 py-2 rounded-xl transition-all flex items-center gap-2">
+                    <i class="fas fa-landmark text-xs"></i>
+                    <span>Macro & Central Banks (<span x-text="macroList.length">0</span>)</span>
+                </button>
+                <button @click="viewMode = 'all'" 
+                        :class="viewMode === 'all' ? 'bg-[#4169E1] text-white shadow-xs font-black' : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white font-bold'"
+                        class="px-4 py-2 rounded-xl transition-all flex items-center gap-2">
+                    <i class="fas fa-layer-group text-xs"></i>
+                    <span>All Events (<span x-text="combinedList.length">0</span>)</span>
+                </button>
+            </div>
+
+            <!-- Hub Direct Link -->
+            <a href="{% url 'earnings' %}" 
+               class="text-xs font-bold text-[#4169E1] hover:underline flex items-center gap-1.5">
+                <span>View Full Regulatory Filings Hub</span>
+                <i class="fas fa-arrow-up-right-from-square text-[10px]"></i>
+            </a>
+        </div>
+
+        <!-- Secondary Filters Row: Sovereign Market + Session + Status + Search -->
+        <div class="flex items-center justify-between flex-wrap gap-3">
+            
+            <!-- Sovereign Market Pills -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                <button @click="selectedCountry = 'all'" 
+                        :class="selectedCountry === 'all' ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-black' : 'bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-dark-750 font-bold'"
+                        class="px-3.5 py-1.5 rounded-full text-xs transition-all flex items-center gap-1.5">
+                    <span>🌐 All Markets</span>
+                </button>
+                <button @click="selectedCountry = 'kenya'" 
+                        :class="selectedCountry === 'kenya' ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-black' : 'bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-dark-750 font-bold'"
+                        class="px-3.5 py-1.5 rounded-full text-xs transition-all flex items-center gap-1.5">
+                    <span>🇰🇪 Kenya</span>
+                </button>
+                <button @click="selectedCountry = 'usa'" 
+                        :class="selectedCountry === 'usa' ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-black' : 'bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-dark-750 font-bold'"
+                        class="px-3.5 py-1.5 rounded-full text-xs transition-all flex items-center gap-1.5">
+                    <span>🇺🇸 United States</span>
+                </button>
+                <button @click="selectedCountry = 'uk'" 
+                        :class="selectedCountry === 'uk' ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-black' : 'bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-dark-750 font-bold'"
+                        class="px-3.5 py-1.5 rounded-full text-xs transition-all flex items-center gap-1.5">
+                    <span>🇬🇧 United Kingdom</span>
+                </button>
+                <button @click="selectedCountry = 'japan'" 
+                        :class="selectedCountry === 'japan' ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-black' : 'bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-dark-750 font-bold'"
+                        class="px-3.5 py-1.5 rounded-full text-xs transition-all flex items-center gap-1.5">
+                    <span>🇯🇵 Japan</span>
+                </button>
+            </div>
+
+            <!-- Session & Status (For Earnings) -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <template x-if="viewMode === 'earnings' || viewMode === 'all'">
+                    <div class="flex items-center gap-1 bg-neutral-100 dark:bg-dark-800 p-1 rounded-full text-[11px] font-bold">
+                        <button @click="selectedSession = 'all'" 
+                                :class="selectedSession === 'all' ? 'bg-white dark:bg-dark-700 text-neutral-900 dark:text-white shadow-2xs' : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'"
+                                class="px-2.5 py-1 rounded-full transition-all">All Timing</button>
+                        <button @click="selectedSession = 'BMO'" 
+                                :class="selectedSession === 'BMO' ? 'bg-white dark:bg-dark-700 text-amber-500 shadow-2xs' : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'"
+                                class="px-2.5 py-1 rounded-full transition-all flex items-center gap-1">
+                            <span>🌅 BMO</span>
+                        </button>
+                        <button @click="selectedSession = 'AMC'" 
+                                :class="selectedSession === 'AMC' ? 'bg-white dark:bg-dark-700 text-indigo-400 shadow-2xs' : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'"
+                                class="px-2.5 py-1 rounded-full transition-all flex items-center gap-1">
+                            <span>🌙 AMC</span>
+                        </button>
+                    </div>
+                </template>
+
+                <!-- Search Input -->
+                <div class="relative min-w-[200px]">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-xs text-neutral-400"></i>
+                    <input type="text" 
+                           placeholder="Search ticker (e.g. NVDA, SCOM, AAPL)..." 
+                           x-model="searchQuery" 
+                           class="w-full pl-8 pr-3 py-1.5 rounded-full bg-neutral-100 dark:bg-dark-800 border border-transparent dark:border-neutral-800 text-xs text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-[#4169E1]">
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- VIEW 1: CORPORATE EARNINGS DESK (LISTED COMPANIES)            -->
+    <!-- ============================================================= -->
+    <div x-show="viewMode === 'earnings'" class="space-y-4">
+        
+        <div class="flex items-center justify-between text-xs text-neutral-400 px-1">
+            <div>
+                Showing <span class="font-bold text-neutral-900 dark:text-white" x-text="filteredEarnings.length">0</span> listed company earnings releases
+            </div>
+            <div class="text-[11px] flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 text-amber-500">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> BMO = Before Market Open
+                </span>
+                <span class="text-neutral-600">&bull;</span>
+                <span class="inline-flex items-center gap-1 text-indigo-400">
+                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span> AMC = After Market Close
+                </span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <template x-for="ev in filteredEarnings" :key="ev.id">
+                <div class="bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-5 shadow-xs hover:shadow-card transition-all flex flex-col justify-between group">
+                    
+                    <div>
+                        <!-- Top Row: Date Pill, Timing Badge, Country Flag -->
+                        <div class="flex items-center justify-between mb-3.5">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-12 h-12 rounded-2xl bg-neutral-100 dark:bg-dark-800 border border-neutral-200 dark:border-neutral-750 flex flex-col items-center justify-center flex-shrink-0 text-center shadow-2xs group-hover:border-[#4169E1] transition-colors">
+                                    <span class="text-[9px] font-extrabold uppercase text-neutral-400 tracking-wider" x-text="getDateMonth(ev.date)">NOV</span>
+                                    <span class="text-base font-black text-neutral-900 dark:text-white" x-text="getDateDay(ev.date)">20</span>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs" x-text="ev.country_flag"></span>
+                                        <span class="text-[11px] font-bold text-neutral-500 dark:text-neutral-400" x-text="ev.country"></span>
+                                        <span class="text-neutral-300 dark:text-neutral-700">&bull;</span>
+                                        <span class="text-[10px] font-mono font-bold text-neutral-400" x-text="ev.exchange"></span>
+                                    </div>
+                                    <div class="text-[11px] font-mono text-neutral-400 mt-0.5" x-text="ev.date"></div>
+                                </div>
+                            </div>
+
+                            <!-- Timing Pill (BMO / AMC / DMH) -->
+                            <div class="flex items-center gap-1.5">
+                                <template x-if="ev.session_code === 'BMO'">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase bg-amber-500/15 text-amber-500 border border-amber-500/30">
+                                        <span>🌅 Before Open</span>
+                                    </span>
+                                </template>
+                                <template x-if="ev.session_code === 'AMC'">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
+                                        <span>🌙 After Close</span>
+                                    </span>
+                                </template>
+                                <template x-if="ev.session_code !== 'BMO' && ev.session_code !== 'AMC'">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase bg-neutral-100 dark:bg-dark-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-750" x-text="ev.time"></span>
+                                </template>
+
+                                <span :class="ev.status === 'Reported' ? 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30' : 'bg-[#4169E1]/15 text-[#4169E1] border-[#4169E1]/30'"
+                                      class="px-2.5 py-1 rounded-full text-[10px] font-bold border" x-text="ev.status"></span>
+                            </div>
+                        </div>
+
+                        <!-- Company Header: Ticker, Name, Fiscal Period -->
+                        <div class="flex items-start gap-3 mb-3.5">
+                            <template x-if="ev.logo">
+                                <img :src="ev.logo" :alt="ev.symbol" class="w-10 h-10 rounded-2xl object-contain bg-white dark:bg-dark-800 p-1.5 border border-neutral-200 dark:border-neutral-750 flex-shrink-0 shadow-2xs">
+                            </template>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <a :href="'/asset/' + ev.symbol + '/'" class="font-mono font-black text-base text-neutral-900 dark:text-white hover:text-[#4169E1] transition-colors">
+                                        <span x-text="'$' + ev.symbol"></span>
+                                    </a>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-neutral-600 dark:text-neutral-400" x-text="ev.fiscal_period"></span>
+                                </div>
+                                <h3 class="text-xs font-bold text-neutral-700 dark:text-neutral-300 truncate" x-text="ev.company_name"></h3>
+                            </div>
+                        </div>
+
+                        <!-- Consensus Estimates vs Actual Data Card -->
+                        <div class="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-neutral-50 dark:bg-dark-800/80 border border-neutral-200/60 dark:border-neutral-800/80 text-xs mb-3.5">
+                            <!-- EPS Metrics -->
+                            <div>
+                                <span class="text-[10px] font-bold uppercase text-neutral-400 block mb-0.5">EPS Consensus</span>
+                                <div class="font-mono font-bold text-neutral-900 dark:text-white" x-text="ev.consensus_eps"></div>
+                                <template x-if="ev.actual_eps">
+                                    <div class="text-[10px] mt-0.5 flex items-center gap-1 font-mono">
+                                        <span class="text-neutral-400">Act:</span>
+                                        <span class="font-bold text-emerald-500" x-text="ev.actual_eps"></span>
+                                        <span class="text-[9px] px-1 rounded bg-emerald-500/15 text-emerald-500 font-bold" x-text="ev.eps_surprise"></span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Revenue Metrics -->
+                            <div>
+                                <span class="text-[10px] font-bold uppercase text-neutral-400 block mb-0.5">Revenue Est.</span>
+                                <div class="font-mono font-bold text-neutral-900 dark:text-white" x-text="ev.consensus_revenue"></div>
+                                <template x-if="ev.actual_revenue">
+                                    <div class="text-[10px] mt-0.5 flex items-center gap-1 font-mono">
+                                        <span class="text-neutral-400">Act:</span>
+                                        <span class="font-bold text-emerald-500" x-text="ev.actual_revenue"></span>
+                                        <span class="text-[9px] px-1 rounded bg-emerald-500/15 text-emerald-500 font-bold" x-text="ev.revenue_surprise"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Notes / Analyst Watch Points -->
+                        <p class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed line-clamp-2 mb-3.5" x-text="ev.description"></p>
+                    </div>
+
+                    <!-- Card Footer: Regulatory Link, Webcast, and Set Reminder CTA -->
+                    <div class="pt-3 border-t border-neutral-100 dark:border-neutral-800/80 flex items-center justify-between gap-2 flex-wrap">
+                        
+                        <!-- Regulatory & Call Info -->
+                        <div class="flex items-center gap-2 text-[11px]">
+                            <template x-if="ev.filing_id">
+                                <a :href="'/earnings/' + ev.filing_id + '/'" class="inline-flex items-center gap-1 font-bold text-[#4169E1] hover:underline" title="View Official Filing Reader">
+                                    <i class="far fa-file-lines text-[10px]"></i>
+                                    <span x-text="ev.filing_type"></span>
+                                </a>
+                            </template>
+                            <template x-if="!ev.filing_id">
+                                <span class="text-neutral-400 flex items-center gap-1">
+                                    <i class="fas fa-landmark text-[10px]"></i>
+                                    <span x-text="ev.regulator"></span>
+                                </span>
+                            </template>
+
+                            <template x-if="ev.call_time">
+                                <span class="text-neutral-400">&bull;</span>
+                                <span class="text-neutral-400 truncate max-w-[120px]" x-text="ev.call_time"></span>
+                            </template>
+                        </div>
+
+                        <!-- Event Reminder CTA -->
+                        <button @click="triggerReminder(ev)" 
+                                :class="isReminded(ev.id) ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-500 dark:text-emerald-400 hover:bg-rose-500/15 hover:border-rose-500/30 hover:text-rose-400' : 'bg-[#4169E1] hover:bg-[#3457C9] text-white shadow-brand-glow'"
+                                class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all border flex items-center gap-1.5 group/btn">
+                            <i :class="isReminded(ev.id) ? 'fas fa-check-circle group-hover/btn:hidden' : 'far fa-bell'"></i>
+                            <i :class="isReminded(ev.id) ? 'hidden group-hover/btn:inline fas fa-bell-slash' : 'hidden'"></i>
+                            <span x-text="isReminded(ev.id) ? 'Reminder Active' : 'Set Reminder'"></span>
+                        </button>
+
+                    </div>
+
+                </div>
+            </template>
+        </div>
+
+        <!-- Empty State (Earnings) -->
+        <div x-show="filteredEarnings.length === 0" class="p-12 text-center bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800">
+            <i class="far fa-file-invoice text-4xl text-neutral-400 mb-3 block"></i>
+            <h3 class="font-extrabold text-base text-neutral-900 dark:text-white">No listed earnings releases match this filter</h3>
+            <p class="text-xs text-neutral-400 mt-1 max-w-sm mx-auto">
+                Try selecting "All Markets" or clearing the session filter to view all corporate earnings releases.
+            </p>
+            <button @click="selectedCountry = 'all'; selectedSession = 'all'; searchQuery = ''" 
+                    class="mt-4 px-5 py-2 rounded-full text-xs font-bold text-white bg-[#4169E1] hover:bg-[#3457C9]">
+                Reset Earnings Filters
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- VIEW 2: MACROECONOMIC RELEASES & CENTRAL BANK DECISIONS       -->
+    <!-- ============================================================= -->
+    <div x-show="viewMode === 'macro'" class="space-y-4">
+        
+        <div class="flex items-center justify-between text-xs text-neutral-400 px-1">
+            <div>
+                Showing <span class="font-bold text-neutral-900 dark:text-white" x-text="filteredMacro.length">0</span> macroeconomic & central bank releases
+            </div>
+            <div class="text-[11px] text-neutral-400">
+                All times displayed in East Africa Time (EAT)
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <template x-for="ev in filteredMacro" :key="ev.id">
+                <div class="bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-5 shadow-xs hover:shadow-card transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-5 group">
+                    
+                    <!-- Left: Date/Time Badge & Meta -->
+                    <div class="flex items-start gap-4">
+                        <!-- Date Pill -->
+                        <div class="w-16 h-16 rounded-2xl bg-neutral-100 dark:bg-dark-800 border border-neutral-200 dark:border-neutral-750 flex flex-col items-center justify-center flex-shrink-0 text-center shadow-2xs group-hover:border-[#4169E1] transition-colors">
+                            <span class="text-[10px] font-extrabold uppercase text-neutral-400 tracking-wider" x-text="getDateMonth(ev.date)">NOV</span>
+                            <span class="text-lg font-black text-neutral-900 dark:text-white" x-text="getDateDay(ev.date)">17</span>
+                            <span class="text-[9px] font-mono text-neutral-400" x-text="ev.time">14:30</span>
+                        </div>
+
+                        <!-- Main Info -->
+                        <div>
+                            <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                <span class="text-xs" x-text="ev.country_flag"></span>
+                                <span class="text-xs font-bold text-neutral-500 dark:text-neutral-400" x-text="ev.country"></span>
+                                <span class="text-neutral-300 dark:text-neutral-700">&bull;</span>
+                                <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-dark-800 text-neutral-600 dark:text-neutral-300" x-text="ev.category_label || ev.category"></span>
+                                <span :class="ev.impact === 'High' ? 'bg-amber-500/15 text-amber-500 border-amber-500/30' : 'bg-blue-500/15 text-blue-500 border-blue-500/30'" 
+                                      class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border" x-text="ev.impact + ' Impact'"></span>
+                            </div>
+
+                            <h3 class="text-base font-extrabold text-neutral-900 dark:text-white group-hover:text-[#4169E1] transition-colors">
+                                <span x-text="ev.title"></span>
+                            </h3>
+
+                            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-2xl leading-relaxed" x-text="ev.description"></p>
+
+                            <!-- Consensus & Previous Tags -->
+                            <div class="flex items-center gap-3 mt-2 text-xs flex-wrap">
+                                <template x-if="ev.consensus">
+                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-50 dark:bg-dark-800/80 border border-neutral-200/60 dark:border-neutral-800 text-[11px]">
+                                        <span class="text-neutral-400 font-medium">Consensus:</span>
+                                        <span class="font-mono font-bold text-neutral-900 dark:text-white" x-text="ev.consensus"></span>
+                                    </div>
+                                </template>
+                                <template x-if="ev.previous">
+                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-50 dark:bg-dark-800/80 border border-neutral-200/60 dark:border-neutral-800 text-[11px]">
+                                        <span class="text-neutral-400 font-medium">Previous:</span>
+                                        <span class="font-mono font-bold text-neutral-500 dark:text-neutral-400" x-text="ev.previous"></span>
+                                    </div>
+                                </template>
+                                <template x-if="ev.symbol">
+                                    <a :href="'/asset/' + ev.symbol + '/'" class="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-[#4169E1] hover:underline">
+                                        <i class="fas fa-arrow-trend-up text-[9px]"></i>
+                                        <span x-text="'$' + ev.symbol"></span>
+                                    </a>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Action Button: Set Email Reminder -->
+                    <div class="flex-shrink-0 w-full md:w-auto flex flex-row md:flex-col items-center md:items-end justify-between gap-2.5 pt-3 md:pt-0 border-t md:border-t-0 border-neutral-100 dark:border-neutral-800">
+                        <button @click="triggerReminder(ev)" 
+                                :class="isReminded(ev.id) ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-500 dark:text-emerald-400 hover:bg-rose-500/15 hover:border-rose-500/30 hover:text-rose-400' : 'bg-[#4169E1] hover:bg-[#3457C9] text-white shadow-brand-glow'"
+                                class="px-5 py-2.5 rounded-full text-xs font-bold transition-all border flex items-center justify-center gap-2 group/btn">
+                            <i :class="isReminded(ev.id) ? 'fas fa-check-circle group-hover/btn:hidden' : 'far fa-bell'"></i>
+                            <i :class="isReminded(ev.id) ? 'hidden group-hover/btn:inline fas fa-bell-slash' : 'hidden'"></i>
+                            <span x-text="isReminded(ev.id) ? 'Reminder Active' : 'Set Email Reminder'"></span>
+                        </button>
+
+                        <span class="text-[10px] text-neutral-400 flex items-center gap-1">
+                            <i class="fas fa-paper-plane text-[9px]"></i>
+                            <span>Dispatched to registered email</span>
+                        </span>
+                    </div>
+
+                </div>
+            </template>
+        </div>
+
+        <!-- Empty State (Macro) -->
+        <div x-show="filteredMacro.length === 0" class="p-12 text-center bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800">
+            <i class="far fa-calendar-xmark text-4xl text-neutral-400 mb-3 block"></i>
+            <h3 class="font-extrabold text-base text-neutral-900 dark:text-white">No scheduled releases match this filter</h3>
+            <p class="text-xs text-neutral-400 mt-1 max-w-sm mx-auto">
+                Try selecting "All Markets" or clearing your search term to see other global releases.
+            </p>
+            <button @click="selectedCountry = 'all'; selectedImpact = 'all'; searchQuery = ''" 
+                    class="mt-4 px-5 py-2 rounded-full text-xs font-bold text-white bg-[#4169E1] hover:bg-[#3457C9]">
+                Reset Macro Filters
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- VIEW 3: COMBINED UNIFIED TIMELINE (ALL EVENTS)                -->
+    <!-- ============================================================= -->
+    <div x-show="viewMode === 'all'" class="space-y-4">
+        
+        <div class="flex items-center justify-between text-xs text-neutral-400 px-1">
+            <div>
+                Showing <span class="font-bold text-neutral-900 dark:text-white" x-text="filteredCombined.length">0</span> combined global market events
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <template x-for="ev in filteredCombined" :key="ev.id">
+                <div class="bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-5 shadow-xs hover:shadow-card transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-5 group">
+                    
+                    <div class="flex items-start gap-4">
+                        <!-- Date Pill -->
+                        <div class="w-16 h-16 rounded-2xl bg-neutral-100 dark:bg-dark-800 border border-neutral-200 dark:border-neutral-750 flex flex-col items-center justify-center flex-shrink-0 text-center shadow-2xs group-hover:border-[#4169E1] transition-colors">
+                            <span class="text-[10px] font-extrabold uppercase text-neutral-400 tracking-wider" x-text="getDateMonth(ev.date)">NOV</span>
+                            <span class="text-lg font-black text-neutral-900 dark:text-white" x-text="getDateDay(ev.date)">17</span>
+                            <span class="text-[9px] font-mono text-neutral-400" x-text="ev.time">14:30</span>
+                        </div>
+
+                        <!-- Main Info -->
+                        <div>
+                            <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                <span class="text-xs" x-text="ev.country_flag"></span>
+                                <span class="text-xs font-bold text-neutral-500 dark:text-neutral-400" x-text="ev.country"></span>
+                                <span class="text-neutral-300 dark:text-neutral-700">&bull;</span>
+                                <span :class="ev.category === 'EARNINGS' ? 'bg-emerald-500/15 text-emerald-500' : 'bg-neutral-100 dark:bg-dark-800 text-neutral-600 dark:text-neutral-300'"
+                                      class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full" x-text="ev.category_label || ev.category"></span>
+                                <span :class="ev.impact === 'High' ? 'bg-amber-500/15 text-amber-500 border-amber-500/30' : 'bg-blue-500/15 text-blue-500 border-blue-500/30'" 
+                                      class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border" x-text="ev.impact + ' Impact'"></span>
+                            </div>
+
+                            <h3 class="text-base font-extrabold text-neutral-900 dark:text-white group-hover:text-[#4169E1] transition-colors">
+                                <span x-text="ev.title"></span>
+                            </h3>
+
+                            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-2xl leading-relaxed" x-text="ev.description"></p>
+
+                            <!-- Consensus Tags -->
+                            <div class="flex items-center gap-3 mt-2 text-xs flex-wrap">
+                                <template x-if="ev.consensus">
+                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-50 dark:bg-dark-800/80 border border-neutral-200/60 dark:border-neutral-800 text-[11px]">
+                                        <span class="text-neutral-400 font-medium">Consensus:</span>
+                                        <span class="font-mono font-bold text-neutral-900 dark:text-white" x-text="ev.consensus"></span>
+                                    </div>
+                                </template>
+                                <template x-if="ev.symbol">
+                                    <a :href="'/asset/' + ev.symbol + '/'" class="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-[#4169E1] hover:underline">
+                                        <i class="fas fa-arrow-trend-up text-[9px]"></i>
+                                        <span x-text="'$' + ev.symbol"></span>
+                                    </a>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Action Button: Set Email Reminder -->
+                    <div class="flex-shrink-0 w-full md:w-auto flex flex-row md:flex-col items-center md:items-end justify-between gap-2.5 pt-3 md:pt-0 border-t md:border-t-0 border-neutral-100 dark:border-neutral-800">
+                        <button @click="triggerReminder(ev)" 
+                                :class="isReminded(ev.id) ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-500 dark:text-emerald-400 hover:bg-rose-500/15 hover:border-rose-500/30 hover:text-rose-400' : 'bg-[#4169E1] hover:bg-[#3457C9] text-white shadow-brand-glow'"
+                                class="px-5 py-2.5 rounded-full text-xs font-bold transition-all border flex items-center justify-center gap-2 group/btn">
+                            <i :class="isReminded(ev.id) ? 'fas fa-check-circle group-hover/btn:hidden' : 'far fa-bell'"></i>
+                            <i :class="isReminded(ev.id) ? 'hidden group-hover/btn:inline fas fa-bell-slash' : 'hidden'"></i>
+                            <span x-text="isReminded(ev.id) ? 'Reminder Active' : 'Set Email Reminder'"></span>
+                        </button>
+
+                        <span class="text-[10px] text-neutral-400 flex items-center gap-1">
+                            <i class="fas fa-paper-plane text-[9px]"></i>
+                            <span>Dispatched to registered email</span>
+                        </span>
+                    </div>
+
+                </div>
+            </template>
+        </div>
+
+    </div>
+
+    <!-- Active Reminders Off-Canvas Modal / Drawer -->
+    <div x-show="showRemindersDrawer" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+         @click.self="showRemindersDrawer = false">
+        <div class="bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-neutral-100 dark:border-neutral-800">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-[#4169E1]/15 text-[#4169E1] flex items-center justify-center">
+                        <i class="fas fa-bell text-xs"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm text-neutral-900 dark:text-white">Active Event Reminders</h3>
+                        <p class="text-[11px] text-neutral-400">Delivered automatically to your registered address</p>
+                    </div>
+                </div>
+                <button @click="showRemindersDrawer = false" class="text-neutral-400 hover:text-neutral-600 p-1">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="space-y-2.5 max-h-80 overflow-y-auto">
+                <template x-for="id in remindedIds" :key="id">
+                    <div class="p-3 rounded-2xl bg-neutral-50 dark:bg-dark-800 border border-neutral-200/70 dark:border-neutral-750 flex items-center justify-between">
+                        <div>
+                            <div class="font-bold text-xs text-neutral-900 dark:text-white line-clamp-1" x-text="getEventTitle(id)"></div>
+                            <div class="text-[10px] text-neutral-400 mt-0.5 flex items-center gap-1.5">
+                                <span class="text-emerald-500 font-bold">✓ Active</span>
+                                <span>&bull;</span>
+                                <span x-text="getEventDate(id)"></span>
+                            </div>
+                        </div>
+                        <button @click="removeReminder(id)" class="text-rose-500 hover:text-rose-600 text-xs px-2.5 py-1 rounded-full hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors" title="Cancel Reminder">
+                            <i class="fas fa-trash-can text-[11px]"></i>
+                        </button>
+                    </div>
+                </template>
+
+                <div x-show="remindedIds.length === 0" class="py-8 text-center text-neutral-400 text-xs">
+                    <i class="far fa-bell-slash text-2xl mb-2 block"></i>
+                    <span>You haven't set any event reminders yet.</span>
+                </div>
+            </div>
+
+            <button @click="showRemindersDrawer = false" class="w-full py-2.5 rounded-full text-xs font-bold text-neutral-800 dark:text-neutral-200 bg-neutral-100 dark:bg-dark-800 hover:bg-neutral-200 transition-colors">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Email Capture Modal for Unauthenticated Guests -->
+    <div x-show="showEmailModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+         @click.self="showEmailModal = false">
+        <div class="bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-6 max-w-sm w-full shadow-2xl space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="font-bold text-sm text-neutral-900 dark:text-white">Receive Event Reminder</div>
+                <button @click="showEmailModal = false" class="text-neutral-400 hover:text-neutral-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-neutral-500 dark:text-neutral-400">
+                Enter your email address to receive immediate alerts and calendar updates for:
+                <strong class="text-neutral-900 dark:text-white block mt-1" x-text="targetEvent?.title"></strong>
+            </p>
+
+            <div>
+                <label class="text-[10px] font-bold uppercase text-neutral-400 block mb-1">Your Email Address</label>
+                <input type="email" 
+                       x-model="guestEmail" 
+                       placeholder="investor@domain.com"
+                       class="w-full px-4 py-2.5 rounded-xl bg-neutral-100 dark:bg-dark-800 border border-neutral-200 dark:border-neutral-700 text-xs text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-[#4169E1]">
+            </div>
+
+            <button @click="submitGuestReminder()" 
+                    :disabled="!guestEmail"
+                    class="w-full py-2.5 rounded-full text-xs font-bold text-white bg-[#4169E1] hover:bg-[#3457C9] disabled:opacity-50 transition-colors shadow-brand-glow">
+                Confirm & Dispatch Email Reminder
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function eventsCalendarController() {
+        const rawMacro = {{ economic_events_json|safe|default:'[]' }};
+        const rawEarnings = {{ corporate_earnings_json|safe|default:'[]' }};
+        const rawCombined = {{ combined_events_json|safe|default:'[]' }};
+        const rawReminded = {{ reminded_ids|safe|default:'[]' }};
+        const userRegisteredEmail = "{{ user_email|default:'' }}";
+
+        return {
+            viewMode: 'earnings', // 'earnings', 'macro', or 'all'
+            macroList: rawMacro,
+            earningsList: rawEarnings,
+            combinedList: rawCombined,
+            remindedIds: rawReminded,
+            userEmail: userRegisteredEmail,
+            selectedCountry: "{{ selected_country|default:'all' }}",
+            selectedSession: "{{ selected_session|default:'all' }}",
+            selectedImpact: "{{ selected_impact|default:'all' }}",
+            searchQuery: '',
+            showRemindersDrawer: false,
+            showEmailModal: false,
+            targetEvent: null,
+            guestEmail: '',
+
+            init() {
+                // Fetch active reminders on boot
+                if (this.userEmail) {
+                    fetch('/api/events/my-reminders/?email=' + encodeURIComponent(this.userEmail))
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.reminded_ids) this.remindedIds = data.reminded_ids;
+                        }).catch(() => {});
+                }
+            },
+
+            countEarningsBySession(sessionCode) {
+                return this.earningsList.filter(e => e.session_code === sessionCode).length;
+            },
+
+            get filteredEarnings() {
+                return this.earningsList.filter(ev => {
+                    // Country filter
+                    if (this.selectedCountry !== 'all' && ev.country_code !== this.selectedCountry) return false;
+                    // Session filter
+                    if (this.selectedSession !== 'all' && ev.session_code !== this.selectedSession) return false;
+                    // Search query
+                    if (this.searchQuery.trim()) {
+                        const q = this.searchQuery.toLowerCase().trim();
+                        const matchSymbol = (ev.symbol || '').toLowerCase().includes(q);
+                        const matchName = (ev.company_name || '').toLowerCase().includes(q);
+                        const matchTitle = (ev.title || '').toLowerCase().includes(q);
+                        const matchDesc = (ev.description || '').toLowerCase().includes(q);
+                        if (!matchSymbol && !matchName && !matchTitle && !matchDesc) return false;
+                    }
+                    return true;
+                });
+            },
+
+            get filteredMacro() {
+                return this.macroList.filter(ev => {
+                    // Country filter
+                    if (this.selectedCountry !== 'all' && ev.country_code !== this.selectedCountry) return false;
+                    // Impact filter
+                    if (this.selectedImpact !== 'all' && ev.impact.toLowerCase() !== this.selectedImpact.toLowerCase()) return false;
+                    // Search query
+                    if (this.searchQuery.trim()) {
+                        const q = this.searchQuery.toLowerCase().trim();
+                        const matchTitle = (ev.title || '').toLowerCase().includes(q);
+                        const matchDesc = (ev.description || '').toLowerCase().includes(q);
+                        const matchCountry = (ev.country || '').toLowerCase().includes(q);
+                        const matchSymbol = (ev.symbol || '').toLowerCase().includes(q);
+                        if (!matchTitle && !matchDesc && !matchCountry && !matchSymbol) return false;
+                    }
+                    return true;
+                });
+            },
+
+            get filteredCombined() {
+                return this.combinedList.filter(ev => {
+                    if (this.selectedCountry !== 'all' && ev.country_code !== this.selectedCountry) return false;
+                    if (this.searchQuery.trim()) {
+                        const q = this.searchQuery.toLowerCase().trim();
+                        const matchSymbol = (ev.symbol || '').toLowerCase().includes(q);
+                        const matchTitle = (ev.title || '').toLowerCase().includes(q);
+                        const matchDesc = (ev.description || '').toLowerCase().includes(q);
+                        if (!matchSymbol && !matchTitle && !matchDesc) return false;
+                    }
+                    return true;
+                });
+            },
+
+            isReminded(id) {
+                return this.remindedIds.includes(id);
+            },
+
+            getDateMonth(dateStr) {
+                if (!dateStr) return 'NOV';
+                if (dateStr.includes('Today') || dateStr.includes('Tomorrow')) return 'NOV';
+                const parts = dateStr.split(' ');
+                return parts[0].toUpperCase();
+            },
+
+            getDateDay(dateStr) {
+                if (!dateStr) return '17';
+                if (dateStr.includes('Today')) return '17';
+                if (dateStr.includes('Tomorrow')) return '18';
+                const parts = dateStr.replace(',', '').split(' ');
+                return parts[1] || '17';
+            },
+
+            getEventTitle(id) {
+                const found = this.combinedList.find(e => e.id === id);
+                return found ? found.title : id;
+            },
+
+            getEventDate(id) {
+                const found = this.combinedList.find(e => e.id === id);
+                return found ? found.date + ' • ' + found.time : '';
+            },
+
+            async triggerReminder(ev) {
+                if (this.userEmail) {
+                    await this.toggleReminderApi(ev.id, this.userEmail, ev);
+                } else {
+                    this.targetEvent = ev;
+                    this.showEmailModal = true;
+                }
+            },
+
+            async submitGuestReminder() {
+                if (!this.guestEmail || !this.targetEvent) return;
+                await this.toggleReminderApi(this.targetEvent.id, this.guestEmail, this.targetEvent);
+                this.showEmailModal = false;
+                this.guestEmail = '';
+            },
+
+            async removeReminder(id) {
+                const email = this.userEmail || this.guestEmail;
+                if (!email) return;
+                await this.toggleReminderApi(id, email);
+            },
+
+            async toggleReminderApi(eventId, email, eventObj) {
+                try {
+                    const res = await fetch('/api/events/remind/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': this.getCsrfToken()
+                        },
+                        body: JSON.stringify({
+                            event_id: eventId,
+                            email: email,
+                            title: eventObj?.title,
+                            date: eventObj?.date,
+                            time: eventObj?.time,
+                            country: eventObj?.country,
+                            impact: eventObj?.impact,
+                            symbol: eventObj?.symbol,
+                            notes: eventObj?.description
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        if (data.is_active) {
+                            if (!this.remindedIds.includes(eventId)) {
+                                this.remindedIds.push(eventId);
+                            }
+                            window.dispatchEvent(new CustomEvent('toast', { detail: data.message }));
+                        } else {
+                            this.remindedIds = this.remindedIds.filter(x => x !== eventId);
+                            window.dispatchEvent(new CustomEvent('toast', { detail: data.message }));
+                        }
+                    } else {
+                        window.dispatchEvent(new CustomEvent('toast', { detail: data.error || 'Failed to update reminder' }));
+                    }
+                } catch (e) {
+                    console.error(e);
+                    window.dispatchEvent(new CustomEvent('toast', { detail: 'Error communicating with reminder service' }));
+                }
+            },
+
+            getCsrfToken() {
+                const cookieValue = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('csrftoken='))
+                    ?.split('=')[1];
+                return cookieValue || '';
+            }
+        };
+    }
+</script>
+{% endblock %}

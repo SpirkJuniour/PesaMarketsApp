@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6 md:space-y-8 pb-16" x-data="newsDetailController()">
+
+    <!-- ========================================== -->
+    <!-- 1. TRENDING TOPICS RIBBON                  -->
+    <!-- ========================================== -->
+    <div class="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/70 dark:bg-dark-850/80 py-2.5 px-4 rounded-2xl flex items-center gap-3 overflow-x-auto ticker-scroll backdrop-blur-sm">
+        <span class="text-[11px] font-extrabold uppercase tracking-wider text-neutral-900 dark:text-neutral-100 flex items-center gap-1.5 flex-shrink-0">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            TRENDING
+        </span>
+        <div class="flex items-center gap-3 text-xs text-neutral-600 dark:text-neutral-300 font-medium whitespace-nowrap">
+            {% for topic in trending_topics %}
+            <a href="{% url 'news' %}?q={{ topic|urlencode }}" class="hover:text-[#4169E1] transition-colors flex items-center gap-2">
+                <span>{{ topic }}</span>
+                {% if not forloop.last %}<span class="text-neutral-300 dark:text-neutral-700">/</span>{% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. ARTICLE BREADCRUMB & METADATA BAR       -->
+    <!-- ========================================== -->
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+        <a href="{% url 'news' %}" class="inline-flex items-center gap-2 text-xs font-bold text-neutral-500 dark:text-neutral-400 hover:text-[#4169E1] transition-colors group">
+            <i class="fas fa-arrow-left text-xs group-hover:-translate-x-1 transition-transform"></i>
+            <span>Back to Market Wire</span>
+        </a>
+
+        <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-[#4169E1]/15 text-[#4169E1] border border-[#4169E1]/20 flex items-center gap-1.5">
+                <i class="{{ story.category_icon|default:'fa-solid fa-bolt' }} text-[10px]"></i>
+                <span>{{ story.category }}</span>
+            </span>
+
+            {% if story.is_paywalled %}
+            <span class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center gap-1.5">
+                <i class="fas fa-lock text-[9px]"></i>
+                <span>{{ story.paywall_tier|default:'Publisher Exclusive' }}</span>
+            </span>
+            {% else %}
+            <span class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 flex items-center gap-1.5">
+                <i class="fas fa-unlock text-[9px]"></i>
+                <span>Full Access</span>
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. MAIN ARTICLE LAYOUT (2 Columns)         -->
+    <!-- ========================================== -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Main Column: Headline, Editorial Image, Body -->
+        <article class="lg:col-span-8 space-y-6">
+
+            <!-- Source Badge Row -->
+            <div class="flex items-center gap-2 text-xs font-semibold text-neutral-500 dark:text-neutral-400 flex-wrap">
+                <span class="text-neutral-900 dark:text-white font-extrabold flex items-center gap-1.5">
+                    <i class="fas fa-newspaper text-[#4169E1]"></i>
+                    {{ story.source }}
+                </span>
+                <span>&bull;</span>
+                <span class="text-emerald-500 font-bold">Syndicated Wire</span>
+                <span>&bull;</span>
+                <span>{{ story.time_ago }}</span>
+            </div>
+
+            <!-- Headline -->
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-neutral-900 dark:text-white tracking-tight leading-tight">
+                {{ story.title }}
+            </h1>
+
+            <!-- ========================================== -->
+            <!-- 4. IN-ARTICLE EDITORIAL HERO IMAGE         -->
+            <!-- ========================================== -->
+            <div class="relative rounded-3xl overflow-hidden shadow-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-900 group">
+                <img src="{{ story.image }}" alt="{{ story.title }}" class="w-full h-72 sm:h-96 md:h-[460px] object-cover group-hover:scale-102 transition-transform duration-500">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"></div>
+                <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs text-white/95">
+                    <span class="font-bold flex items-center gap-2 drop-shadow-sm">
+                        <i class="fas fa-camera text-[#4169E1]"></i>
+                        <span>{{ story.source }} Wire Photography</span>
+                    </span>
+                    <span class="text-[11px] font-mono font-bold text-neutral-200 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                        {{ story.category }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 5. AUTHOR BYLINE & SOCIAL ACTIONS         -->
+            <!-- ========================================== -->
+            <div class="flex items-center justify-between border-y border-neutral-200 dark:border-neutral-800 py-3.5 flex-wrap gap-4">
+                <div class="flex items-center gap-3">
+                    <img src="{{ story.author_avatar }}" alt="{{ story.author_name }}" class="w-11 h-11 rounded-full object-cover ring-2 ring-emerald-500/20 shadow-xs">
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-extrabold text-sm text-neutral-900 dark:text-white">{{ story.author_name }}</span>
+                            <span class="text-neutral-400 text-xs">&bull;</span>
+                            <span class="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{{ story.author_role }}</span>
+                        </div>
+                        <div class="text-xs text-neutral-400 mt-0.5">
+                            {{ story.published_date }} &bull; {{ story.read_time }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
+                    <button @click="shareArticle()" class="w-9 h-9 rounded-full bg-neutral-100 dark:bg-dark-800 hover:bg-neutral-200 dark:hover:bg-dark-750 flex items-center justify-center text-xs font-bold transition-colors" title="Share Dispatch">
+                        <i class="fas fa-share-nodes"></i>
+                    </button>
+                    <button @click="bookmarkArticle()" class="w-9 h-9 rounded-full bg-neutral-100 dark:bg-dark-800 hover:bg-neutral-200 dark:hover:bg-dark-750 flex items-center justify-center text-xs font-bold transition-colors" title="Save to Watchlist">
+                        <i :class="isBookmarked ? 'fas text-[#4169E1]' : 'far'" class="fa-bookmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mentioned Tickers Quick Bar -->
+            {% if ticker_assets %}
+            <div class="bg-neutral-50 dark:bg-dark-850 rounded-2xl p-4 border border-neutral-200 dark:border-neutral-800">
+                <span class="text-[11px] font-extrabold text-neutral-400 uppercase tracking-wider block mb-2">Tickers referenced in this dispatch:</span>
+                <div class="flex items-center gap-2.5 overflow-x-auto ticker-scroll pb-1">
+                    {% for t in ticker_assets %}
+                    <a href="{% url 'asset_detail' t.symbol %}" class="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white dark:bg-dark-800 border border-neutral-200 dark:border-neutral-700 hover:border-[#4169E1] transition-all flex-shrink-0 group shadow-2xs">
+                        <span class="font-mono font-black text-xs text-neutral-900 dark:text-white group-hover:text-[#4169E1]">${{ t.symbol }}</span>
+                        <span class="text-xs font-mono text-neutral-600 dark:text-neutral-300">${{ t.price }}</span>
+                        <span class="text-[11px] font-mono font-bold {% if t.change >= 0 %}text-emerald-500{% else %}text-rose-500{% endif %}">
+                            {% if t.change >= 0 %}+{% endif %}{{ t.change }}%
+                        </span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Key Takeaways Callout Box -->
+            {% if story.key_takeaways %}
+            <div class="bg-emerald-500/5 dark:bg-emerald-500/10 rounded-2xl border border-emerald-500/20 p-5">
+                <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-2 mb-3">
+                    <i class="fas fa-bolt"></i>
+                    <span>Executive Takeaways</span>
+                </h4>
+                <ul class="space-y-2.5">
+                    {% for takeaway in story.key_takeaways %}
+                    <li class="flex items-start gap-2.5 text-xs sm:text-sm text-neutral-700 dark:text-neutral-200 leading-relaxed">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></span>
+                        <span>{{ takeaway }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- ========================================== -->
+            <!-- 6. ARTICLE BODY & PAYWALL HANDLING         -->
+            <!-- ========================================== -->
+            <div class="text-neutral-800 dark:text-neutral-200 text-sm sm:text-base leading-relaxed space-y-5">
+                {% if story.is_paywalled %}
+                    <!-- Show preview limit (first 2 paragraphs) -->
+                    {% for p in story.paragraphs|slice:":2" %}
+                    <p class="leading-relaxed">{{ p }}</p>
+                    {% endfor %}
+
+                    <!-- Gradient Fade Out Mask -->
+                    <div class="relative">
+                        <div class="h-28 -mt-24 bg-gradient-to-t from-white dark:from-dark-900 to-transparent pointer-events-none"></div>
+                    </div>
+
+                    <!-- Institutional Publisher Paywall Card -->
+                    <div class="bg-gradient-to-b from-neutral-50 to-neutral-100 dark:from-dark-850 dark:to-dark-900 rounded-3xl border border-neutral-300 dark:border-neutral-800 p-6 sm:p-8 text-center space-y-4 shadow-xl">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center justify-center mx-auto text-xl shadow-xs">
+                            <i class="fas fa-lock"></i>
+                        </div>
+
+                        <div>
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider text-amber-500 block mb-1">
+                                {{ story.paywall_tier|default:'Publisher Exclusive' }}
+                            </span>
+                            <h3 class="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white">
+                                Continue reading with {{ story.paywall_agency|default:story.source }}
+                            </h3>
+                            <p class="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-2 max-w-lg mx-auto leading-relaxed">
+                                This market report is syndicated under accredited license from <strong>{{ story.paywall_agency|default:story.source }}</strong>. Complete investigative disclosures, proprietary quantitative models, and full reporting copy require an active subscriber credential.
+                            </p>
+                        </div>
+
+                        <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
+                            <a href="{{ story.paywall_url|default:story.url }}" target="_blank" rel="noopener noreferrer"
+                               class="w-full sm:w-auto px-6 py-3 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm">
+                                <span>Subscribe to {{ story.paywall_agency|default:story.source }}</span>
+                                <i class="fas fa-arrow-up-right-from-square text-[10px]"></i>
+                            </a>
+
+                            <a href="{{ story.paywall_url|default:story.url }}" target="_blank" rel="noopener noreferrer"
+                               class="w-full sm:w-auto px-5 py-3 rounded-full bg-white dark:bg-dark-800 hover:bg-neutral-100 dark:hover:bg-dark-750 text-neutral-700 dark:text-neutral-200 border border-neutral-300 dark:border-neutral-700 font-bold text-xs transition-all flex items-center justify-center gap-1.5">
+                                <span>Sign In to Agency</span>
+                            </a>
+                        </div>
+
+                        <p class="text-[11px] text-neutral-400 pt-3 border-t border-neutral-200 dark:border-neutral-800">
+                            PesaMarkets syndicates licensed news wires. Subscriptions directly support independent financial journalism.
+                        </p>
+                    </div>
+
+                {% else %}
+                    <!-- Full open access article reading directly on PesaMarkets -->
+                    {% for p in story.paragraphs %}
+                    <p class="leading-relaxed">{{ p }}</p>
+                    {% endfor %}
+
+                    <div class="p-5 rounded-2xl bg-neutral-50 dark:bg-dark-850 border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-500 dark:text-neutral-400 flex items-center justify-between flex-wrap gap-3 mt-6">
+                        <div>
+                            <span class="font-bold text-neutral-800 dark:text-neutral-200">Accredited Reporting:</span>
+                            <span>Originally syndicated via {{ story.source }}. PesaMarkets does not self-publish news.</span>
+                        </div>
+                        <a href="{{ story.url }}" target="_blank" rel="noopener noreferrer" class="text-[#4169E1] hover:underline font-bold inline-flex items-center gap-1">
+                            <span>Read at Source</span>
+                            <i class="fas fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+        </article>
+
+        <!-- Sidebar: Related Category Stories & Action Desk -->
+        <aside class="lg:col-span-4 space-y-6">
+
+            <!-- Related Category Stories -->
+            <div class="bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-6 shadow-xs space-y-5">
+                <div class="flex items-center justify-between pb-3 border-b border-neutral-100 dark:border-neutral-800">
+                    <h3 class="font-extrabold text-sm text-neutral-900 dark:text-white flex items-center gap-2">
+                        <i class="fas fa-layer-group text-[#4169E1]"></i>
+                        <span>More in {{ story.category }}</span>
+                    </h3>
+                    <a href="{% url 'news' %}?category={{ story.category_slug }}" class="text-xs font-bold text-[#4169E1] hover:underline">
+                        View All
+                    </a>
+                </div>
+
+                <div class="space-y-4">
+                    {% for rel in story.related_stories %}
+                    <a href="{% url 'news_article_detail' rel.id %}" class="flex items-start gap-3 group">
+                        <img src="{{ rel.image }}" alt="{{ rel.title }}" class="w-16 h-16 rounded-xl object-cover flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-xs font-bold text-neutral-900 dark:text-white line-clamp-2 leading-snug group-hover:text-[#4169E1] transition-colors">
+                                {{ rel.title }}
+                            </h4>
+                            <div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1">
+                                <span>{{ rel.source }}</span>
+                                <span>&bull;</span>
+                                <span>{{ rel.time_ago }}</span>
+                            </div>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <p class="text-xs text-neutral-400">No other dispatches in this category currently.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Trade Mentioned Desk Quick Widget -->
+            {% if ticker_assets %}
+            <div class="bg-gradient-to-br from-[#4169E1]/10 to-emerald-500/10 rounded-3xl border border-[#4169E1]/20 p-6 shadow-xs space-y-4">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#4169E1] block mb-1">Live Trading Desk</span>
+                    <h3 class="font-black text-sm text-neutral-900 dark:text-white">Trade Covered Instruments</h3>
+                    <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1">Execute direct market orders on assets mentioned in this briefing.</p>
+                </div>
+
+                <div class="space-y-2">
+                    {% for t in ticker_assets %}
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-dark-800 border border-neutral-200 dark:border-neutral-700 text-xs">
+                        <div>
+                            <span class="font-mono font-bold text-neutral-900 dark:text-white">${{ t.symbol }}</span>
+                            <span class="text-[11px] text-neutral-400 block">{{ t.name|truncatechars:20 }}</span>
+                        </div>
+                        <div class="text-right flex items-center gap-3">
+                            <div>
+                                <span class="font-mono font-bold text-neutral-900 dark:text-white">${{ t.price }}</span>
+                                <span class="text-[10px] font-mono block {% if t.change >= 0 %}text-emerald-500{% else %}text-rose-500{% endif %}">
+                                    {% if t.change >= 0 %}+{% endif %}{{ t.change }}%
+                                </span>
+                            </div>
+                            <a href="{% url 'trade' %}?symbol={{ t.symbol }}" class="px-3 py-1 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-bold text-[11px] transition-colors shadow-2xs">
+                                Trade
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+        </aside>
+
+    </div>
+
+</div>
+
+<!-- ========================================== -->
+<!-- 7. ARTICLE INTERACTION SCRIPT              -->
+<!-- ========================================== -->
+<script>
+    function newsDetailController() {
+        return {
+            isBookmarked: false,
+
+            shareArticle() {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(window.location.href);
+                    alert("Article link copied to clipboard!");
+                } else {
+                    prompt("Copy link to share:", window.location.href);
+                }
+            },
+
+            bookmarkArticle() {
+                this.isBookmarked = !this.isBookmarked;
+                const status = this.isBookmarked ? "saved to" : "removed from";
+                alert(`Story ${status} your reading list.`);
+            }
+        };
+    }
+</script>
+{% endblock %}

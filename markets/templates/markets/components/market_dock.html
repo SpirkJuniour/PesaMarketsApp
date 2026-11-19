@@ -1,0 +1,623 @@
+<!-- ========================================== -->
+<!-- MARKET DOCK / RIGHT RAIL COMPONENT         -->
+<!-- Matches design in Screenshots 1, 2, 3      -->
+<!-- ========================================== -->
+<aside class="hidden xl:flex flex-col w-80 2xl:w-88 flex-shrink-0 bg-white dark:bg-[#121214] border-l border-[#EBEBEB] dark:border-neutral-800/80 overflow-y-auto text-xs z-20 select-none custom-dock-scroll sticky top-[117px] h-[calc(100vh-117px)] self-start"
+       x-data="marketDockController()">
+
+    <!-- 1. Quote Lookup Input -->
+    <div class="p-3.5 border-b border-neutral-100 dark:border-neutral-800/80 sticky top-0 bg-white/95 dark:bg-[#121214]/95 backdrop-blur-md z-30">
+        <div class="relative">
+            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-neutral-400"></i>
+            <input type="text" 
+                   placeholder="Quote Lookup" 
+                   x-model="quoteQuery" 
+                   @input.debounce.250ms="filterTickers()"
+                   class="w-full pl-9 pr-4 py-2 rounded-xl bg-neutral-100 dark:bg-dark-800/80 border border-transparent dark:border-neutral-800/70 text-xs text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-[#4169E1] transition-colors">
+            <button x-show="quoteQuery" @click="quoteQuery = ''; filterTickers()" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600">
+                <i class="fas fa-times text-[10px]"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="divide-y divide-neutral-100 dark:divide-neutral-800/70">
+
+        <!-- 2. Trending tickers -->
+        <section class="p-4" x-show="showSection('trending')">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-extrabold text-xs text-neutral-900 dark:text-white tracking-tight">Trending tickers</h3>
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            </div>
+
+            <div class="space-y-2.5">
+                {% for item in dock_data.trending_tickers %}
+                <a href="{% url 'asset_detail' item.symbol %}" 
+                   class="flex items-center justify-between p-1.5 -mx-1.5 rounded-xl hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors group">
+                    <!-- Left: Ticker & Company Name -->
+                    <div class="w-28 flex-shrink-0">
+                        <div class="font-black text-neutral-900 dark:text-white text-xs group-hover:text-[#4169E1] transition-colors">
+                            {{ item.symbol }}
+                        </div>
+                        <div class="text-[10px] text-neutral-400 truncate">
+                            {{ item.name }}
+                        </div>
+                    </div>
+
+                    <!-- Middle: Mini SVG Sparkline Chart -->
+                    <div class="w-20 h-5 flex items-center justify-center">
+                        <svg class="w-full h-full overflow-visible" viewBox="0 0 80 22">
+                            <polygon points="{{ item.sparkline.area }}" fill="{{ item.sparkline.fill }}" />
+                            <polyline points="{{ item.sparkline.polyline }}" fill="none" stroke="{{ item.sparkline.stroke }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+
+                    <!-- Right: Price & Percent Change -->
+                    <div class="text-right flex-shrink-0 min-w-[70px]">
+                        <div class="font-mono font-bold text-neutral-900 dark:text-white text-xs">
+                            {{ item.price }}
+                        </div>
+                        <div class="font-mono text-[10px] font-bold {% if item.is_positive %}text-emerald-500{% else %}text-rose-500{% endif %}">
+                            {{ item.change }} ({{ item.change_percent }})
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- 3. Portfolios (Screenshot 1) -->
+        <section class="p-4 text-center" x-show="showSection('portfolios')">
+            <h3 class="font-extrabold text-xs text-neutral-900 dark:text-white text-left mb-3 tracking-tight">Portfolios</h3>
+            
+            {% if request.user.is_authenticated %}
+            <div class="bg-neutral-50 dark:bg-dark-850 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 text-left">
+                <div class="flex items-center justify-between text-[11px] text-neutral-400 mb-1">
+                    <span>Portfolio Equity</span>
+                    <span class="text-emerald-500 font-bold">+2.45% Today</span>
+                </div>
+                <div class="text-lg font-black font-mono text-neutral-900 dark:text-white mb-2">
+                    ${{ request.user.portfolios.first.cash_balance_usd|default:request.user.profile.cash_balance_usd|default:'0.00' }}
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'portfolio' %}" class="flex-1 text-center py-1.5 px-3 rounded-full text-[11px] font-bold bg-[#4169E1] text-white hover:bg-[#3457C9] transition-colors shadow-2xs">
+                        View Positions
+                    </a>
+                    <a href="{% url 'trade' %}" class="py-1.5 px-3 rounded-full text-[11px] font-bold bg-neutral-200 dark:bg-dark-750 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-300 dark:hover:bg-dark-700 transition-colors">
+                        Trade
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="py-4 px-2">
+                <p class="text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-3">
+                    Sign in to access your portfolio
+                </p>
+                <a href="{% url 'login' %}" 
+                   class="inline-block px-6 py-2 rounded-full text-xs font-bold text-white bg-neutral-900 dark:bg-neutral-100 dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-white transition-all shadow-xs">
+                    Sign in
+                </a>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- 4. Recently viewed (Screenshot 1) -->
+        <section class="p-4" x-show="showSection('recently_viewed')">
+            <h3 class="font-extrabold text-xs text-neutral-900 dark:text-white mb-3 tracking-tight">Recently viewed</h3>
+            
+            <div class="space-y-2.5">
+                {% for item in dock_data.recently_viewed %}
+                <a href="{% url 'asset_detail' item.symbol %}" 
+                   class="flex items-center justify-between p-1.5 -mx-1.5 rounded-xl hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors group">
+                    <div class="w-28 flex-shrink-0">
+                        <div class="font-black text-neutral-900 dark:text-white text-xs group-hover:text-[#4169E1] transition-colors">
+                            {{ item.symbol }}
+                        </div>
+                        <div class="text-[10px] text-neutral-400 truncate">
+                            {{ item.name }}
+                        </div>
+                    </div>
+
+                    <div class="w-20 h-5 flex items-center justify-center">
+                        <svg class="w-full h-full overflow-visible" viewBox="0 0 80 22">
+                            <polygon points="{{ item.sparkline.area }}" fill="{{ item.sparkline.fill }}" />
+                            <polyline points="{{ item.sparkline.polyline }}" fill="none" stroke="{{ item.sparkline.stroke }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+
+                    <div class="text-right flex-shrink-0 min-w-[70px]">
+                        <div class="font-mono font-bold text-neutral-900 dark:text-white text-xs">
+                            {{ item.price }}
+                        </div>
+                        <div class="font-mono text-[10px] font-bold {% if item.is_positive %}text-emerald-500{% else %}text-rose-500{% endif %}">
+                            {{ item.change }} ({{ item.change_percent }})
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- 5. Top gainers (Screenshot 1) -->
+        <section class="p-4" x-show="showSection('gainers')">
+            <h3 class="font-extrabold text-xs text-neutral-900 dark:text-white mb-3 tracking-tight">Top gainers</h3>
+            
+            <div class="space-y-2.5">
+                {% for item in dock_data.top_gainers %}
+                <a href="{% url 'asset_detail' item.symbol %}" 
+                   class="flex items-center justify-between p-1.5 -mx-1.5 rounded-xl hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors group">
+                    <div class="w-28 flex-shrink-0">
+                        <div class="font-black text-neutral-900 dark:text-white text-xs group-hover:text-emerald-500 transition-colors">
+                            {{ item.symbol }}
+                        </div>
+                        <div class="text-[10px] text-neutral-400 truncate">
+                            {{ item.name }}
+                        </div>
+                    </div>
+
+                    <div class="w-20 h-5 flex items-center justify-center">
+                        <svg class="w-full h-full overflow-visible" viewBox="0 0 80 22">
+                            <polygon points="{{ item.sparkline.area }}" fill="{{ item.sparkline.fill }}" />
+                            <polyline points="{{ item.sparkline.polyline }}" fill="none" stroke="{{ item.sparkline.stroke }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+
+                    <div class="text-right flex-shrink-0 min-w-[70px]">
+                        <div class="font-mono font-bold text-neutral-900 dark:text-white text-xs">
+                            {{ item.price }}
+                        </div>
+                        <div class="font-mono text-[10px] font-bold text-emerald-500">
+                            {{ item.change }} ({{ item.change_percent }})
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- 6. Top losers (Screenshot 2) -->
+        <section class="p-4" x-show="showSection('losers')">
+            <h3 class="font-extrabold text-xs text-neutral-900 dark:text-white mb-3 tracking-tight">Top losers</h3>
+            
+            <div class="space-y-2.5">
+                {% for item in dock_data.top_losers %}
+                <div class="flex items-center justify-between p-1.5 -mx-1.5 rounded-xl hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors group">
+                    <a href="{% url 'asset_detail' item.symbol %}" class="w-28 flex-shrink-0">
+                        <div class="font-black text-neutral-900 dark:text-white text-xs group-hover:text-rose-500 transition-colors">
+                            {{ item.symbol }}
+                        </div>
+                        <div class="text-[10px] text-neutral-400 truncate">
+                            {{ item.name }}
+                        </div>
+                    </a>
+
+                    <div class="w-20 h-5 flex items-center justify-center">
+                        <svg class="w-full h-full overflow-visible" viewBox="0 0 80 22">
+                            <polygon points="{{ item.sparkline.area }}" fill="{{ item.sparkline.fill }}" />
+                            <polyline points="{{ item.sparkline.polyline }}" fill="none" stroke="{{ item.sparkline.stroke }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+
+                    <div class="text-right flex-shrink-0 min-w-[70px] flex items-center justify-end gap-1.5">
+                        <div>
+                            <div class="font-mono font-bold text-neutral-900 dark:text-white text-xs">
+                                {{ item.price }}
+                            </div>
+                            <div class="font-mono text-[10px] font-bold text-rose-500">
+                                {{ item.change }} ({{ item.change_percent }})
+                            </div>
+                        </div>
+                        <button class="text-neutral-400 hover:text-amber-400 text-xs ml-0.5" title="Watchlist">
+                            <i class="far fa-star"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- 7. Most active (Screenshot 2) -->
+        <section class="p-4" x-show="showSection('active')">
+            <h3 class="font-extrabold text-xs text-neutral-900 dark:text-white mb-3 tracking-tight">Most active</h3>
+            
+            <div class="space-y-2.5">
+                {% for item in dock_data.most_active %}
+                <a href="{% url 'asset_detail' item.symbol %}" 
+                   class="flex items-center justify-between p-1.5 -mx-1.5 rounded-xl hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors group">
+                    <div class="w-28 flex-shrink-0">
+                        <div class="font-black text-neutral-900 dark:text-white text-xs group-hover:text-[#4169E1] transition-colors">
+                            {{ item.symbol }}
+                        </div>
+                        <div class="text-[10px] text-neutral-400 truncate">
+                            {{ item.name }}
+                        </div>
+                    </div>
+
+                    <div class="w-20 h-5 flex items-center justify-center">
+                        <svg class="w-full h-full overflow-visible" viewBox="0 0 80 22">
+                            <polygon points="{{ item.sparkline.area }}" fill="{{ item.sparkline.fill }}" />
+                            <polyline points="{{ item.sparkline.polyline }}" fill="none" stroke="{{ item.sparkline.stroke }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+
+                    <div class="text-right flex-shrink-0 min-w-[70px]">
+                        <div class="font-mono font-bold text-neutral-900 dark:text-white text-xs">
+                            {{ item.price }}
+                        </div>
+                        <div class="font-mono text-[10px] font-bold {% if item.is_positive %}text-emerald-500{% else %}text-rose-500{% endif %}">
+                            {{ item.change }} ({{ item.change_percent }})
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- 8. Top economic events (Screenshot 2) -->
+        <section class="p-4" x-show="showSection('economic')">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-extrabold text-xs text-neutral-900 dark:text-white tracking-tight">Top economic events</h3>
+                
+                <!-- Country Dropdown Pill (Kenya 🇰🇪 / USA 🇺🇸 / UK 🇬🇧 / Japan 🇯🇵 / All 🌐) -->
+                <div class="relative" x-data="{ openCountry: false }">
+                    <button @click="openCountry = !openCountry" 
+                            class="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-750 hover:border-[#4169E1] transition-colors">
+                        <span x-text="countryLabels[selectedCountry] || 'Kenya 🇰🇪'">Kenya 🇰🇪</span>
+                        <i class="fas fa-chevron-down text-[8px] text-neutral-400"></i>
+                    </button>
+                    
+                    <div x-show="openCountry" @click.outside="openCountry = false" x-cloak
+                         class="absolute right-0 mt-1.5 w-36 bg-white dark:bg-dark-850 rounded-xl shadow-card border border-[#EBEBEB] dark:border-dark-750 py-1 z-50">
+                        <button @click="selectedCountry = 'kenya'; openCountry = false" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-neutral-100 dark:hover:bg-dark-800 flex items-center justify-between">
+                            <span>Kenya 🇰🇪</span>
+                        </button>
+                        <button @click="selectedCountry = 'usa'; openCountry = false" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-neutral-100 dark:hover:bg-dark-800 flex items-center justify-between">
+                            <span>USA 🇺🇸</span>
+                        </button>
+                        <button @click="selectedCountry = 'uk'; openCountry = false" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-neutral-100 dark:hover:bg-dark-800 flex items-center justify-between">
+                            <span>UK 🇬🇧</span>
+                        </button>
+                        <button @click="selectedCountry = 'japan'; openCountry = false" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-neutral-100 dark:hover:bg-dark-800 flex items-center justify-between">
+                            <span>Japan 🇯🇵</span>
+                        </button>
+                        <button @click="selectedCountry = 'all'; openCountry = false" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-neutral-100 dark:hover:bg-dark-800 flex items-center justify-between">
+                            <span>All 🌐</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State (Matches Screenshot 2 when selected country has no immediate release) -->
+            <div x-show="getEventsForCountry().length === 0" class="py-6 px-2 text-center">
+                <i class="far fa-calendar text-2xl text-neutral-400 mb-2 block"></i>
+                <p class="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed mb-4">
+                    There are no important events for this country at this time. Select "All" to see top events in other countries or view all events.
+                </p>
+                <div class="flex items-center justify-center gap-2">
+                    <button @click="selectedCountry = 'all'" 
+                            class="px-3.5 py-1.5 rounded-full text-xs font-bold text-neutral-800 dark:text-neutral-200 border border-neutral-300 dark:border-neutral-700 hover:border-[#4169E1] transition-colors">
+                        Select All
+                    </button>
+                    <a href="{% url 'events_calendar' %}" 
+                       class="px-3.5 py-1.5 rounded-full text-xs font-bold text-white bg-[#4169E1] hover:bg-[#3457C9] transition-colors">
+                        View All Events
+                    </a>
+                </div>
+            </div>
+
+            <!-- Active Events List with Email Reminder Bell -->
+            <div x-show="getEventsForCountry().length > 0" class="space-y-2">
+                <template x-for="ev in getEventsForCountry()" :key="ev.id || ev.title">
+                    <div class="p-2.5 rounded-xl bg-neutral-50 dark:bg-dark-800/60 border border-neutral-200/60 dark:border-neutral-800/60 flex items-center justify-between group">
+                        <div class="flex-1 min-w-0 pr-2">
+                            <div class="font-bold text-neutral-900 dark:text-white text-[11px] truncate" x-text="ev.title"></div>
+                            <div class="text-[10px] text-neutral-400 flex items-center gap-1.5 mt-0.5">
+                                <span x-text="ev.date"></span>
+                                <span>&bull;</span>
+                                <span x-text="ev.time"></span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <span class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500" x-text="ev.impact || 'High'"></span>
+                            <button @click.stop="toggleDockReminder(ev)" 
+                                    class="p-1 rounded-md text-neutral-400 hover:text-[#4169E1] transition-colors"
+                                    :title="isReminded(ev.id) ? 'Reminder active (Click to remove)' : 'Set reminder to my email'">
+                                <i :class="isReminded(ev.id) ? 'fas fa-bell text-[#4169E1]' : 'far fa-bell'"></i>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
+                <div class="pt-2 text-center">
+                    <a href="{% url 'events_calendar' %}" class="text-[11px] font-bold text-[#4169E1] hover:underline inline-flex items-center gap-1">
+                        <span>View All Events in Calendar</span>
+                        <i class="fas fa-arrow-right text-[9px]"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. Earnings events (Screenshots 2 & 3) -->
+        <section class="p-4" x-show="showSection('earnings')">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-extrabold text-xs text-neutral-900 dark:text-white tracking-tight">Earnings events</h3>
+                
+                <div class="flex items-center gap-1.5">
+                    <!-- Dropdown: Upcoming / Reported -->
+                    <div class="relative" x-data="{ openEarn: false }">
+                        <button @click="openEarn = !openEarn" 
+                                class="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-750 hover:border-[#4169E1] transition-colors">
+                            <span x-text="earningsView === 'upcoming' ? 'Upcoming' : 'Reported'">Upcoming</span>
+                            <i class="fas fa-chevron-down text-[8px] text-neutral-400"></i>
+                        </button>
+                        
+                        <div x-show="openEarn" @click.outside="openEarn = false" x-cloak
+                             class="absolute right-0 mt-1.5 w-32 bg-white dark:bg-dark-850 rounded-xl shadow-card border border-[#EBEBEB] dark:border-dark-750 py-1 z-50">
+                            <button @click="earningsView = 'upcoming'; openEarn = false" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-neutral-100 dark:hover:bg-dark-800">
+                                Upcoming
+                            </button>
+                            <button @click="earningsView = 'reported'; openEarn = false" class="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-neutral-100 dark:hover:bg-dark-800">
+                                Reported
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- View Mode Toggle Icons (Screenshot 2) -->
+                    <div class="flex items-center bg-neutral-100 dark:bg-dark-800 rounded-lg p-0.5 text-neutral-400">
+                        <button class="w-5 h-5 flex items-center justify-center rounded text-[10px] text-neutral-700 dark:text-neutral-200 bg-white dark:bg-dark-750 shadow-2xs">
+                            <i class="far fa-user text-[9px]"></i>
+                        </button>
+                        <button class="w-5 h-5 flex items-center justify-center rounded text-[10px] hover:text-neutral-700 dark:hover:text-neutral-200">
+                            <i class="fas fa-chart-line text-[9px]"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Date Header Badge (Screenshot 3: NOV 17) -->
+            <div class="bg-black/90 dark:bg-dark-900 text-white rounded-2xl p-3 border border-neutral-800 shadow-md">
+                <div class="flex items-center gap-2 mb-2 pb-2 border-b border-neutral-800">
+                    <div class="text-center font-black leading-tight bg-neutral-800/80 px-2 py-1 rounded-lg">
+                        <span class="block text-[9px] uppercase tracking-wider text-neutral-400">NOV</span>
+                        <span class="block text-sm text-white">17</span>
+                    </div>
+                    <div>
+                        <div class="text-[11px] font-bold text-neutral-200">Regulatory Corporate Filings</div>
+                        <div class="text-[9px] text-neutral-400">SEC EDGAR &bull; CMA &bull; FCA Reports</div>
+                    </div>
+                </div>
+
+                <!-- Earnings Schedule / Reports Items -->
+                <div class="space-y-1.5">
+                    {% for ev in dock_data.earnings_upcoming %}
+                    <div class="flex items-center justify-between p-2 rounded-xl hover:bg-white/10 transition-colors group">
+                        <a href="{% url 'earnings' %}" class="flex-1 min-w-0 pr-2">
+                            <div class="font-bold text-white text-xs group-hover:text-[#4169E1] transition-colors">
+                                {{ ev.symbol }}
+                            </div>
+                            <div class="text-[10px] text-neutral-400 truncate max-w-[150px]">
+                                {{ ev.company_name }}
+                            </div>
+                        </a>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <span class="text-[9px] font-mono text-neutral-400">{{ ev.time }}</span>
+                            <button @click.prevent.stop="toggleDockReminder({id: '{{ ev.id }}', title: '{{ ev.company_name }} Earnings', date: '{{ ev.day_badge }}', time: '{{ ev.time }}', country: '{{ ev.market }}', symbol: '{{ ev.symbol }}', category: 'EARNINGS'})" 
+                                    class="p-1 text-neutral-400 hover:text-[#4169E1] transition-colors" 
+                                    :title="isReminded('{{ ev.id }}') ? 'Reminder active (Click to remove)' : 'Set reminder to my email'">
+                                <i :class="isReminded('{{ ev.id }}') ? 'fas fa-bell text-[#4169E1]' : 'far fa-bell'"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-3 pt-2 border-t border-neutral-800 text-center">
+                    <a href="{% url 'earnings' %}" class="text-[11px] font-bold text-[#4169E1] hover:underline flex items-center justify-center gap-1">
+                        <span>Open Earnings & SEC Reports Hub</span>
+                        <i class="fas fa-arrow-right text-[9px]"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. Dock Footer: Edit your Dock & Terms (Screenshot 3) -->
+        <footer class="p-4 text-center space-y-3">
+            <button @click="openEditModal = true" 
+                    class="w-full py-2 px-4 rounded-full text-xs font-bold text-neutral-800 dark:text-neutral-200 bg-neutral-100 dark:bg-dark-800 hover:bg-neutral-200 dark:hover:bg-dark-750 transition-colors border border-neutral-200 dark:border-neutral-750">
+                Edit your Dock
+            </button>
+
+            <div class="text-[10px] text-neutral-400 space-y-1">
+                <div>
+                    <a href="{% url 'support' %}" class="hover:underline">Terms and Privacy Policy</a>
+                </div>
+                <div>
+                    <a href="{% url 'support' %}" class="hover:underline">Privacy & Cookie Settings</a>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Edit Dock Modal -->
+    <div x-show="openEditModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+         @click.self="openEditModal = false">
+        <div class="bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-6 max-w-sm w-full shadow-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-sm text-neutral-900 dark:text-white">Customize Market Dock</h3>
+                <button @click="openEditModal = false" class="text-neutral-400 hover:text-neutral-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-4">
+                Choose which financial widgets and lists appear in your personal dock rail:
+            </p>
+
+            <div class="space-y-2.5 text-xs">
+                <label class="flex items-center justify-between p-2 rounded-xl bg-neutral-50 dark:bg-dark-800">
+                    <span class="font-semibold text-neutral-800 dark:text-neutral-200">Trending Tickers</span>
+                    <input type="checkbox" x-model="sections.trending" class="rounded text-[#4169E1]">
+                </label>
+                <label class="flex items-center justify-between p-2 rounded-xl bg-neutral-50 dark:bg-dark-800">
+                    <span class="font-semibold text-neutral-800 dark:text-neutral-200">Portfolios Summary</span>
+                    <input type="checkbox" x-model="sections.portfolios" class="rounded text-[#4169E1]">
+                </label>
+                <label class="flex items-center justify-between p-2 rounded-xl bg-neutral-50 dark:bg-dark-800">
+                    <span class="font-semibold text-neutral-800 dark:text-neutral-200">Top Gainers & Losers</span>
+                    <input type="checkbox" x-model="sections.gainers" class="rounded text-[#4169E1]">
+                </label>
+                <label class="flex items-center justify-between p-2 rounded-xl bg-neutral-50 dark:bg-dark-800">
+                    <span class="font-semibold text-neutral-800 dark:text-neutral-200">Most Active</span>
+                    <input type="checkbox" x-model="sections.active" class="rounded text-[#4169E1]">
+                </label>
+                <label class="flex items-center justify-between p-2 rounded-xl bg-neutral-50 dark:bg-dark-800">
+                    <span class="font-semibold text-neutral-800 dark:text-neutral-200">Top Economic Events</span>
+                    <input type="checkbox" x-model="sections.economic" class="rounded text-[#4169E1]">
+                </label>
+                <label class="flex items-center justify-between p-2 rounded-xl bg-neutral-50 dark:bg-dark-800">
+                    <span class="font-semibold text-neutral-800 dark:text-neutral-200">Earnings Events</span>
+                    <input type="checkbox" x-model="sections.earnings" class="rounded text-[#4169E1]">
+                </label>
+            </div>
+
+            <button @click="openEditModal = false" class="w-full mt-5 py-2.5 rounded-full text-xs font-bold text-white bg-[#4169E1] hover:bg-[#3457C9] transition-colors">
+                Save Preferences
+            </button>
+        </div>
+    </div>
+
+    <!-- Dock Quick Email Prompt Modal for Unauthenticated Users -->
+    <div x-show="showDockEmailModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+         @click.self="showDockEmailModal = false">
+        <div class="bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-6 max-w-sm w-full shadow-2xl">
+            <div class="w-10 h-10 rounded-2xl bg-[#4169E1]/15 text-[#4169E1] flex items-center justify-center mb-3 text-lg">
+                <i class="fas fa-bell"></i>
+            </div>
+            <h3 class="font-extrabold text-sm text-neutral-900 dark:text-white mb-1">Set Event Reminder</h3>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-4" x-text="'Receive an alert before ' + (dockTargetEvent ? (dockTargetEvent.title || 'this event') : 'this event') + '.'">
+            </p>
+            <form @submit.prevent="submitDockGuestReminder()">
+                <label class="block text-[11px] font-bold text-neutral-700 dark:text-neutral-300 mb-1.5">Your Email Address</label>
+                <input type="email" x-model="dockGuestEmail" required placeholder="you@example.com" 
+                       class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 dark:bg-dark-800 border border-neutral-200 dark:border-neutral-700 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-[#4169E1] mb-4">
+                <div class="flex items-center gap-2">
+                    <button type="button" @click="showDockEmailModal = false" class="flex-1 py-2 rounded-xl text-xs font-bold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-dark-750">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 py-2 rounded-xl text-xs font-bold text-white bg-[#4169E1] hover:bg-[#3457C9] transition-colors">
+                        Confirm Alert
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</aside>
+
+{{ dock_data.economic_events|json_script:"dock-economic-events-data" }}
+
+<script>
+    function marketDockController() {
+        return {
+            quoteQuery: '',
+            selectedCountry: 'kenya',
+            earningsView: 'upcoming',
+            openEditModal: false,
+            showDockEmailModal: false,
+            dockGuestEmail: '',
+            dockTargetEvent: null,
+            userEmail: '{{ request.user.email|default:"" }}',
+            remindedIds: {{ dock_data.user_reminded_ids|default:"[]"|safe }},
+            dockEvents: JSON.parse(document.getElementById('dock-economic-events-data')?.textContent || '{}'),
+            countryLabels: {
+                'kenya': 'Kenya 🇰🇪',
+                'usa': 'USA 🇺🇸',
+                'uk': 'UK 🇬🇧',
+                'japan': 'Japan 🇯🇵',
+                'all': 'All 🌐'
+            },
+            sections: {
+                trending: true,
+                portfolios: true,
+                recently_viewed: true,
+                gainers: true,
+                losers: true,
+                active: true,
+                economic: true,
+                earnings: true
+            },
+            showSection(name) {
+                return this.sections[name] !== false;
+            },
+            getEventsForCountry() {
+                return this.dockEvents[this.selectedCountry] || [];
+            },
+            isReminded(id) {
+                return this.remindedIds.includes(id);
+            },
+            async toggleDockReminder(ev) {
+                if (this.userEmail) {
+                    await this.dispatchReminder(ev.id, this.userEmail, ev);
+                } else {
+                    this.dockTargetEvent = ev;
+                    this.showDockEmailModal = true;
+                }
+            },
+            async submitDockGuestReminder() {
+                if (!this.dockGuestEmail || !this.dockTargetEvent) return;
+                await this.dispatchReminder(this.dockTargetEvent.id, this.dockGuestEmail, this.dockTargetEvent);
+                this.showDockEmailModal = false;
+                this.dockGuestEmail = '';
+            },
+            async dispatchReminder(eventId, email, eventObj) {
+                try {
+                    const res = await fetch('/api/events/remind/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': this.getCsrfToken()
+                        },
+                        body: JSON.stringify({
+                            event_id: eventId,
+                            email: email,
+                            title: eventObj?.title,
+                            date: eventObj?.date,
+                            time: eventObj?.time,
+                            country: eventObj?.country,
+                            impact: eventObj?.impact,
+                            symbol: eventObj?.symbol,
+                            notes: eventObj?.description
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        if (data.is_active) {
+                            if (!this.remindedIds.includes(eventId)) {
+                                this.remindedIds.push(eventId);
+                            }
+                        } else {
+                            this.remindedIds = this.remindedIds.filter(x => x !== eventId);
+                        }
+                        window.dispatchEvent(new CustomEvent('toast', { detail: data.message }));
+                    } else {
+                        window.dispatchEvent(new CustomEvent('toast', { detail: data.error || 'Failed to update reminder' }));
+                    }
+                } catch (e) {
+                    console.error(e);
+                    window.dispatchEvent(new CustomEvent('toast', { detail: 'Error communicating with reminder service' }));
+                }
+            },
+            getCsrfToken() {
+                const cookieValue = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('csrftoken='))
+                    ?.split('=')[1];
+                return cookieValue || '';
+            },
+            filterTickers() {
+                if (!this.quoteQuery.trim()) return;
+                const q = this.quoteQuery.trim().toUpperCase();
+            }
+        };
+    }
+</script>

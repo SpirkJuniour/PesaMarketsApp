@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6" x-data="{ activeSection: 'summary' }">
+
+    <!-- Top Breadcrumb & Action Toolbar -->
+    <div class="flex items-center justify-between flex-wrap gap-4">
+        <a href="{% url 'earnings' %}" class="inline-flex items-center gap-2 text-xs font-bold text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors">
+            <i class="fas fa-arrow-left text-[10px]"></i>
+            <span>Back to Earnings Hub</span>
+        </a>
+
+        <div class="flex items-center gap-2 flex-wrap">
+            <a href="{% url 'asset_detail' filing.symbol %}" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-neutral-100 dark:bg-dark-800 text-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-750 hover:border-[#4169E1] transition-colors">
+                View ${{ filing.symbol }} Asset
+            </a>
+            <a href="{% url 'earnings_download_file' filing.id 'pdf' %}" 
+               class="px-3.5 py-1.5 rounded-full text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors shadow-2xs flex items-center gap-1.5">
+                <i class="fas fa-file-pdf text-[11px]"></i>
+                <span>Download PDF</span>
+            </a>
+            <a href="{% url 'earnings_download_file' filing.id 'excel' %}" 
+               class="px-3.5 py-1.5 rounded-full text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-2xs flex items-center gap-1.5">
+                <i class="fas fa-file-excel text-[11px]"></i>
+                <span>Download Excel</span>
+            </a>
+            <a href="{% url 'earnings_download_file' filing.id 'csv' %}" 
+               class="px-3.5 py-1.5 rounded-full text-xs font-bold text-neutral-700 dark:text-neutral-200 bg-neutral-100 dark:bg-dark-800 border border-neutral-200 dark:border-neutral-700 hover:border-[#4169E1] transition-colors flex items-center gap-1.5">
+                <i class="fas fa-file-csv text-[11px] text-[#4169E1]"></i>
+                <span>CSV</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Official Regulatory Document Header Box -->
+    <div class="bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-6 sm:p-8 shadow-xs">
+        
+        <!-- Regulator In-App Archive Badge -->
+        <div class="border-b border-neutral-200 dark:border-neutral-800 pb-6 mb-6 text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 text-[11px] font-mono font-bold mb-3 border border-neutral-200 dark:border-neutral-700">
+                <i class="fas fa-shield-alt text-[#4169E1]"></i>
+                <span>OFFICIAL STATUTORY DISCLOSURE &bull; {{ filing.regulator }}</span>
+            </div>
+            <h1 class="text-xl sm:text-3xl font-black text-neutral-900 dark:text-white tracking-tight">
+                {{ filing.title }}
+            </h1>
+            <p class="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-2 font-mono">
+                {{ filing.company_name }} &bull; Symbol: ${{ filing.symbol }} &bull; Fiscal Period: {{ filing.fiscal_period }}
+            </p>
+        </div>
+
+        <!-- In-App Download Center Banner -->
+        <div class="mb-8 p-5 rounded-2xl bg-gradient-to-r from-[#4169E1]/10 via-[#4169E1]/5 to-transparent border border-[#4169E1]/20">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-[#4169E1] animate-pulse"></span>
+                        <h2 class="text-sm font-extrabold text-neutral-900 dark:text-white">Institutional Filing Download Center</h2>
+                    </div>
+                    <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                        Export complete statutory disclosure documents, financial models, and structured datasets directly from our servers.
+                    </p>
+                </div>
+                <div class="flex items-center gap-2.5 flex-wrap">
+                    <a href="{% url 'earnings_download_file' filing.id 'pdf' %}" 
+                       class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors shadow-2xs flex items-center gap-2">
+                        <i class="fas fa-file-pdf text-xs"></i>
+                        <span>PDF Report</span>
+                    </a>
+                    <a href="{% url 'earnings_download_file' filing.id 'excel' %}" 
+                       class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-2xs flex items-center gap-2">
+                        <i class="fas fa-file-excel text-xs"></i>
+                        <span>Excel (.xlsx) Model</span>
+                    </a>
+                    <a href="{% url 'earnings_download_file' filing.id 'csv' %}" 
+                       class="px-4 py-2 rounded-xl text-xs font-bold text-neutral-800 dark:text-neutral-100 bg-neutral-100 dark:bg-dark-800 border border-neutral-300 dark:border-neutral-700 hover:border-[#4169E1] transition-colors flex items-center gap-2">
+                        <i class="fas fa-table text-xs text-[#4169E1]"></i>
+                        <span>Raw CSV</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Telemetry Metadata Strip -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-neutral-50 dark:bg-dark-800/70 border border-neutral-200/80 dark:border-neutral-800 text-xs font-mono mb-8">
+            <div>
+                <span class="text-[10px] text-neutral-400 uppercase tracking-wider block font-sans font-bold">Filing Type</span>
+                <span class="font-bold text-neutral-900 dark:text-white">{{ filing.filing_type }}</span>
+            </div>
+            <div>
+                <span class="text-[10px] text-neutral-400 uppercase tracking-wider block font-sans font-bold">Accession Number</span>
+                <span class="font-bold text-neutral-900 dark:text-white text-[11px] truncate block">{{ filing.accession_number }}</span>
+            </div>
+            <div>
+                <span class="text-[10px] text-neutral-400 uppercase tracking-wider block font-sans font-bold">Period Ended</span>
+                <span class="font-bold text-neutral-900 dark:text-white">{{ filing.fiscal_period_ended }}</span>
+            </div>
+            <div>
+                <span class="text-[10px] text-neutral-400 uppercase tracking-wider block font-sans font-bold">Filing Date</span>
+                <span class="font-bold text-neutral-900 dark:text-white">{{ filing.filing_date }}</span>
+            </div>
+        </div>
+
+        <!-- Financial Summary Banner Cards (Digestible Highlights) -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="p-4 rounded-2xl bg-neutral-50 dark:bg-dark-800 border border-neutral-200/80 dark:border-neutral-800">
+                <span class="text-[11px] text-neutral-400 font-bold block mb-1">Total Net Revenue</span>
+                <div class="text-lg sm:text-xl font-black font-mono text-neutral-900 dark:text-white">
+                    {{ filing.revenue_actual }}
+                </div>
+                <span class="text-[10px] font-bold text-emerald-500 block mt-0.5">{{ filing.revenue_yoy }} YoY</span>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-neutral-50 dark:bg-dark-800 border border-neutral-200/80 dark:border-neutral-800">
+                <span class="text-[11px] text-neutral-400 font-bold block mb-1">Diluted EPS</span>
+                <div class="text-lg sm:text-xl font-black font-mono text-neutral-900 dark:text-white">
+                    {{ filing.eps_actual }}
+                </div>
+                <span class="text-[10px] font-bold text-emerald-500 block mt-0.5">{{ filing.eps_surprise }} vs Consensus</span>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-neutral-50 dark:bg-dark-800 border border-neutral-200/80 dark:border-neutral-800">
+                <span class="text-[11px] text-neutral-400 font-bold block mb-1">Net Income</span>
+                <div class="text-lg sm:text-xl font-black font-mono text-neutral-900 dark:text-white">
+                    {{ filing.net_income }}
+                </div>
+                <span class="text-[10px] font-bold text-neutral-400 block mt-0.5 font-mono">{{ filing.gross_margin }} Gross Marg.</span>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-neutral-50 dark:bg-dark-800 border border-neutral-200/80 dark:border-neutral-800">
+                <span class="text-[11px] text-neutral-400 font-bold block mb-1">Free Cash Flow</span>
+                <div class="text-lg sm:text-xl font-black font-mono text-neutral-900 dark:text-white">
+                    {{ filing.free_cash_flow }}
+                </div>
+                <span class="text-[10px] font-bold text-emerald-500 block mt-0.5">Operating Surplus</span>
+            </div>
+        </div>
+
+        <!-- Interactive Digest Navigation Tabs -->
+        <div class="flex items-center gap-2 border-b border-neutral-200 dark:border-neutral-800 pb-3 mb-6 overflow-x-auto">
+            <button @click="activeSection = 'summary'" 
+                    :class="activeSection === 'summary' ? 'bg-[#4169E1] text-white' : 'bg-neutral-100 dark:bg-dark-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-dark-750'"
+                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+                <i class="fas fa-bullseye text-xs"></i>
+                <span>Executive Highlights</span>
+            </button>
+            <button @click="activeSection = 'financials'" 
+                    :class="activeSection === 'financials' ? 'bg-[#4169E1] text-white' : 'bg-neutral-100 dark:bg-dark-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-dark-750'"
+                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+                <i class="fas fa-table-list text-xs"></i>
+                <span>Statement of Operations</span>
+            </button>
+            {% if filing.segment_breakdown %}
+            <button @click="activeSection = 'segments'" 
+                    :class="activeSection === 'segments' ? 'bg-[#4169E1] text-white' : 'bg-neutral-100 dark:bg-dark-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-dark-750'"
+                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+                <i class="fas fa-chart-pie text-xs"></i>
+                <span>Segment Breakdown</span>
+            </button>
+            {% endif %}
+            <button @click="activeSection = 'governance'" 
+                    :class="activeSection === 'governance' ? 'bg-[#4169E1] text-white' : 'bg-neutral-100 dark:bg-dark-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-dark-750'"
+                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+                <i class="fas fa-certificate text-xs"></i>
+                <span>Filing Governance</span>
+            </button>
+        </div>
+
+        <!-- Section 1: Executive Highlights & MD&A -->
+        <div x-show="activeSection === 'summary'" class="space-y-6">
+            <div class="p-4 rounded-2xl bg-neutral-50 dark:bg-dark-800/40 border border-neutral-200/60 dark:border-neutral-800/60">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-2">Executive Summary</h4>
+                <p class="text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed">
+                    {{ filing.summary }}
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                <h3 class="text-sm font-extrabold text-neutral-900 dark:text-white flex items-center gap-2">
+                    <i class="fas fa-list-check text-[#4169E1]"></i>
+                    <span>Management's Discussion & Operational Highlights</span>
+                </h3>
+
+                <div class="space-y-2.5">
+                    {% for item in filing.executive_highlights %}
+                    <div class="flex items-start gap-3 p-3.5 rounded-2xl bg-neutral-50 dark:bg-dark-800/50 border border-neutral-200/60 dark:border-neutral-800/60">
+                        <span class="w-2 h-2 rounded-full bg-[#4169E1] mt-1.5 flex-shrink-0"></span>
+                        <p class="text-xs text-neutral-700 dark:text-neutral-300 leading-relaxed font-medium">
+                            {{ item }}
+                        </p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Condensed Financial Statements Table -->
+        <div x-show="activeSection === 'financials'" class="space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-extrabold text-neutral-900 dark:text-white flex items-center gap-2">
+                    <i class="fas fa-table-list text-[#4169E1]"></i>
+                    <span>Condensed Consolidated Statement of Operations</span>
+                </h3>
+                <span class="text-xs font-mono text-neutral-400">Values in USD / Local Reporting Standard</span>
+            </div>
+
+            <div class="overflow-x-auto rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-dark-800/30">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-neutral-200 dark:border-neutral-800 font-extrabold text-neutral-400 text-[10px] uppercase tracking-wider bg-neutral-100/60 dark:bg-dark-800/80">
+                            <th class="p-3.5">Financial Line Item</th>
+                            <th class="p-3.5 text-right font-mono">Reported Period Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-200/70 dark:divide-neutral-800/60 font-mono">
+                        {% for key, val in filing.financial_statements.items %}
+                        <tr class="hover:bg-neutral-100/40 dark:hover:bg-dark-800/50 transition-colors">
+                            <td class="p-3.5 font-sans font-medium text-neutral-700 dark:text-neutral-300 capitalize">
+                                {{ key|cut:'_'|title }}
+                            </td>
+                            <td class="p-3.5 text-right font-bold text-neutral-900 dark:text-white">
+                                {{ val }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section 3: Segment Breakdown -->
+        {% if filing.segment_breakdown %}
+        <div x-show="activeSection === 'segments'" class="space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-extrabold text-neutral-900 dark:text-white flex items-center gap-2">
+                    <i class="fas fa-chart-pie text-[#4169E1]"></i>
+                    <span>Business Segment Contribution</span>
+                </h3>
+                <span class="text-xs font-mono text-neutral-400">Quarterly Breakdown</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {% for seg_name, seg_val in filing.segment_breakdown.items %}
+                <div class="p-4 rounded-2xl bg-neutral-50 dark:bg-dark-800/50 border border-neutral-200/60 dark:border-neutral-800/60">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-xs font-bold text-neutral-700 dark:text-neutral-300 capitalize">
+                            {{ seg_name|cut:'_'|title }}
+                        </span>
+                        <span class="font-mono font-black text-sm text-neutral-900 dark:text-white">
+                            {{ seg_val }}
+                        </span>
+                    </div>
+                    <div class="w-full bg-neutral-200 dark:bg-dark-750 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-[#4169E1] h-full rounded-full" style="width: 72%;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Section 4: Filing Governance & Audit Archive -->
+        <div x-show="activeSection === 'governance'" class="space-y-4">
+            <h3 class="text-sm font-extrabold text-neutral-900 dark:text-white flex items-center gap-2">
+                <i class="fas fa-certificate text-emerald-500"></i>
+                <span>Institutional Archive Verification</span>
+            </h3>
+
+            <div class="p-5 rounded-2xl bg-neutral-50 dark:bg-dark-800/60 border border-neutral-200/80 dark:border-neutral-800 text-xs space-y-3">
+                <div class="flex items-center justify-between py-1.5 border-b border-neutral-200/60 dark:border-neutral-800">
+                    <span class="text-neutral-400">Primary Regulatory Jurisdiction</span>
+                    <span class="font-bold text-neutral-800 dark:text-neutral-200">{{ filing.regulator }}</span>
+                </div>
+                <div class="flex items-center justify-between py-1.5 border-b border-neutral-200/60 dark:border-neutral-800">
+                    <span class="text-neutral-400">Official Accession Key</span>
+                    <span class="font-mono font-bold text-neutral-800 dark:text-neutral-200">{{ filing.accession_number }}</span>
+                </div>
+                <div class="flex items-center justify-between py-1.5 border-b border-neutral-200/60 dark:border-neutral-800">
+                    <span class="text-neutral-400">Central Index Key (CIK)</span>
+                    <span class="font-mono font-bold text-neutral-800 dark:text-neutral-200">{{ filing.cik }}</span>
+                </div>
+                <div class="flex items-center justify-between py-1.5 border-b border-neutral-200/60 dark:border-neutral-800">
+                    <span class="text-neutral-400">Publication Timestamp</span>
+                    <span class="font-mono font-bold text-neutral-800 dark:text-neutral-200">{{ filing.accepted_date }}</span>
+                </div>
+                <div class="flex items-center justify-between py-1.5">
+                    <span class="text-neutral-400">Data Integrity Status</span>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-500">
+                        <i class="fas fa-check-circle text-[9px]"></i> Cryptographically Verified & Cached
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- In-App Governance Note (No External Links) -->
+        <div class="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between flex-wrap gap-4 text-xs text-neutral-400">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-shield-halved text-emerald-500 text-sm"></i>
+                <span>Published and indexed directly within PesaMarkets Institutional Data Desk under Accession #{{ filing.accession_number }}</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="{% url 'earnings_download_file' filing.id 'pdf' %}" class="font-bold text-[#4169E1] hover:underline flex items-center gap-1">
+                    <i class="fas fa-download text-[10px]"></i> Statutory PDF
+                </a>
+                <span class="text-neutral-600">&bull;</span>
+                <a href="{% url 'earnings_download_file' filing.id 'excel' %}" class="font-bold text-[#4169E1] hover:underline flex items-center gap-1">
+                    <i class="fas fa-file-excel text-[10px]"></i> Excel Model
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

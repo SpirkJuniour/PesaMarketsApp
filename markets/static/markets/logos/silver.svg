@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <radialGradient id="agBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2a323d"/>
+      <stop offset="100%" stop-color="#12161b"/>
+    </radialGradient>
+    <linearGradient id="silverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#e0e5eb"/>
+      <stop offset="70%" stop-color="#a4b0be"/>
+      <stop offset="100%" stop-color="#ffffff"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#agBg)" stroke="url(#silverGrad)" stroke-width="2.5"/>
+  <circle cx="60" cy="60" r="49" fill="none" stroke="url(#silverGrad)" stroke-width="1" stroke-dasharray="2,2"/>
+  <!-- Silver Ingot Icon -->
+  <polygon points="36,66 48,42 72,42 84,66" fill="url(#silverGrad)"/>
+  <polygon points="36,66 84,66 80,74 40,74" fill="#8898aa"/>
+  <!-- Element Symbol Ag 47 -->
+  <text x="60" y="60" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="900" fill="#1e272e" text-anchor="middle">Ag</text>
+  <text x="60" y="36" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="700" fill="#c7d1dc" text-anchor="middle">47 &bull; 107.87</text>
+  <text x="60" y="102" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="2">SILVER</text>
+</svg>

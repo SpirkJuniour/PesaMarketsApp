@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <rect width="200" height="200" rx="36" fill="#C8102E"/>
+  <!-- Painter Crown -->
+  <polygon points="55,100 70,60 100,85 130,60 145,100" fill="#FFD700"/>
+  <rect x="55" y="104" width="90" height="12" fill="#FFD700" rx="3"/>
+  <text x="100" y="148" font-family="'Arial Black', sans-serif" font-size="18" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">CROWN</text>
+  <text x="100" y="166" font-family="'Arial', sans-serif" font-size="11" font-weight="700" fill="#FFD700" text-anchor="middle" letter-spacing="2">PAINTS</text>
+</svg>

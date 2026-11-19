@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <radialGradient id="cuBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3d1f11"/>
+      <stop offset="100%" stop-color="#190a04"/>
+    </radialGradient>
+    <linearGradient id="copperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8a576"/>
+      <stop offset="50%" stop-color="#d96b32"/>
+      <stop offset="100%" stop-color="#963c0c"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#cuBg)" stroke="url(#copperGrad)" stroke-width="2.5"/>
+  <circle cx="60" cy="60" r="49" fill="none" stroke="url(#copperGrad)" stroke-width="1" stroke-dasharray="2,2"/>
+  <!-- Copper Cathode / Coils -->
+  <rect x="42" y="38" width="36" height="38" rx="4" fill="url(#copperGrad)"/>
+  <line x1="48" y1="38" x2="48" y2="76" stroke="#963c0c" stroke-width="1.5"/>
+  <line x1="60" y1="38" x2="60" y2="76" stroke="#963c0c" stroke-width="1.5"/>
+  <line x1="72" y1="38" x2="72" y2="76" stroke="#963c0c" stroke-width="1.5"/>
+  <text x="60" y="60" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="900" fill="#ffffff" text-anchor="middle">Cu</text>
+  <text x="60" y="33" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="700" fill="#f8a576" text-anchor="middle">29 &bull; 63.55</text>
+  <text x="60" y="102" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="2">COPPER</text>
+</svg>

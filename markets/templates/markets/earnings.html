@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6" x-data="earningsPageController()">
+
+    <!-- Header Banner -->
+    <div class="bg-white dark:bg-dark-850 rounded-3xl p-6 sm:p-8 border border-neutral-200 dark:border-neutral-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#4169E1]/15 text-[#4169E1]">
+                    Statutory Corporate Filings
+                </span>
+                <span class="text-xs text-neutral-400">&bull;</span>
+                <span class="text-xs font-mono text-neutral-400">SEC EDGAR &bull; CMA &bull; FCA &bull; FSA</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-black text-neutral-900 dark:text-white tracking-tight">
+                Earnings Reports & Regulatory Disclosures
+            </h1>
+            <p class="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-1 max-w-2xl leading-relaxed">
+                Explore upcoming earnings release schedules and read verified quarterly & annual statutory filings sourced directly from securities regulators.
+            </p>
+        </div>
+
+        <!-- Regulator Badges -->
+        <div class="flex items-center gap-2 flex-wrap">
+            <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700 flex items-center gap-1.5">
+                <i class="fas fa-building-columns text-[#4169E1]"></i>
+                <span>US SEC EDGAR</span>
+            </span>
+            <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700 flex items-center gap-1.5">
+                <i class="fas fa-landmark text-emerald-500"></i>
+                <span>CMA Kenya</span>
+            </span>
+            <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700 flex items-center gap-1.5">
+                <i class="fas fa-scale-balanced text-indigo-500"></i>
+                <span>UK FCA</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Mode Selector & Filter Toolbar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <!-- Tab Pill Toggle: Upcoming Schedule vs Reported Filings -->
+        <div class="inline-flex p-1 rounded-full bg-neutral-200/70 dark:bg-dark-800 border border-neutral-200 dark:border-neutral-750">
+            <button @click="activeTab = 'upcoming'" 
+                    :class="activeTab === 'upcoming' ? 'bg-white dark:bg-dark-700 text-neutral-900 dark:text-white shadow-xs font-bold' : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 font-medium'"
+                    class="px-5 py-2 rounded-full text-xs transition-all flex items-center gap-2">
+                <i class="far fa-calendar-alt text-xs"></i>
+                <span>Upcoming Earnings</span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-[#4169E1]/20 text-[#4169E1] font-mono">{{ upcoming_list|length }}</span>
+            </button>
+            <button @click="activeTab = 'reported'" 
+                    :class="activeTab === 'reported' ? 'bg-white dark:bg-dark-700 text-neutral-900 dark:text-white shadow-xs font-bold' : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 font-medium'"
+                    class="px-5 py-2 rounded-full text-xs transition-all flex items-center gap-2">
+                <i class="fas fa-file-lines text-xs"></i>
+                <span>Statutory Filings</span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-mono">{{ reported_list|length }}</span>
+            </button>
+        </div>
+
+        <!-- Regulator Filter Pills -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+            <button @click="selectedRegulator = 'all'" 
+                    :class="selectedRegulator === 'all' ? 'bg-[#4169E1] text-white' : 'bg-white dark:bg-dark-850 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-800'"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-2xs">
+                All Markets
+            </button>
+            <button @click="selectedRegulator = 'sec'" 
+                    :class="selectedRegulator === 'sec' ? 'bg-[#4169E1] text-white' : 'bg-white dark:bg-dark-850 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-800'"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-2xs">
+                USA (SEC)
+            </button>
+            <button @click="selectedRegulator = 'cma'" 
+                    :class="selectedRegulator === 'cma' ? 'bg-[#4169E1] text-white' : 'bg-white dark:bg-dark-850 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-800'"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-2xs">
+                Kenya (CMA)
+            </button>
+            <button @click="selectedRegulator = 'fca'" 
+                    :class="selectedRegulator === 'fca' ? 'bg-[#4169E1] text-white' : 'bg-white dark:bg-dark-850 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-800'"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-2xs">
+                UK (FCA)
+            </button>
+            <button @click="selectedRegulator = 'fsa'" 
+                    :class="selectedRegulator === 'fsa' ? 'bg-[#4169E1] text-white' : 'bg-white dark:bg-dark-850 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-800'"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-2xs">
+                Japan (FSA)
+            </button>
+        </div>
+    </div>
+
+    <!-- 1. UPCOMING EARNINGS CALENDAR SECTION -->
+    <div x-show="activeTab === 'upcoming'" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {% for item in upcoming_list %}
+            <div x-show="filterItem('{{ item.regulator_code|lower }}')" 
+                 class="bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-5 shadow-xs hover:shadow-card transition-all flex flex-col justify-between group">
+                
+                <div>
+                    <!-- Header: Date Badge & Regulator Tag -->
+                    <div class="flex items-center justify-between mb-3.5">
+                        <span class="px-2.5 py-1 rounded-xl bg-neutral-100 dark:bg-dark-800 font-black text-xs text-neutral-800 dark:text-neutral-200">
+                            {{ item.day_badge }}
+                        </span>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[#4169E1]/10 text-[#4169E1] border border-[#4169E1]/20">
+                            {{ item.regulator_badge }}
+                        </span>
+                    </div>
+
+                    <!-- Company and Ticker -->
+                    <div class="flex items-center gap-3 mb-3">
+                        <a href="{% url 'asset_detail' item.symbol %}" class="w-10 h-10 rounded-2xl bg-neutral-100 dark:bg-dark-800 flex items-center justify-center font-black text-sm text-[#4169E1] border border-neutral-200 dark:border-neutral-750 flex-shrink-0 group-hover:border-[#4169E1] transition-colors">
+                            {{ item.symbol }}
+                        </a>
+                        <div>
+                            <a href="{% url 'asset_detail' item.symbol %}" class="font-extrabold text-sm text-neutral-900 dark:text-white group-hover:text-[#4169E1] transition-colors block line-clamp-1">
+                                {{ item.company_name }}
+                            </a>
+                            <div class="text-[11px] text-neutral-400">
+                                {{ item.fiscal_period }} &bull; {{ item.filing_type }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-neutral-50 dark:bg-dark-800/60 border border-neutral-200/60 dark:border-neutral-800/60 text-xs mb-4">
+                        <div>
+                            <span class="text-[10px] text-neutral-400 block">Consensus EPS</span>
+                            <span class="font-mono font-bold text-neutral-800 dark:text-neutral-200">{{ item.consensus_eps }}</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-neutral-400 block">Est. Revenue</span>
+                            <span class="font-mono font-bold text-neutral-800 dark:text-neutral-200">{{ item.consensus_revenue }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer: Timing, Regulator Link & Email Reminder Button -->
+                <div class="pt-3 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between text-xs">
+                    <span class="text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
+                        <i class="far fa-clock text-[10px]"></i>
+                        <span>{{ item.time }}</span>
+                    </span>
+
+                    <div class="flex items-center gap-2">
+                        <button @click="toggleReminder({id: '{{ item.id }}', title: '{{ item.company_name }} ({{ item.symbol }}) Earnings', date: '{{ item.date_str }}', time: '{{ item.time }}', country: '{{ item.market }}', symbol: '{{ item.symbol }}', category: 'EARNINGS'})"
+                                :class="isReminded('{{ item.id }}') ? 'bg-[#4169E1] text-white border-[#4169E1]' : 'bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-neutral-750 hover:border-[#4169E1]'"
+                                class="px-2.5 py-1 rounded-full text-[11px] font-bold border transition-colors flex items-center gap-1.5"
+                                :title="isReminded('{{ item.id }}') ? 'Reminder active (Click to cancel)' : 'Set reminder to my email'">
+                            <i :class="isReminded('{{ item.id }}') ? 'fas fa-bell' : 'far fa-bell text-[#4169E1]'"></i>
+                            <span x-text="isReminded('{{ item.id }}') ? 'Reminded' : 'Remind Me'">Remind Me</span>
+                        </button>
+                        {% if item.filing_id %}
+                        <a href="{% url 'earnings_filing_detail' item.filing_id %}" 
+                           class="text-[11px] font-bold text-[#4169E1] hover:underline flex items-center gap-1">
+                            <span>Digest</span>
+                            <i class="fas fa-chevron-right text-[9px]"></i>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'asset_detail' item.symbol %}" 
+                           class="text-[11px] font-bold text-[#4169E1] hover:underline flex items-center gap-1">
+                            <span>${{ item.symbol }}</span>
+                            <i class="fas fa-chevron-right text-[9px]"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 2. REPORTED STATUTORY FILINGS SECTION (In-App Reader Cards) -->
+    <div x-show="activeTab === 'reported'" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for report in reported_list %}
+            <div x-show="filterItem('{{ report.regulator_code|lower }}')" 
+                 class="bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-6 shadow-xs hover:shadow-card transition-all flex flex-col justify-between group">
+                
+                <div>
+                    <!-- Top Badge Row -->
+                    <div class="flex items-center justify-between mb-3.5">
+                        <div class="flex items-center gap-2">
+                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                                Verified Filing
+                            </span>
+                            <span class="text-xs font-mono font-bold text-neutral-400">{{ report.filing_type }}</span>
+                        </div>
+                        <span class="text-[11px] font-mono text-neutral-400">{{ report.filing_date }}</span>
+                    </div>
+
+                    <!-- Title & Header -->
+                    <h2 class="text-lg font-black text-neutral-900 dark:text-white leading-snug mb-2 group-hover:text-[#4169E1] transition-colors">
+                        <a href="{% url 'earnings_filing_detail' report.id %}">
+                            {{ report.title }}
+                        </a>
+                    </h2>
+
+                    <div class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400 mb-4">
+                        <span class="font-bold text-neutral-700 dark:text-neutral-300">{{ report.company_name }} (${{ report.symbol }})</span>
+                        <span>&bull;</span>
+                        <span class="text-xs font-mono">CIK: {{ report.cik }}</span>
+                    </div>
+
+                    <!-- Financial Highlights Bar -->
+                    <div class="grid grid-cols-3 gap-2 p-3.5 rounded-2xl bg-neutral-50 dark:bg-dark-800/80 border border-neutral-200/80 dark:border-neutral-800 text-xs mb-4">
+                        <div>
+                            <span class="text-[10px] text-neutral-400 block">Total Revenue</span>
+                            <span class="font-mono font-bold text-neutral-900 dark:text-white text-xs sm:text-sm">{{ report.revenue_actual }}</span>
+                            <span class="text-[10px] font-bold text-emerald-500 block">{{ report.revenue_yoy }} YoY</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-neutral-400 block">Diluted EPS</span>
+                            <span class="font-mono font-bold text-neutral-900 dark:text-white text-xs sm:text-sm">{{ report.eps_actual }}</span>
+                            <span class="text-[10px] font-bold text-emerald-500 block">{{ report.eps_surprise }} Beat</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-neutral-400 block">Net Income</span>
+                            <span class="font-mono font-bold text-neutral-900 dark:text-white text-xs sm:text-sm">{{ report.net_income }}</span>
+                            <span class="text-[10px] text-neutral-400 block font-mono">{{ report.gross_margin }} Marg.</span>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-neutral-600 dark:text-neutral-300 line-clamp-3 leading-relaxed mb-4">
+                        {{ report.summary }}
+                    </p>
+                </div>
+
+                <!-- Action Row -->
+                <div class="pt-4 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
+                    <div class="text-[10px] font-mono text-neutral-400">
+                        Acc: {{ report.accession_number }}
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <a href="{% url 'earnings_download_file' report.id 'pdf' %}" 
+                           class="px-2.5 py-1.5 rounded-full text-xs font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors flex items-center gap-1 border border-rose-200/50 dark:border-rose-900/40" 
+                           title="Download Statutory PDF">
+                            <i class="fas fa-file-pdf text-[11px]"></i>
+                            <span class="hidden sm:inline text-[10px]">PDF</span>
+                        </a>
+                        <a href="{% url 'earnings_download_file' report.id 'excel' %}" 
+                           class="px-2.5 py-1.5 rounded-full text-xs font-bold text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors flex items-center gap-1 border border-emerald-200/50 dark:border-emerald-900/40" 
+                           title="Download Financial Model (.xlsx)">
+                            <i class="fas fa-file-excel text-[11px]"></i>
+                            <span class="hidden sm:inline text-[10px]">Excel</span>
+                        </a>
+                        <a href="{% url 'earnings_filing_detail' report.id %}" 
+                           class="px-4 py-2 rounded-full text-xs font-bold text-white bg-[#4169E1] hover:bg-[#3457C9] transition-colors shadow-2xs flex items-center gap-1.5">
+                            <i class="fas fa-book-open text-[10px]"></i>
+                            <span>Read Digest</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Guest Email Prompt Modal -->
+    <div x-show="showEmailModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+         @click.self="showEmailModal = false">
+        <div class="bg-white dark:bg-dark-850 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-6 max-w-sm w-full shadow-2xl">
+            <div class="w-10 h-10 rounded-2xl bg-[#4169E1]/15 text-[#4169E1] flex items-center justify-center mb-3 text-lg">
+                <i class="fas fa-bell"></i>
+            </div>
+            <h3 class="font-extrabold text-sm text-neutral-900 dark:text-white mb-1">Set Earnings Alert</h3>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-4" x-text="'Receive an alert before ' + (targetEvent ? targetEvent.title : 'this corporate release') + '.'">
+            </p>
+            <form @submit.prevent="submitGuestReminder()">
+                <label class="block text-[11px] font-bold text-neutral-700 dark:text-neutral-300 mb-1.5">Your Email Address</label>
+                <input type="email" x-model="guestEmail" required placeholder="you@example.com" 
+                       class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 dark:bg-dark-800 border border-neutral-200 dark:border-neutral-700 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-[#4169E1] mb-4">
+                <div class="flex items-center gap-2">
+                    <button type="button" @click="showEmailModal = false" class="flex-1 py-2 rounded-xl text-xs font-bold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-dark-750">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 py-2 rounded-xl text-xs font-bold text-white bg-[#4169E1] hover:bg-[#3457C9] transition-colors">
+                        Confirm Alert
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function earningsPageController() {
+        return {
+            activeTab: 'upcoming',
+            selectedRegulator: 'all',
+            showEmailModal: false,
+            guestEmail: '',
+            targetEvent: null,
+            userEmail: '{{ request.user.email|default:"" }}',
+            remindedIds: {{ dock_data.user_reminded_ids|default:"[]"|safe }},
+            filterItem(regCode) {
+                if (this.selectedRegulator === 'all') return true;
+                return regCode.includes(this.selectedRegulator);
+            },
+            isReminded(id) {
+                return this.remindedIds.includes(id);
+            },
+            async toggleReminder(item) {
+                if (this.userEmail) {
+                    await this.dispatchReminder(item.id, this.userEmail, item);
+                } else {
+                    this.targetEvent = item;
+                    this.showEmailModal = true;
+                }
+            },
+            async submitGuestReminder() {
+                if (!this.guestEmail || !this.targetEvent) return;
+                await this.dispatchReminder(this.targetEvent.id, this.guestEmail, this.targetEvent);
+                this.showEmailModal = false;
+                this.guestEmail = '';
+            },
+            async dispatchReminder(eventId, email, eventObj) {
+                try {
+                    const res = await fetch('/api/events/remind/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': this.getCsrfToken()
+                        },
+                        body: JSON.stringify({
+                            event_id: eventId,
+                            email: email,
+                            title: eventObj?.title,
+                            date: eventObj?.date,
+                            time: eventObj?.time,
+                            country: eventObj?.country,
+                            impact: 'High',
+                            symbol: eventObj?.symbol,
+                            notes: eventObj?.notes || `${eventObj?.title} statutory corporate filing.`
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        if (data.is_active) {
+                            if (!this.remindedIds.includes(eventId)) {
+                                this.remindedIds.push(eventId);
+                            }
+                        } else {
+                            this.remindedIds = this.remindedIds.filter(x => x !== eventId);
+                        }
+                        window.dispatchEvent(new CustomEvent('toast', { detail: data.message }));
+                    } else {
+                        window.dispatchEvent(new CustomEvent('toast', { detail: data.error || 'Failed to update reminder' }));
+                    }
+                } catch (e) {
+                    console.error(e);
+                    window.dispatchEvent(new CustomEvent('toast', { detail: 'Error communicating with reminder service' }));
+                }
+            },
+            getCsrfToken() {
+                const cookieValue = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('csrftoken='))
+                    ?.split('=')[1];
+                return cookieValue || '';
+            }
+        };
+    }
+</script>
+{% endblock %}

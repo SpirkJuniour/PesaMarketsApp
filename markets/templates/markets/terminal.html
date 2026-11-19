@@ -26,7 +26,13 @@
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                             PESAMARKETS &bull; PRO WORKSTATION
                         </span>
-                        <span class="text-[9px] font-mono font-bold bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full uppercase">PRO TIER</span>
+                        {% if is_paid %}
+                        <span class="text-[9px] font-mono font-bold bg-amber-400 text-slate-950 px-2.5 py-0.5 rounded-full uppercase">PRO TIER &bull; ACTIVE</span>
+                        {% else %}
+                        <span class="text-[9px] font-mono font-bold bg-slate-800 text-amber-400 px-2.5 py-0.5 rounded-full uppercase border border-amber-500/30 flex items-center gap-1">
+                            <i class="fas fa-lock text-[8px]"></i>PREVIEW MODE
+                        </span>
+                        {% endif %}
                     </div>
                     <h1 class="text-xl md:text-2xl font-black text-white tracking-tight flex items-center gap-2 mt-0.5">
                         <span x-text="currentSymbol"></span>
@@ -65,11 +71,28 @@
 
             <!-- Right: Quick Actions -->
             <div class="flex items-center gap-2 flex-wrap">
+                {% if not is_paid %}
+                    {% if request.user.is_authenticated %}
+                    <form method="POST" action="{% url 'api_upgrade_subscription' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="upgrade">
+                        <button type="submit" class="px-4 py-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-mono font-black shadow-md shadow-amber-500/25 transition-all flex items-center gap-1.5 whitespace-nowrap">
+                            <i class="fas fa-crown text-[10px]"></i>
+                            <span>UPGRADE TO PRO ($29/MO)</span>
+                        </button>
+                    </form>
+                    {% else %}
+                    <a href="{% url 'login' %}?next={% url 'terminal' %}" class="px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-mono font-black shadow-md shadow-amber-500/25 transition-all flex items-center gap-1.5 whitespace-nowrap">
+                        <i class="fas fa-arrow-right-to-bracket text-[10px]"></i>
+                        <span>SIGN IN TO ACCESS PRO</span>
+                    </a>
+                    {% endif %}
+                {% endif %}
                 <button @click="copyTelemetry()" class="px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-mono font-bold transition-all flex items-center gap-1.5">
                     <i class="far fa-copy text-amber-400"></i>
                     <span>COPY DESK</span>
                 </button>
-                <a :href="'/trade/?symbol=' + currentSymbol" class="px-5 py-2 rounded-full bg-primary hover:bg-[#E00B41] text-white text-xs font-mono font-bold shadow-md shadow-primary/25 transition-all flex items-center gap-1.5">
+                <a :href="'/trade/?symbol=' + currentSymbol" class="px-5 py-2 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white text-xs font-mono font-bold shadow-md shadow-[#4169E1]/25 transition-all flex items-center gap-1.5">
                     <i class="fas fa-bolt"></i>
                     <span>TRADE TICKET</span>
                 </a>
@@ -82,7 +105,7 @@
         <!-- Fast Command Prompt & Quick Ticker Ribbon -->
         <div class="mt-4 pt-4 border-t border-slate-850 flex flex-col md:flex-row md:items-center justify-between gap-3">
             <!-- Command Line Input -->
-            <form @submit.prevent="executeCommand()" class="flex items-center gap-2 bg-slate-900 border border-slate-750 rounded-full px-4 py-1.5 flex-1 max-w-xl group focus-within:border-primary transition-colors">
+            <form @submit.prevent="executeCommand()" class="flex items-center gap-2 bg-slate-900 border border-slate-750 rounded-full px-4 py-1.5 flex-1 max-w-xl group focus-within:border-[#4169E1] transition-colors">
                 <span class="text-amber-500 font-mono font-black text-xs">&gt;</span>
                 <input type="text" 
                        x-model="cmdInput" 
@@ -96,7 +119,7 @@
             <div class="flex items-center gap-1.5 overflow-x-auto ticker-scroll pb-1">
                 <template x-for="item in allAssets" :key="item.symbol">
                     <button @click="switchSymbol(item.symbol)"
-                            :class="currentSymbol === item.symbol ? 'bg-primary text-white font-black shadow-md shadow-primary/20' : 'bg-slate-900/90 hover:bg-slate-800 text-slate-300 border border-slate-800 font-semibold'"
+                            :class="currentSymbol === item.symbol ? 'bg-[#4169E1] text-white font-black shadow-md shadow-[#4169E1]/20' : 'bg-slate-900/90 hover:bg-slate-800 text-slate-300 border border-slate-800 font-semibold'"
                             class="px-3 py-1.5 rounded-full text-xs font-mono transition-all flex items-center gap-2 flex-shrink-0">
                         <div class="w-4 h-4 rounded-full bg-white p-0.5 flex items-center justify-center flex-shrink-0" x-show="item.logo">
                             <img :src="item.logo" :alt="item.symbol" class="w-full h-full object-contain">
@@ -153,7 +176,7 @@
         <button @click="activeView = 'ycrv'" 
                 :class="activeView === 'ycrv' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
                 class="px-4 py-2 rounded-full text-xs font-mono font-bold transition-all flex items-center gap-2 flex-shrink-0">
-            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-primary text-white font-black">F6</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-[#4169E1] text-white font-black">F6</span>
             <span>SOVEREIGN YIELDS & CORR (YCRV)</span>
         </button>
     </div>
@@ -216,11 +239,95 @@
             </div>
         </div>
 
+        <!-- Primary Interactive Technical & Price Chart Canvas (12 Cols) -->
+        <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-dark-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#4169E1] animate-pulse"></span>
+                    <h3 class="font-bold text-sm text-slate-900 dark:text-white font-mono uppercase">
+                        <span x-text="currentSymbol"></span> Price Trajectory & Volume Stream
+                    </h3>
+                    <span class="text-xs font-mono font-bold text-emerald-500" x-text="formatPrice(terminalData.asset.price) + ' ' + terminalData.asset.currency"></span>
+                </div>
+                
+                <!-- Timeframe Selectors & Overlay Toggles -->
+                <div class="flex items-center gap-2 flex-wrap">
+                    <!-- Overlay Toggles -->
+                    <div class="flex items-center gap-1 bg-slate-100 dark:bg-dark-800 p-1 rounded-full text-xs font-mono">
+                        <button type="button" @click="toggleChartEma()" 
+                                :class="showEma ? 'bg-amber-500 text-slate-950 font-black' : 'text-slate-400 hover:text-white'"
+                                class="px-2.5 py-1 rounded-full transition-all">
+                            EMA 20
+                        </button>
+                        <button type="button" @click="toggleChartSma()" 
+                                :class="showSma ? 'bg-blue-500 text-white font-black' : 'text-slate-400 hover:text-white'"
+                                class="px-2.5 py-1 rounded-full transition-all">
+                            SMA 50
+                        </button>
+                        <button type="button" @click="toggleChartVol()" 
+                                :class="showVol ? 'bg-cyan-500 text-slate-950 font-black' : 'text-slate-400 hover:text-white'"
+                                class="px-2.5 py-1 rounded-full transition-all">
+                            VOL
+                        </button>
+                    </div>
+
+                    <!-- Timeframe Buttons -->
+                    <div class="flex items-center gap-1 bg-slate-100 dark:bg-dark-800 p-1 rounded-full text-xs font-mono">
+                        <template x-for="tf in ['1D', '5D', '1M', '6M', '1Y', 'ALL']" :key="tf">
+                            <button type="button" @click="setChartTimeframe(tf)"
+                                    :class="activeTimeframe === tf ? 'bg-[#4169E1] text-white font-bold shadow-xs' : 'text-slate-400 hover:text-white'"
+                                    class="px-3 py-1 rounded-full transition-all"
+                                    x-text="tf">
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="w-full h-72 sm:h-80 relative">
+                <canvas id="terminalPriceChart" class="w-full h-full"></canvas>
+            </div>
+        </div>
+
         <!-- Main Workspace Grid: Level 2 Depth vs Diagnostic HUD -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
             
             <!-- Left: Level 2 Order Book (Market Depth Ladder) (7 Cols) -->
-            <div class="lg:col-span-7 bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm overflow-hidden flex flex-col justify-between">
+            <div class="lg:col-span-7 bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm overflow-hidden flex flex-col justify-between relative">
+                {% if not is_paid %}
+                <!-- Institutional Paywall Overlay for Free/Guest Users -->
+                <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center z-20 rounded-3xl">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl mb-3 shadow-lg shadow-amber-500/10">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <span class="text-[10px] font-mono font-black text-amber-400 uppercase tracking-widest bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 mb-2">
+                        TERMINAL PRO REQUIRED
+                    </span>
+                    <h3 class="text-base md:text-lg font-black text-white font-mono uppercase">
+                        Direct Market Access (DMA) Level 2 Depth Gated
+                    </h3>
+                    <p class="text-xs text-slate-300 font-mono max-w-md mt-1 mb-4 leading-relaxed">
+                        8-tier Level 2 order books, real-time institutional block flow (>100k shares), and financial health models require an active Terminal Pro subscription.
+                    </p>
+                    {% if request.user.is_authenticated %}
+                    <form method="POST" action="{% url 'api_upgrade_subscription' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="upgrade">
+                        <button type="submit" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-mono font-black text-xs shadow-xl shadow-amber-500/25 transition-all flex items-center gap-2">
+                            <i class="fas fa-crown"></i>
+                            <span>UPGRADE TO TERMINAL PRO ($29/MO)</span>
+                        </button>
+                    </form>
+                    {% else %}
+                    <a href="{% url 'login' %}?next={% url 'terminal' %}" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-mono font-black text-xs shadow-xl shadow-amber-500/25 transition-all flex items-center gap-2">
+                        <i class="fas fa-arrow-right-to-bracket"></i>
+                        <span>SIGN IN TO ACCESS PRO</span>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
                 <div>
                     <div class="p-4 border-b border-slate-100 dark:border-dark-750 flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -282,8 +389,24 @@
                 </div>
             </div>
 
-            <!-- Right: Client Sentiment & Core Valuation Summary (5 Cols) -->
+            <!-- Right: Visual Depth Chart, Client Sentiment & Core Valuation Summary (5 Cols) -->
             <div class="lg:col-span-5 space-y-4">
+                
+                <!-- Level 2 Visual Market Depth Profile Canvas Card -->
+                <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-dark-800 pb-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-layer-group text-amber-500 text-xs"></i>
+                            <h4 class="font-bold text-xs text-slate-900 dark:text-white font-mono uppercase">Visual Depth Curve (Order Flow)</h4>
+                        </div>
+                        <span class="text-[11px] font-mono text-slate-400">
+                            Mid: <strong class="text-cyan-400" x-text="formatPrice(terminalData.level2.micro_price)"></strong>
+                        </span>
+                    </div>
+                    <div class="w-full h-52 relative">
+                        <canvas id="terminalDepthChart" class="w-full h-full"></canvas>
+                    </div>
+                </div>
                 
                 <!-- Client Positioning Card -->
                 <div class="bg-white dark:bg-dark-850 p-5 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-4">
@@ -502,6 +625,19 @@
                     </div>
                 </div>
 
+                <!-- Technical Oscillators Multi-Period Chart Canvas Card -->
+                <div class="bg-slate-50 dark:bg-dark-800/90 p-4 rounded-2xl border border-slate-200/80 dark:border-dark-700 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 uppercase flex items-center gap-1.5">
+                            <i class="fas fa-wave-square text-emerald-500"></i> RSI 14 Momentum Stream & Boundary Bands
+                        </span>
+                        <span class="text-[11px] font-mono text-slate-400">70 Overbought / 30 Oversold</span>
+                    </div>
+                    <div class="w-full h-48 relative">
+                        <canvas id="terminalOscillatorChart" class="w-full h-full"></canvas>
+                    </div>
+                </div>
+
                 <!-- Moving Averages Matrix Table -->
                 <div>
                     <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">Moving Averages Alignment Grid</h4>
@@ -563,7 +699,40 @@
     <!-- ======================================================== -->
     <div x-show="activeView === 'flow'" x-cloak class="space-y-4">
         
-        <div class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm overflow-hidden">
+        <div class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm overflow-hidden relative">
+            {% if not is_paid %}
+            <!-- Institutional Paywall Overlay for Free/Guest Users -->
+            <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center z-20">
+                <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xl mb-3 shadow-lg shadow-purple-500/10">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <span class="text-[10px] font-mono font-black text-purple-400 uppercase tracking-widest bg-purple-500/10 px-2.5 py-0.5 rounded-full border border-purple-500/20 mb-2">
+                    TERMINAL PRO REQUIRED
+                </span>
+                <h3 class="text-base md:text-lg font-black text-white font-mono uppercase">
+                    Institutional Block Tape (>100k Shares) Gated
+                </h3>
+                <p class="text-xs text-slate-300 font-mono max-w-md mt-1 mb-4 leading-relaxed">
+                    Sub-second time & sales, cumulative volume delta (CVD), and dark pool cross routes require an active Terminal Pro subscription.
+                </p>
+                {% if request.user.is_authenticated %}
+                <form method="POST" action="{% url 'api_upgrade_subscription' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="upgrade">
+                    <button type="submit" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-mono font-black text-xs shadow-xl shadow-amber-500/25 transition-all flex items-center gap-2">
+                        <i class="fas fa-crown"></i>
+                        <span>UPGRADE TO TERMINAL PRO ($29/MO)</span>
+                    </button>
+                </form>
+                {% else %}
+                <a href="{% url 'login' %}?next={% url 'terminal' %}" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-mono font-black text-xs shadow-xl shadow-amber-500/25 transition-all flex items-center gap-2">
+                    <i class="fas fa-arrow-right-to-bracket"></i>
+                    <span>SIGN IN TO ACCESS PRO</span>
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+
             <div class="p-5 border-b border-slate-100 dark:border-dark-750 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h3 class="font-black text-sm text-slate-900 dark:text-white font-mono uppercase flex items-center gap-2">
@@ -704,6 +873,27 @@
     <!-- ======================================================== -->
     <div x-show="activeView === 'ycrv'" x-cloak class="space-y-4">
         
+        <!-- Comparative 4-Sovereign Benchmark Yield Curve Chart (YCRV) -->
+        <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-dark-800 pb-3">
+                <div>
+                    <h3 class="font-black text-sm md:text-base text-slate-900 dark:text-white font-mono uppercase flex items-center gap-2">
+                        <i class="fas fa-chart-line text-[#4169E1]"></i>
+                        <span>Comparative Multi-Sovereign Benchmark Curves (YCRV)</span>
+                    </h3>
+                    <p class="text-xs font-mono text-slate-400 mt-0.5">
+                        Interactive yield curve overlay comparing Kenya CBK, US Treasuries, UK Gilts, and Japan JGBs across tenors (1M to 30Y).
+                    </p>
+                </div>
+                <div class="flex items-center gap-2 text-xs font-mono">
+                    <span class="text-slate-400">2Y/10Y Spread: <strong class="text-cyan-400" x-text="terminalData.yield_curves.curve_spread_2_10"></strong></span>
+                </div>
+            </div>
+            <div class="w-full h-72 sm:h-80 relative">
+                <canvas id="terminalYieldCurveChart" class="w-full h-full"></canvas>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             
             <!-- Kenya Sovereign Yield Curve Ladder -->
@@ -755,6 +945,46 @@
                     </div>
                 </div>
 
+                <!-- UK Gilts Benchmark Curve -->
+                <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-3" x-show="terminalData.yield_curves.uk_gilts">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-dark-800 pb-3">
+                        <h3 class="font-black text-sm text-slate-900 dark:text-white font-mono uppercase flex items-center gap-2">
+                            <i class="fas fa-crown text-purple-500"></i>
+                            <span>UK GILTS BENCHMARK CURVE (HM TREASURY / DMO)</span>
+                        </h3>
+                        <span class="text-xs font-mono text-purple-400 font-bold">10Y Benchmark: 4.15%</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
+                        <template x-for="gilt in terminalData.yield_curves.uk_gilts" :key="gilt.tenor">
+                            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-dark-800 border border-slate-100 dark:border-dark-700">
+                                <span class="text-[10px] text-slate-400 block" x-text="gilt.tenor"></span>
+                                <span class="font-black text-sm text-slate-900 dark:text-white mt-0.5 block" x-text="gilt.yield.toFixed(2) + '%'"></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Japan JGBs Benchmark Curve -->
+                <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-3" x-show="terminalData.yield_curves.japan_jgbs">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-dark-800 pb-3">
+                        <h3 class="font-black text-sm text-slate-900 dark:text-white font-mono uppercase flex items-center gap-2">
+                            <i class="fas fa-torii-gate text-rose-500"></i>
+                            <span>JAPAN SOVEREIGN JGB CURVE (MINISTRY OF FINANCE)</span>
+                        </h3>
+                        <span class="text-xs font-mono text-rose-400 font-bold">10Y Benchmark: 0.95%</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
+                        <template x-for="jgb in terminalData.yield_curves.japan_jgbs" :key="jgb.tenor">
+                            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-dark-800 border border-slate-100 dark:border-dark-700">
+                                <span class="text-[10px] text-slate-400 block" x-text="jgb.tenor"></span>
+                                <span class="font-black text-sm text-slate-900 dark:text-white mt-0.5 block" x-text="jgb.yield.toFixed(2) + '%'"></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
                 <!-- Intermarket Correlation Matrix with Current Asset -->
                 <div class="bg-white dark:bg-dark-850 p-6 rounded-3xl border border-slate-200/80 dark:border-dark-750 shadow-sm space-y-3">
                     <h3 class="font-black text-sm text-slate-900 dark:text-white font-mono uppercase flex items-center gap-2 border-b border-slate-100 dark:border-dark-800 pb-3">
@@ -795,6 +1025,14 @@
             terminalData: {{ terminal_json|safe }},
             allAssets: {{ terminal_json|safe }}.all_assets,
             cmdInput: '',
+            activeTimeframe: '1D',
+            showEma: true,
+            showSma: true,
+            showVol: true,
+            priceChart: null,
+            depthChart: null,
+            yieldChart: null,
+            oscillatorChart: null,
             clocks: {
                 nbo: '14:02 EAT',
                 lnd: '12:02 GMT',
@@ -809,12 +1047,507 @@
                 // Handle keyboard shortcuts (F1 - F6)
                 window.addEventListener('keydown', (e) => {
                     if (document.activeElement.tagName === 'INPUT') return;
-                    if (e.key === 'F1' || e.key === '1') { e.preventDefault(); this.activeView = 'l2'; }
-                    if (e.key === 'F2' || e.key === '2') { e.preventDefault(); this.activeView = 'fa'; }
-                    if (e.key === 'F3' || e.key === '3') { e.preventDefault(); this.activeView = 'tech'; }
-                    if (e.key === 'F4' || e.key === '4') { e.preventDefault(); this.activeView = 'flow'; }
-                    if (e.key === 'F5' || e.key === '5') { e.preventDefault(); this.activeView = 'eco'; }
-                    if (e.key === 'F6' || e.key === '6') { e.preventDefault(); this.activeView = 'ycrv'; }
+                    if (e.key === 'F1' || e.key === '1') { e.preventDefault(); this.setView('l2'); }
+                    if (e.key === 'F2' || e.key === '2') { e.preventDefault(); this.setView('fa'); }
+                    if (e.key === 'F3' || e.key === '3') { e.preventDefault(); this.setView('tech'); }
+                    if (e.key === 'F4' || e.key === '4') { e.preventDefault(); this.setView('flow'); }
+                    if (e.key === 'F5' || e.key === '5') { e.preventDefault(); this.setView('eco'); }
+                    if (e.key === 'F6' || e.key === '6') { e.preventDefault(); this.setView('ycrv'); }
+                });
+
+                // Watch activeView and resize / redraw charts upon activation
+                this.$watch('activeView', (view) => {
+                    this.$nextTick(() => {
+                        if (view === 'l2') {
+                            if (this.priceChart) this.priceChart.resize();
+                            else this.renderPriceChart();
+                            if (this.depthChart) this.depthChart.resize();
+                            else this.renderDepthChart();
+                        } else if (view === 'tech') {
+                            if (this.oscillatorChart) this.oscillatorChart.resize();
+                            else this.renderOscillatorChart();
+                        } else if (view === 'ycrv') {
+                            if (this.yieldChart) this.yieldChart.resize();
+                            else this.renderYieldChart();
+                        }
+                    });
+                });
+
+                this.$nextTick(() => {
+                    this.initAllCharts();
+                });
+            },
+
+            setView(view) {
+                this.activeView = view;
+            },
+
+            formatPrice(val) {
+                if (val === null || val === undefined) return '-';
+                return Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            },
+
+            setChartTimeframe(tf) {
+                this.activeTimeframe = tf;
+                this.renderPriceChart();
+            },
+
+            toggleChartEma() {
+                this.showEma = !this.showEma;
+                this.renderPriceChart();
+            },
+
+            toggleChartSma() {
+                this.showSma = !this.showSma;
+                this.renderPriceChart();
+            },
+
+            toggleChartVol() {
+                this.showVol = !this.showVol;
+                this.renderPriceChart();
+            },
+
+            initAllCharts() {
+                this.renderPriceChart();
+                this.renderDepthChart();
+                this.renderOscillatorChart();
+                this.renderYieldChart();
+            },
+
+            updateAllCharts() {
+                this.renderPriceChart();
+                this.renderDepthChart();
+                this.renderOscillatorChart();
+                this.renderYieldChart();
+            },
+
+            renderPriceChart() {
+                const canvas = document.getElementById('terminalPriceChart');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                if (this.priceChart) {
+                    this.priceChart.destroy();
+                    this.priceChart = null;
+                }
+                const series = this.terminalData.charts?.price_series?.[this.activeTimeframe] || {
+                    labels: ['09:30', '11:00', '13:00', '15:00', '16:00'],
+                    prices: [this.terminalData.asset.price, this.terminalData.asset.price],
+                    volumes: [10000, 15000],
+                    ema20: [this.terminalData.asset.price, this.terminalData.asset.price],
+                    sma50: [this.terminalData.asset.price, this.terminalData.asset.price]
+                };
+
+                const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0, 'rgba(65, 105, 225, 0.35)');
+                gradient.addColorStop(1, 'rgba(65, 105, 225, 0.00)');
+
+                const datasets = [
+                    {
+                        type: 'line',
+                        label: `${this.currentSymbol} Price`,
+                        data: series.prices,
+                        borderColor: '#4169E1',
+                        backgroundColor: gradient,
+                        borderWidth: 2.2,
+                        fill: true,
+                        tension: 0.15,
+                        pointRadius: series.prices.length > 20 ? 0 : 2.5,
+                        pointHoverRadius: 5,
+                        yAxisID: 'y'
+                    }
+                ];
+
+                if (this.showEma && series.ema20) {
+                    datasets.push({
+                        type: 'line',
+                        label: 'EMA 20',
+                        data: series.ema20,
+                        borderColor: '#10B981',
+                        borderWidth: 1.5,
+                        borderDash: [3, 3],
+                        fill: false,
+                        tension: 0.15,
+                        pointRadius: 0,
+                        yAxisID: 'y'
+                    });
+                }
+
+                if (this.showSma && series.sma50) {
+                    datasets.push({
+                        type: 'line',
+                        label: 'SMA 50',
+                        data: series.sma50,
+                        borderColor: '#F59E0B',
+                        borderWidth: 1.5,
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.15,
+                        pointRadius: 0,
+                        yAxisID: 'y'
+                    });
+                }
+
+                if (this.showVol && series.volumes) {
+                    datasets.push({
+                        type: 'bar',
+                        label: 'Volume',
+                        data: series.volumes,
+                        backgroundColor: 'rgba(148, 163, 184, 0.18)',
+                        borderColor: 'rgba(148, 163, 184, 0.35)',
+                        borderWidth: 1,
+                        yAxisID: 'yVolume',
+                        barPercentage: 0.55
+                    });
+                }
+
+                this.priceChart = new Chart(ctx, {
+                    data: {
+                        labels: series.labels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 350 },
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    boxWidth: 10,
+                                    color: '#94A3B8',
+                                    font: { family: 'monospace', size: 11 }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: '#0F172A',
+                                titleColor: '#F8FAFC',
+                                bodyColor: '#38BDF8',
+                                borderColor: '#334155',
+                                borderWidth: 1,
+                                padding: 10,
+                                titleFont: { family: 'monospace' },
+                                bodyFont: { family: 'monospace' }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#64748B', font: { family: 'monospace', size: 10 }, maxTicksLimit: 12 }
+                            },
+                            y: {
+                                position: 'right',
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: {
+                                    color: '#94A3B8',
+                                    font: { family: 'monospace', size: 10 },
+                                    callback: (v) => Number(v).toLocaleString()
+                                }
+                            },
+                            yVolume: {
+                                position: 'left',
+                                display: false,
+                                min: 0,
+                                max: Math.max(...(series.volumes || [1])) * 4.5,
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            },
+
+            renderDepthChart() {
+                const canvas = document.getElementById('terminalDepthChart');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                if (this.depthChart) {
+                    this.depthChart.destroy();
+                    this.depthChart = null;
+                }
+                const depth = this.terminalData.charts?.depth_curve || { bids: [], asks: [] };
+
+                const bidLabels = (depth.bids || []).map(b => b.x);
+                const bidData = (depth.bids || []).map(b => b.y);
+                const askLabels = (depth.asks || []).map(a => a.x);
+                const askData = (depth.asks || []).map(a => a.y);
+                const allLabels = [...bidLabels, ...askLabels];
+
+                this.depthChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: allLabels,
+                        datasets: [
+                            {
+                                label: 'Cumulative Bids',
+                                data: allLabels.map(lbl => {
+                                    const idx = bidLabels.indexOf(lbl);
+                                    return idx !== -1 ? bidData[idx] : null;
+                                }),
+                                borderColor: '#10B981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.16)',
+                                fill: true,
+                                stepped: 'after',
+                                borderWidth: 2,
+                                pointRadius: 2.5
+                            },
+                            {
+                                label: 'Cumulative Asks',
+                                data: allLabels.map(lbl => {
+                                    const idx = askLabels.indexOf(lbl);
+                                    return idx !== -1 ? askData[idx] : null;
+                                }),
+                                borderColor: '#F43F5E',
+                                backgroundColor: 'rgba(244, 63, 94, 0.16)',
+                                fill: true,
+                                stepped: 'before',
+                                borderWidth: 2,
+                                pointRadius: 2.5
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 300 },
+                        interaction: { mode: 'nearest', intersect: false },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: { color: '#94A3B8', font: { family: 'monospace', size: 10 }, boxWidth: 8 }
+                            },
+                            tooltip: {
+                                backgroundColor: '#0F172A',
+                                borderColor: '#334155',
+                                borderWidth: 1,
+                                titleFont: { family: 'monospace' },
+                                bodyFont: { family: 'monospace' },
+                                callbacks: {
+                                    title: (items) => 'Price: ' + items[0].label,
+                                    label: (item) => ' Depth: ' + Number(item.raw).toLocaleString() + ' shares'
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#64748B', font: { family: 'monospace', size: 9 }, maxTicksLimit: 8 }
+                            },
+                            y: {
+                                position: 'right',
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#94A3B8', font: { family: 'monospace', size: 9 }, callback: (v) => Number(v).toLocaleString() }
+                            }
+                        }
+                    }
+                });
+            },
+
+            renderOscillatorChart() {
+                const canvas = document.getElementById('terminalOscillatorChart');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                if (this.oscillatorChart) {
+                    this.oscillatorChart.destroy();
+                    this.oscillatorChart = null;
+                }
+                const osc = this.terminalData.charts?.oscillators || {
+                    labels: [], rsi: [], overbought: [], oversold: [], hist: []
+                };
+
+                this.oscillatorChart = new Chart(ctx, {
+                    data: {
+                        labels: osc.labels,
+                        datasets: [
+                            {
+                                type: 'line',
+                                label: 'RSI 14',
+                                data: osc.rsi,
+                                borderColor: '#10B981',
+                                borderWidth: 2,
+                                tension: 0.2,
+                                pointRadius: 2,
+                                yAxisID: 'y'
+                            },
+                            {
+                                type: 'line',
+                                label: 'Overbought (70)',
+                                data: osc.overbought,
+                                borderColor: 'rgba(244, 63, 94, 0.65)',
+                                borderDash: [4, 4],
+                                borderWidth: 1,
+                                pointRadius: 0,
+                                fill: false,
+                                yAxisID: 'y'
+                            },
+                            {
+                                type: 'line',
+                                label: 'Oversold (30)',
+                                data: osc.oversold,
+                                borderColor: 'rgba(16, 185, 129, 0.65)',
+                                borderDash: [4, 4],
+                                borderWidth: 1,
+                                pointRadius: 0,
+                                fill: false,
+                                yAxisID: 'y'
+                            },
+                            {
+                                type: 'bar',
+                                label: 'MACD Hist',
+                                data: osc.hist,
+                                backgroundColor: (osc.hist || []).map(h => h >= 0 ? 'rgba(16, 185, 129, 0.4)' : 'rgba(244, 63, 94, 0.4)'),
+                                borderColor: (osc.hist || []).map(h => h >= 0 ? '#10B981' : '#F43F5E'),
+                                borderWidth: 1,
+                                yAxisID: 'yMacd',
+                                barPercentage: 0.6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 300 },
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: { color: '#94A3B8', font: { family: 'monospace', size: 10 }, boxWidth: 8 }
+                            },
+                            tooltip: {
+                                backgroundColor: '#0F172A',
+                                borderColor: '#334155',
+                                borderWidth: 1,
+                                titleFont: { family: 'monospace' },
+                                bodyFont: { family: 'monospace' }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#64748B', font: { family: 'monospace', size: 9 }, maxTicksLimit: 10 }
+                            },
+                            y: {
+                                position: 'right',
+                                min: 10,
+                                max: 90,
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#94A3B8', font: { family: 'monospace', size: 9 } }
+                            },
+                            yMacd: {
+                                display: false,
+                                position: 'left',
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            },
+
+            renderYieldChart() {
+                const canvas = document.getElementById('terminalYieldCurveChart');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                if (this.yieldChart) {
+                    this.yieldChart.destroy();
+                    this.yieldChart = null;
+                }
+                const ycrv = this.terminalData.charts?.yield_curves_multi || {
+                    tenors: ['1M', '3M', '6M', '1Y', '2Y', '5Y', '10Y', '30Y'],
+                    kenya: [14.9, 15.7, 16.2, 16.5, 16.8, 17.2, 16.1, 15.8],
+                    us_treasuries: [4.85, 4.62, 4.48, 4.25, 4.12, 4.18, 4.35, 4.58],
+                    uk_gilts: [4.88, 4.75, 4.60, 4.45, 4.28, 4.32, 4.42, 4.78],
+                    japan_jgbs: [0.10, 0.18, 0.25, 0.38, 0.48, 0.72, 1.08, 2.15]
+                };
+
+                this.yieldChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ycrv.tenors,
+                        datasets: [
+                            {
+                                label: 'Kenya Sovereign (CBK)',
+                                data: ycrv.kenya,
+                                borderColor: '#10B981',
+                                backgroundColor: '#10B981',
+                                borderWidth: 2.5,
+                                tension: 0.25,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            },
+                            {
+                                label: 'US Treasuries',
+                                data: ycrv.us_treasuries,
+                                borderColor: '#3B82F6',
+                                backgroundColor: '#3B82F6',
+                                borderWidth: 2.5,
+                                tension: 0.25,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            },
+                            {
+                                label: 'UK Gilts (HM Treasury)',
+                                data: ycrv.uk_gilts,
+                                borderColor: '#A855F7',
+                                backgroundColor: '#A855F7',
+                                borderWidth: 2,
+                                tension: 0.25,
+                                pointRadius: 3.5,
+                                pointHoverRadius: 5.5
+                            },
+                            {
+                                label: 'Japan Sovereign (JGB)',
+                                data: ycrv.japan_jgbs,
+                                borderColor: '#F43F5E',
+                                backgroundColor: '#F43F5E',
+                                borderWidth: 2,
+                                tension: 0.25,
+                                pointRadius: 3.5,
+                                pointHoverRadius: 5.5
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 400 },
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: { color: '#94A3B8', font: { family: 'monospace', size: 11 }, boxWidth: 10 }
+                            },
+                            tooltip: {
+                                backgroundColor: '#0F172A',
+                                borderColor: '#334155',
+                                borderWidth: 1,
+                                titleFont: { family: 'monospace' },
+                                bodyFont: { family: 'monospace' },
+                                callbacks: {
+                                    label: (item) => ` ${item.dataset.label}: ${item.raw.toFixed(2)}%`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'Curve Tenor Horizon', color: '#64748B', font: { family: 'monospace', size: 11 } },
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#94A3B8', font: { family: 'monospace', size: 10 } }
+                            },
+                            y: {
+                                position: 'right',
+                                title: { display: true, text: 'Yield (%)', color: '#64748B', font: { family: 'monospace', size: 11 } },
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: {
+                                    color: '#94A3B8',
+                                    font: { family: 'monospace', size: 10 },
+                                    callback: (v) => v.toFixed(1) + '%'
+                                }
+                            }
+                        }
+                    }
                 });
             },
 
@@ -839,7 +1572,8 @@
                         this.terminalData = data;
                         this.currentSymbol = sym.toUpperCase();
                         window.history.pushState({}, '', '/terminal/?symbol=' + sym);
-                        this.showToast('Terminal switched to ' + sym.toUpperCase());
+                        this.$nextTick(() => this.updateAllCharts());
+                        window.dispatchEvent(new CustomEvent('toast', { detail: 'Terminal switched to ' + sym.toUpperCase() }));
                     }
                 } catch (e) {
                     console.error(e);
@@ -852,27 +1586,27 @@
                 if (!raw) return;
 
                 if (raw === 'L2' || raw === 'BOOK' || raw === 'DEPTH') {
-                    this.activeView = 'l2';
+                    this.setView('l2');
                     return;
                 }
                 if (raw === 'FA' || raw === 'DES' || raw === 'VALUATION') {
-                    this.activeView = 'fa';
+                    this.setView('fa');
                     return;
                 }
                 if (raw === 'TECH' || raw === 'CHART' || raw === 'RSI' || raw === 'MACD') {
-                    this.activeView = 'tech';
+                    this.setView('tech');
                     return;
                 }
                 if (raw === 'FLOW' || raw === 'TAPE' || raw === 'BLOCK') {
-                    this.activeView = 'flow';
+                    this.setView('flow');
                     return;
                 }
                 if (raw === 'ECO' || raw === 'CALENDAR' || raw === 'CBK' || raw === 'FED') {
-                    this.activeView = 'eco';
+                    this.setView('eco');
                     return;
                 }
                 if (raw === 'YCRV' || raw === 'YIELD' || raw === 'CORR') {
-                    this.activeView = 'ycrv';
+                    this.setView('ycrv');
                     return;
                 }
                 if (raw === 'BONDS' || raw === 'TBILL' || raw === 'TBILLS' || raw === 'DHOWCSD') {
@@ -886,20 +1620,20 @@
                     this.switchSymbol(candidateSym);
                     if (parts.length > 1) {
                         const sub = parts[1];
-                        if (sub === 'FA' || sub === 'DES') this.activeView = 'fa';
-                        else if (sub === 'L2') this.activeView = 'l2';
-                        else if (sub === 'TECH') this.activeView = 'tech';
-                        else if (sub === 'FLOW') this.activeView = 'flow';
+                        if (sub === 'FA' || sub === 'DES') this.setView('fa');
+                        else if (sub === 'L2') this.setView('l2');
+                        else if (sub === 'TECH') this.setView('tech');
+                        else if (sub === 'FLOW') this.setView('flow');
                     }
                 } else {
-                    this.showToast('Unknown terminal command: ' + raw);
+                    window.dispatchEvent(new CustomEvent('toast', { detail: 'Unknown terminal command: ' + raw }));
                 }
             },
 
             copyTelemetry() {
                 const payload = `${this.currentSymbol} [${this.terminalData.asset.name}]: Price: ${this.terminalData.asset.currency} ${this.terminalData.asset.price} | Spread: ${this.terminalData.level2.spread_bps} bps | PE: ${this.terminalData.valuation_fa.pe_ttm} | RSI: ${this.terminalData.technicals.rsi_14}`;
                 navigator.clipboard.writeText(payload);
-                this.showToast('Terminal telemetry copied to clipboard');
+                window.dispatchEvent(new CustomEvent('toast', { detail: 'Terminal telemetry copied to clipboard' }));
             }
         };
     }

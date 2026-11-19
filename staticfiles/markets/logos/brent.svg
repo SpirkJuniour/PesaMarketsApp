@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <radialGradient id="brentBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0b2545"/>
+      <stop offset="100%" stop-color="#030c17"/>
+    </radialGradient>
+    <linearGradient id="brentAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00d2ff"/>
+      <stop offset="100%" stop-color="#3a7bd5"/>
+    </linearGradient>
+    <linearGradient id="goldTrim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f6d365"/>
+      <stop offset="100%" stop-color="#fda085"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#brentBg)" stroke="url(#brentAccent)" stroke-width="2.5"/>
+  <circle cx="60" cy="60" r="49" fill="none" stroke="url(#goldTrim)" stroke-width="1" stroke-dasharray="2,2"/>
+  <!-- Offshore Oil Rig Silhouette -->
+  <path d="M42 78 L52 46 L68 46 L78 78 Z" fill="none" stroke="url(#brentAccent)" stroke-width="2.2" stroke-linejoin="round"/>
+  <line x1="47" y1="62" x2="73" y2="62" stroke="url(#brentAccent)" stroke-width="1.8"/>
+  <line x1="52" y1="46" x2="68" y2="78" stroke="url(#brentAccent)" stroke-width="1.2"/>
+  <line x1="68" y1="46" x2="52" y2="78" stroke="url(#brentAccent)" stroke-width="1.2"/>
+  <line x1="60" y1="36" x2="60" y2="46" stroke="url(#goldTrim)" stroke-width="2.2"/>
+  <!-- Burner Flare flame -->
+  <path d="M60 36 C57 32 58 26 60 22 C62 26 63 32 60 36 Z" fill="url(#goldTrim)"/>
+  <!-- Ocean Waves below -->
+  <path d="M30 82 Q45 78 60 82 T90 82" fill="none" stroke="url(#brentAccent)" stroke-width="2.5"/>
+  <text x="60" y="102" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="2">BRENT</text>
+</svg>

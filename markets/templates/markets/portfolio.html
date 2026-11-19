@@ -8,20 +8,21 @@
     <!-- ========================================== -->
     <div class="bg-white dark:bg-dark-850 p-6 sm:p-8 rounded-3xl shadow-sm border border-[#EBEBEB] dark:border-dark-750 relative overflow-hidden">
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            {% if request.user.is_authenticated %}
             <div>
                 <span class="text-xs font-bold uppercase tracking-wider text-neutral-400 block mb-1">Total Portfolio Value</span>
-                <div class="text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-tight text-neutral-900 dark:text-white" x-text="formatPrice({{ portfolio.total_value_usd }})">
-                    ${{ portfolio.total_value_usd }}
+                <div class="text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-tight text-neutral-900 dark:text-white" x-text="formatPrice({{ portfolio.total_value_usd|default:0.0 }})">
+                    ${{ portfolio.total_value_usd|default:"0.00" }}
                 </div>
                 
                 <div class="mt-4 flex flex-wrap items-center gap-3 text-xs">
-                    <div class="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 px-3 py-1 rounded-full font-bold">
-                        <i class="fas fa-arrow-up text-[10px]"></i>
-                        <span>Today: +${{ portfolio.day_profit_usd }} (+{{ portfolio.day_profit_percent }}%)</span>
+                    <div class="flex items-center gap-1.5 {% if portfolio.day_profit_usd >= 0 %}bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400{% else %}bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400{% endif %} px-3 py-1 rounded-full font-bold">
+                        <i class="fas {% if portfolio.day_profit_usd >= 0 %}fa-arrow-up{% else %}fa-arrow-down{% endif %} text-[10px]"></i>
+                        <span>Today: {% if portfolio.day_profit_usd >= 0 %}+{% endif %}${{ portfolio.day_profit_usd }} ({% if portfolio.day_profit_usd >= 0 %}+{% endif %}{{ portfolio.day_profit_percent }}%)</span>
                     </div>
-                    <div class="flex items-center gap-1.5 bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 px-3 py-1 rounded-full font-bold">
+                    <div class="flex items-center gap-1.5 {% if portfolio.total_profit_usd >= 0 %}bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400{% else %}bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400{% endif %} px-3 py-1 rounded-full font-bold">
                         <i class="fas fa-award text-[10px]"></i>
-                        <span>All-Time: +${{ portfolio.total_profit_usd }} (+{{ portfolio.total_profit_percent }}%)</span>
+                        <span>All-Time: {% if portfolio.total_profit_usd >= 0 %}+{% endif %}${{ portfolio.total_profit_usd }} ({% if portfolio.total_profit_usd >= 0 %}+{% endif %}{{ portfolio.total_profit_percent }}%)</span>
                     </div>
                 </div>
             </div>
@@ -30,17 +31,40 @@
             <div class="bg-neutral-50 dark:bg-dark-800 p-5 rounded-3xl border border-[#EBEBEB] dark:border-dark-700 flex flex-col gap-3 min-w-[240px]">
                 <div>
                     <span class="text-[11px] text-neutral-400 uppercase font-bold block">Available Cash</span>
-                    <span class="text-2xl font-black font-mono text-neutral-900 dark:text-white" x-text="formatPrice({{ portfolio.cash_balance_usd }})">${{ portfolio.cash_balance_usd }}</span>
+                    <span class="text-2xl font-black font-mono text-neutral-900 dark:text-white" x-text="formatPrice({{ portfolio.cash_balance_usd|default:0.0 }})">${{ portfolio.cash_balance_usd|default:"0.00" }}</span>
                 </div>
                 <div class="flex gap-2">
-                    <a href="{% url 'trade' %}" class="flex-1 py-2 text-center text-xs font-bold bg-[#FF385C] hover:bg-[#E00B41] text-white rounded-full transition-colors shadow-brand-glow">
+                    <a href="{% url 'trade' %}" class="flex-1 py-2 text-center text-xs font-bold bg-[#4169E1] hover:bg-[#3457C9] text-white rounded-full transition-colors shadow-brand-glow">
                         Trade
                     </a>
-                    <button @click="showToast('Deposit simulation credited to USD wallet')" class="flex-1 py-2 text-center text-xs font-bold bg-white dark:bg-dark-750 hover:bg-neutral-100 text-neutral-800 dark:text-white border border-[#DDDDDD] dark:border-dark-700 rounded-full transition-colors">
-                        Deposit
+                    <button @click="depositModalOpen = true" class="flex-1 py-2 text-center text-xs font-bold bg-white dark:bg-dark-750 hover:bg-neutral-100 text-neutral-800 dark:text-white border border-[#DDDDDD] dark:border-dark-700 rounded-full transition-colors">
+                        Deposit / Transfer
                     </button>
                 </div>
             </div>
+            {% else %}
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-neutral-400 block mb-1">Portfolio & Wealth Desk</span>
+                <div class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900 dark:text-white">
+                    Institutional Custody & Multi-Asset Tracking
+                </div>
+                <p class="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-2 max-w-xl">
+                    Manage multi-currency portfolios across USA, UK, Kenya, and Japan with automated FX conversion, CSD depository registration, and statutory reports.
+                </p>
+            </div>
+
+            <div class="bg-neutral-50 dark:bg-dark-800 p-5 rounded-3xl border border-[#EBEBEB] dark:border-dark-700 flex flex-col gap-3 min-w-[240px] text-center">
+                <div>
+                    <span class="text-[11px] text-neutral-400 uppercase font-bold block mb-1">Account Status</span>
+                    <span class="text-sm font-black text-amber-500 flex items-center justify-center gap-1.5">
+                        <i class="fas fa-lock"></i> Guest Session
+                    </span>
+                </div>
+                <a href="{% url 'login' %}?next={% url 'portfolio' %}" class="w-full py-2.5 text-center text-xs font-bold bg-[#4169E1] hover:bg-[#3457C9] text-white rounded-full transition-colors shadow-brand-glow">
+                    Sign in to Access Portfolio
+                </a>
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -52,8 +76,17 @@
         <!-- Donut Allocation Chart -->
         <div class="bg-white dark:bg-dark-850 p-6 md:p-7 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm flex flex-col justify-between">
             <div>
-                <h3 class="text-base font-bold text-neutral-900 dark:text-white mb-1">Asset Allocation</h3>
-                <p class="text-xs text-neutral-400 mb-4">Portfolio diversification across equities, crypto & cash</p>
+                <div class="flex items-center justify-between mb-1">
+                    <h3 class="text-base font-bold text-neutral-900 dark:text-white">
+                        {% if request.user.is_authenticated %}Personal Asset Allocation{% else %}Global Model Allocation{% endif %}
+                    </h3>
+                    {% if not request.user.is_authenticated %}
+                    <span class="text-[10px] font-bold bg-[#4169E1]/10 text-[#4169E1] px-2.5 py-0.5 rounded-full">Model Benchmark</span>
+                    {% endif %}
+                </div>
+                <p class="text-xs text-neutral-400 mb-4">
+                    {% if request.user.is_authenticated %}Portfolio diversification across equities, sovereign debt & cash{% else %}Institutional multi-asset distribution across equities, sovereign debt & liquidity{% endif %}
+                </p>
                 
                 <div class="h-56 relative flex items-center justify-center">
                     <canvas id="allocationChart"></canvas>
@@ -66,11 +99,14 @@
                     <span class="font-bold text-neutral-800 dark:text-neutral-200">{{ item.label }}</span>
                     <span class="font-mono text-neutral-500">{{ item.percent }}%</span>
                 </div>
+                {% empty %}
+                <div class="col-span-2 text-center py-2 text-neutral-400 text-xs">No allocations yet.</div>
                 {% endfor %}
             </div>
         </div>
 
-        <!-- Holdings Performance Cards (2 Cols) -->
+        <!-- Holdings Performance Cards / Model Strategy (2 Cols) -->
+        {% if request.user.is_authenticated %}
         <div class="lg:col-span-2 bg-white dark:bg-dark-850 p-6 md:p-7 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between mb-4">
@@ -78,7 +114,7 @@
                         <h3 class="text-base font-bold text-neutral-900 dark:text-white">Active Holdings</h3>
                         <p class="text-xs text-neutral-400 mt-0.5">Real-time market valuation and unrealized gains</p>
                     </div>
-                    <a href="{% url 'trade' %}" class="text-xs font-bold text-[#FF385C] hover:underline">
+                    <a href="{% url 'trade' %}" class="text-xs font-bold text-[#4169E1] hover:underline">
                         + Add Holding
                     </a>
                 </div>
@@ -92,7 +128,7 @@
                                 <img src="{{ h.logo }}" alt="{{ h.name }}" class="w-full h-full object-contain">
                             </div>
                             <div>
-                                <a href="{% url 'asset_detail' h.symbol %}" class="font-bold text-sm text-neutral-900 dark:text-white hover:text-[#FF385C] transition-colors">
+                                <a href="{% url 'asset_detail' h.symbol %}" class="font-bold text-sm text-neutral-900 dark:text-white hover:text-[#4169E1] transition-colors">
                                     {{ h.name }}
                                 </a>
                                 <p class="text-xs text-neutral-400 mt-0.5 font-mono">
@@ -107,17 +143,28 @@
                                     ${{ h.total_value_usd }}
                                 </span>
                                 <span class="block text-xs font-bold {% if h.profit_percent >= 0 %}text-emerald-600 dark:text-emerald-400{% else %}text-rose-600 dark:text-rose-400{% endif %}">
-                                    +${{ h.profit_usd }} (+{{ h.profit_percent }}%)
+                                    {% if h.profit_percent >= 0 %}+{% endif %}${{ h.profit_usd }} ({% if h.profit_percent >= 0 %}+{% endif %}{{ h.profit_percent }}%)
                                 </span>
                             </div>
 
                             <div class="flex gap-2">
-                                <a href="{% url 'trade' %}?symbol={{ h.symbol }}" class="px-3.5 py-1.5 rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white text-xs font-bold transition-colors shadow-brand-glow">
+                                <a href="{% url 'trade' %}?symbol={{ h.symbol }}" class="px-3.5 py-1.5 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white text-xs font-bold transition-colors shadow-brand-glow">
                                     Trade
                                 </a>
                             </div>
                         </div>
 
+                    </div>
+                    {% empty %}
+                    <div class="p-8 text-center bg-neutral-50 dark:bg-dark-800 rounded-3xl border border-[#EBEBEB] dark:border-dark-700">
+                        <div class="w-10 h-10 rounded-full bg-neutral-100 dark:bg-dark-750 text-neutral-400 mx-auto flex items-center justify-center text-sm mb-2">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <h4 class="text-xs font-bold text-neutral-800 dark:text-neutral-200">No Equities in Portfolio</h4>
+                        <p class="text-[11px] text-neutral-400 mt-0.5">Explore global markets to place your first trade.</p>
+                        <a href="{% url 'trade' %}" class="inline-block mt-3 px-4 py-1.5 rounded-full bg-[#4169E1] text-white text-xs font-bold shadow-2xs">
+                            Start Trading
+                        </a>
                     </div>
                     {% endfor %}
                 </div>
@@ -128,6 +175,67 @@
                 <span class="font-bold text-neutral-800 dark:text-neutral-200">Total Positions: {{ portfolio.holdings|length }}</span>
             </div>
         </div>
+        {% else %}
+        <!-- Model Strategy Preview for Guests -->
+        <div class="lg:col-span-2 bg-white dark:bg-dark-850 p-6 md:p-7 rounded-3xl border border-[#EBEBEB] dark:border-dark-750 shadow-sm flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-base font-bold text-neutral-900 dark:text-white">Portfolio Analytics & Holdings Locked</h3>
+                            <span class="text-[10px] font-bold bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-full">Model Preview</span>
+                        </div>
+                        <p class="text-xs text-neutral-400 mt-0.5">Reference allocation strategy demonstrating risk parity across sovereign and equity instruments</p>
+                    </div>
+                    <a href="{% url 'login' %}?next={% url 'portfolio' %}" class="text-xs font-bold text-[#4169E1] hover:underline">
+                        Sign In &rarr;
+                    </a>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="p-4 rounded-3xl bg-neutral-50 dark:bg-dark-800 border border-[#EBEBEB] dark:border-dark-700 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl bg-[#4169E1]/10 text-[#4169E1] flex items-center justify-center font-black text-sm">EQ</div>
+                            <div>
+                                <span class="font-bold text-sm text-neutral-900 dark:text-white block">Global Equities Core (45%)</span>
+                                <span class="text-xs text-neutral-400">High-conviction listings across NSE, NASDAQ, NYSE, LSE, and Tokyo</span>
+                            </div>
+                        </div>
+                        <span class="font-mono font-bold text-sm text-neutral-900 dark:text-white">$13,500</span>
+                    </div>
+
+                    <div class="p-4 rounded-3xl bg-neutral-50 dark:bg-dark-800 border border-[#EBEBEB] dark:border-dark-700 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-black text-sm">CBK</div>
+                            <div>
+                                <span class="font-bold text-sm text-neutral-900 dark:text-white block">Kenya Sovereign Debt & T-Bills (35%)</span>
+                                <span class="text-xs text-neutral-400">Fixed-coupon Treasury bonds & 91D/182D bills yielding 15.7% - 17.8% p.a.</span>
+                            </div>
+                        </div>
+                        <span class="font-mono font-bold text-sm text-neutral-900 dark:text-white">$10,500</span>
+                    </div>
+
+                    <div class="p-4 rounded-3xl bg-neutral-50 dark:bg-dark-800 border border-[#EBEBEB] dark:border-dark-700 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center font-black text-sm">USD</div>
+                            <div>
+                                <span class="font-bold text-sm text-neutral-900 dark:text-white block">Liquid Cash & Reserves (20%)</span>
+                                <span class="text-xs text-neutral-400">Instant buying power for market dip execution and secondary OTC trades</span>
+                            </div>
+                        </div>
+                        <span class="font-mono font-bold text-sm text-neutral-900 dark:text-white">$6,000</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-[#EBEBEB] dark:border-dark-750 flex items-center justify-between text-xs text-neutral-400">
+                <span>Sign in to create your personal portfolio, execute trades, and manage CSD depository accounts.</span>
+                <a href="{% url 'login' %}?next={% url 'portfolio' %}" class="px-4 py-1.5 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-bold transition-all shadow-xs">
+                    Sign in to Access Portfolio
+                </a>
+            </div>
+        </div>
+        {% endif %}
 
     </div>
 
@@ -155,42 +263,59 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EBEBEB] dark:divide-dark-800">
-                    {% for h in portfolio.holdings %}
-                    <tr class="hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors">
-                        <td class="px-6 py-4">
-                            <a href="{% url 'asset_detail' h.symbol %}" class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-xl bg-white border border-neutral-200 p-1 flex items-center justify-center shadow-2xs logo-badge">
-                                    <img src="{{ h.logo }}" alt="{{ h.name }}" class="w-full h-full object-contain">
+                    {% if request.user.is_authenticated %}
+                        {% for h in portfolio.holdings %}
+                        <tr class="hover:bg-neutral-50 dark:hover:bg-dark-800/60 transition-colors">
+                            <td class="px-6 py-4">
+                                <a href="{% url 'asset_detail' h.symbol %}" class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-xl bg-white border border-neutral-200 p-1 flex items-center justify-center shadow-2xs logo-badge">
+                                        <img src="{{ h.logo }}" alt="{{ h.name }}" class="w-full h-full object-contain">
+                                    </div>
+                                    <span class="font-bold text-neutral-900 dark:text-white hover:text-[#4169E1]">
+                                        {{ h.symbol }} - {{ h.name }}
+                                    </span>
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 font-mono font-medium">{{ h.shares }}</td>
+                            <td class="px-6 py-4 font-mono text-neutral-500">{{ h.currency }} {{ h.avg_buy_price }}</td>
+                            <td class="px-6 py-4 font-mono font-bold text-neutral-800 dark:text-neutral-200">{{ h.currency }} {{ h.current_price }}</td>
+                            <td class="px-6 py-4 font-mono font-extrabold text-neutral-900 dark:text-white" x-text="formatPrice({{ h.total_value_usd }})">
+                                ${{ h.total_value_usd }}
+                            </td>
+                            <td class="px-6 py-4 font-mono font-bold {% if h.profit_percent >= 0 %}text-emerald-600 dark:text-emerald-400{% else %}text-rose-600 dark:text-rose-400{% endif %}">
+                                {% if h.profit_percent >= 0 %}+{% endif %}${{ h.profit_usd }} ({% if h.profit_percent >= 0 %}+{% endif %}{{ h.profit_percent }}%)
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-16 bg-neutral-100 dark:bg-dark-750 h-1.5 rounded-full overflow-hidden">
+                                        <div class="bg-[#4169E1] h-full rounded-full" style="width: {{ h.allocation_percent }}%;"></div>
+                                    </div>
+                                    <span class="font-mono text-neutral-500">{{ h.allocation_percent }}%</span>
                                 </div>
-                                <span class="font-bold text-neutral-900 dark:text-white hover:text-[#FF385C]">
-                                    {{ h.symbol }} - {{ h.name }}
-                                </span>
-                            </a>
-                        </td>
-                        <td class="px-6 py-4 font-mono font-medium">{{ h.shares }}</td>
-                        <td class="px-6 py-4 font-mono text-neutral-500">{{ h.currency }} {{ h.avg_buy_price }}</td>
-                        <td class="px-6 py-4 font-mono font-bold text-neutral-800 dark:text-neutral-200">{{ h.currency }} {{ h.current_price }}</td>
-                        <td class="px-6 py-4 font-mono font-extrabold text-neutral-900 dark:text-white" x-text="formatPrice({{ h.total_value_usd }})">
-                            ${{ h.total_value_usd }}
-                        </td>
-                        <td class="px-6 py-4 font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                            +${{ h.profit_usd }} (+{{ h.profit_percent }}%)
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-2">
-                                <div class="w-16 bg-neutral-100 dark:bg-dark-750 h-1.5 rounded-full overflow-hidden">
-                                    <div class="bg-[#FF385C] h-full rounded-full" style="width: {{ h.allocation_percent }}%;"></div>
-                                </div>
-                                <span class="font-mono text-neutral-500">{{ h.allocation_percent }}%</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            <a href="{% url 'trade' %}?symbol={{ h.symbol }}" class="px-3.5 py-1.5 rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white font-bold text-xs transition-colors shadow-brand-glow">
-                                Trade
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="{% url 'trade' %}?symbol={{ h.symbol }}" class="px-3.5 py-1.5 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-bold text-xs transition-colors shadow-brand-glow">
+                                    Trade
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-8 text-neutral-400">
+                                No active holdings in this portfolio. Execute your first order on the Trade Desk.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-10 bg-neutral-50/50 dark:bg-dark-900/30">
+                                <p class="text-xs font-bold text-neutral-700 dark:text-neutral-300">Guest Session &bull; Holdings breakdown is private to authenticated accounts.</p>
+                                <a href="{% url 'login' %}?next={% url 'portfolio' %}" class="inline-block mt-3 px-5 py-2 rounded-full bg-[#4169E1] text-white font-bold text-xs shadow-brand-glow">
+                                    Sign In to View Positions
+                                </a>
+                            </td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
@@ -221,6 +346,7 @@
             </div>
         </div>
 
+        {% if request.user.is_authenticated %}
         <!-- Quick Summary Ribbon -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div class="bg-neutral-50 dark:bg-dark-800 p-4 rounded-2xl border border-[#EBEBEB] dark:border-dark-700">
@@ -233,7 +359,7 @@
             </div>
             <div class="bg-neutral-50 dark:bg-dark-800 p-4 rounded-2xl border border-[#EBEBEB] dark:border-dark-700">
                 <span class="text-[10px] uppercase font-bold text-neutral-400 block mb-0.5">Weighted Avg. Yield</span>
-                <span class="text-lg font-black font-mono text-[#FF385C]">{{ bond_portfolio.avg_yield }}% p.a.</span>
+                <span class="text-lg font-black font-mono text-[#4169E1]">{{ bond_portfolio.avg_yield }}% p.a.</span>
             </div>
             <div class="bg-neutral-50 dark:bg-dark-800 p-4 rounded-2xl border border-[#EBEBEB] dark:border-dark-700">
                 <span class="text-[10px] uppercase font-bold text-neutral-400 block mb-0.5">Next Coupon Payout</span>
@@ -281,10 +407,34 @@
                             </a>
                         </td>
                     </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-6 text-neutral-400">
+                            No sovereign bonds or treasury bills currently held in your CSD profile.
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <!-- Locked Guest CSD Depository State -->
+        <div class="p-8 text-center bg-neutral-50 dark:bg-dark-800 rounded-2xl border border-[#EBEBEB] dark:border-dark-700">
+            <div class="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center text-lg mb-3">
+                <i class="fas fa-landmark"></i>
+            </div>
+            <h4 class="text-sm font-bold text-neutral-900 dark:text-white">Central Depository (CBK DHOWCSD) Custody</h4>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-md mx-auto">
+                Sign in to connect your Central Bank (CBK DHOWCSD) depository profile, view scheduled coupon payouts, and manage your sovereign debt holdings.
+            </p>
+            <div class="mt-4">
+                <a href="{% url 'login' %}?next={% url 'portfolio' %}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all">
+                    <i class="fas fa-arrow-right-to-bracket"></i>
+                    <span>Sign in to Access CSD Custody</span>
+                </a>
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     <!-- ========================================== -->
@@ -294,11 +444,14 @@
         <div class="p-6 border-b border-[#EBEBEB] dark:border-dark-750 flex items-center justify-between">
             <div>
                 <h3 class="text-base font-bold text-neutral-900 dark:text-white">Recent Transactions & Trade History</h3>
-                <p class="text-xs text-neutral-400 mt-0.5">Execution records across equities, crypto, bonds, and CBK auctions</p>
+                <p class="text-xs text-neutral-400 mt-0.5">Execution records across equities, sovereign debt, T-bills, and CBK auctions</p>
             </div>
+            {% if request.user.is_authenticated %}
             <span class="text-xs font-mono text-neutral-400">{{ portfolio.transactions|length }} Transactions</span>
+            {% endif %}
         </div>
 
+        {% if request.user.is_authenticated %}
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[650px] text-xs">
                 <thead>
@@ -347,20 +500,159 @@
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <!-- Locked Guest Transactions State -->
+        <div class="p-10 text-center bg-neutral-50/50 dark:bg-dark-900/30">
+            <div class="w-14 h-14 rounded-full bg-[#EBF0FF] dark:bg-[#4169E1]/15 text-[#4169E1] mx-auto flex items-center justify-center text-xl mb-3 shadow-2xs">
+                <i class="fas fa-receipt"></i>
+            </div>
+            <h4 class="text-base font-bold text-neutral-900 dark:text-white">No Transactions for Guest Session</h4>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-md mx-auto">
+                Sign in to view your execution records, tax ledger, and trade confirmations. Guest sessions have no transaction history.
+            </p>
+            <div class="mt-5">
+                <a href="{% url 'login' %}?next={% url 'portfolio' %}" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-bold text-xs shadow-brand-glow transition-all">
+                    <i class="fas fa-arrow-right-to-bracket"></i>
+                    <span>Sign in to View Trade History</span>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Deposit & Transfer Modal -->
+    <div x-show="depositModalOpen" x-cloak
+         class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.outside="depositModalOpen = false"
+             class="w-full max-w-md bg-white dark:bg-dark-850 rounded-3xl border border-[#DDDDDD] dark:border-dark-750 p-6 sm:p-7 shadow-card">
+            <div class="flex items-center justify-between pb-4 border-b border-[#EBEBEB] dark:border-dark-750 mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-full bg-[#EBF0FF] dark:bg-[#4169E1]/15 text-[#4169E1] flex items-center justify-center font-bold">
+                        <i class="fas fa-wallet text-sm"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-neutral-900 dark:text-white">Cash Desk & Transfers</h4>
+                        <span class="text-[11px] text-neutral-400 block">Deposit or withdraw funds securely</span>
+                    </div>
+                </div>
+                <button @click="depositModalOpen = false" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+
+            <form @submit.prevent="submitTransfer()" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1.5">Action</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" 
+                                @click="transferType = 'DEPOSIT'"
+                                :class="transferType === 'DEPOSIT' ? 'bg-[#4169E1] text-white shadow-brand-glow' : 'bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 border border-[#DDDDDD] dark:border-dark-750'"
+                                class="py-2 rounded-full font-bold text-xs transition-all">
+                            Deposit Cash
+                        </button>
+                        <button type="button" 
+                                @click="transferType = 'WITHDRAWAL'"
+                                :class="transferType === 'WITHDRAWAL' ? 'bg-[#4169E1] text-white shadow-brand-glow' : 'bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300 border border-[#DDDDDD] dark:border-dark-750'"
+                                class="py-2 rounded-full font-bold text-xs transition-all">
+                            Withdraw Funds
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1">Transfer Rail / Method</label>
+                    <select x-model="transferMethod" class="w-full py-2.5 px-3.5 rounded-full bg-neutral-50 dark:bg-dark-800 border border-[#DDDDDD] dark:border-dark-750 text-neutral-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-[#4169E1] outline-none">
+                        <option value="MPESA">M-PESA Express (Kenya)</option>
+                        <option value="BANK">National Bank Transfer (ACH / EFT)</option>
+                        <option value="CARD">Debit / Credit Card (Visa / Mastercard)</option>
+                        <option value="WIRE">International Wire (SWIFT / Fedwire)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1">Phone Number or Bank Account</label>
+                    <input type="text" x-model="transferAccount" required
+                           class="w-full py-2.5 px-3.5 rounded-full bg-neutral-50 dark:bg-dark-800 border border-[#DDDDDD] dark:border-dark-750 text-neutral-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-[#4169E1] outline-none"
+                           placeholder="+254 712 345 678 or Account Number">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1">Amount (USD Equivalent)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-xs text-neutral-400 font-bold">$</span>
+                        <input type="number" step="any" min="1" x-model="transferAmount" required
+                               class="w-full pl-8 pr-4 py-2.5 rounded-full bg-neutral-50 dark:bg-dark-800 border border-[#DDDDDD] dark:border-dark-750 text-neutral-900 dark:text-white text-xs font-bold focus:ring-2 focus:ring-[#4169E1] outline-none">
+                    </div>
+                </div>
+
+                <div x-show="transferError" x-cloak class="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-medium" x-text="transferError">
+                </div>
+
+                <button type="submit" 
+                        :disabled="transferLoading"
+                        class="w-full py-2.5 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-extrabold text-xs shadow-brand-glow transition-all flex items-center justify-center gap-2">
+                    <span x-show="!transferLoading" x-text="transferType === 'DEPOSIT' ? 'Confirm Deposit' : 'Confirm Withdrawal'"></span>
+                    <span x-show="transferLoading"><i class="fas fa-spinner fa-spin mr-1"></i> Processing transfer...</span>
+                </button>
+            </form>
+        </div>
     </div>
 
 </div>
 
-<!-- Allocation Donut Chart Script -->
+<!-- Allocation Donut Chart Script & Portfolio Controller -->
 <script>
     function portfolioController() {
         return {
             allocationData: {{ allocation_json|safe }},
+            cashBalance: {{ portfolio.cash_balance_usd|default:0.0 }},
+            depositModalOpen: false,
+            transferType: 'DEPOSIT',
+            transferMethod: 'MPESA',
+            transferAccount: '+254 712 345 678',
+            transferAmount: 500,
+            transferLoading: false,
+            transferError: '',
+
             init() {
                 this.$nextTick(() => {
                     this.renderChart();
                 });
             },
+
+            async submitTransfer() {
+                this.transferLoading = true;
+                this.transferError = '';
+                try {
+                    const res = await fetch('/api/portfolio/transfer/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            transfer_type: this.transferType,
+                            method: this.transferMethod,
+                            account_or_phone: this.transferAccount,
+                            amount: this.transferAmount
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        this.cashBalance = data.cash_balance_usd;
+                        this.depositModalOpen = false;
+                        if (window.showToast) {
+                            window.showToast(data.message);
+                        }
+                    } else {
+                        this.transferError = data.error || (data.errors ? Object.values(data.errors).flat().join(', ') : 'Transfer could not be completed.');
+                    }
+                } catch(e) {
+                    this.transferError = 'Network communication error during cash transfer. Please try again.';
+                } finally {
+                    this.transferLoading = false;
+                }
+            },
+
             renderChart() {
                 const ctx = document.getElementById('allocationChart');
                 if(!ctx) return;
@@ -375,14 +667,14 @@
                         datasets: [{
                             data: values,
                             backgroundColor: [
-                                '#FF385C', // Safaricom (Coral)
-                                '#3b82f6', // Apple (Blue)
-                                '#8b5cf6', // Nvidia (Purple)
-                                '#f59e0b', // Bitcoin (Amber)
-                                '#64748b'  // Cash (Slate)
+                                '#4169E1',
+                                '#3b82f6',
+                                '#8b5cf6',
+                                '#10b981',
+                                '#64748b'
                             ],
                             borderWidth: 2,
-                            borderColor: document.documentElement.classList.contains('dark') ? '#181818' : '#ffffff',
+                            borderColor: document.documentElement.classList.contains('dark') ? '#18181B' : '#ffffff',
                             hoverOffset: 6
                         }]
                     },

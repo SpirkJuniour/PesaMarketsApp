@@ -316,7 +316,7 @@ class FinancialChartEngine {
                     if (d.is_bullish) {
                         ctx.strokeStyle = color;
                         ctx.lineWidth = 1.5;
-                        ctx.fillStyle = isDark ? '#101626' : '#ffffff';
+                        ctx.fillStyle = isDark ? '#18181B' : '#ffffff';
                         ctx.fillRect(x - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
                         ctx.strokeRect(x - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
                     } else {
@@ -370,7 +370,7 @@ class FinancialChartEngine {
                 // Gradient fill
                 const gradient = ctx.createLinearGradient(0, padTop, 0, padTop + pricePlotHeight);
                 gradient.addColorStop(0, isOverallBullish ? 'rgba(16, 185, 129, 0.32)' : 'rgba(244, 63, 94, 0.32)');
-                gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+                gradient.addColorStop(1, isOverallBullish ? 'rgba(16, 185, 129, 0.0)' : 'rgba(244, 63, 94, 0.0)');
 
                 ctx.beginPath();
                 ctx.moveTo(indexToX(0), priceToY(this.data[0].close));
@@ -526,7 +526,11 @@ class FinancialChartEngine {
         const labelStep = Math.max(1, Math.floor(n / 6));
         for (let i = 0; i < n; i += labelStep) {
             const x = indexToX(i);
-            const timeLabel = this.data[i].time;
+            let timeLabel = this.data[i].time;
+            if (typeof timeLabel === 'number') {
+                const d = new Date(timeLabel * 1000);
+                timeLabel = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            }
             ctx.fillText(timeLabel, x, height - padBottom + 8);
         }
 
@@ -580,7 +584,11 @@ class FinancialChartEngine {
             ctx.fillText(priceText, badgeX + badgeW / 2, badgeY + badgeH / 2);
 
             // Time Badge on Bottom Axis
-            const timeText = activeCandle.time;
+            let timeText = activeCandle.time;
+            if (typeof timeText === 'number') {
+                const d = new Date(timeText * 1000);
+                timeText = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            }
             const timeBadgeW = Math.max(46, ctx.measureText(timeText).width + 16);
             const timeBadgeH = 18;
             const timeBadgeX = Math.max(padLeft, Math.min(width - padRight - timeBadgeW, activeX - timeBadgeW / 2));
