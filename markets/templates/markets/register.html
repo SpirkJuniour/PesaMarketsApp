@@ -72,7 +72,7 @@
             Get access to free stories each month and receive our free editorial newsletters.
         </p>
         <p class="text-sm text-neutral-300 mb-5">
-            Already registered? <a href="{% url 'login' %}" class="font-medium underline underline-offset-4 decoration-neutral-500 hover:text-[#4169E1] transition-colors">Log in</a>
+            Already registered? <a href="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" class="font-medium underline underline-offset-4 decoration-neutral-500 hover:text-[#4169E1] transition-colors">Log in</a>
         </p>
 
         <!-- Divider: Continue with -->
@@ -137,6 +137,7 @@
         <!-- Registration Form -->
         <form method="POST" action="{% url 'register' %}" class="space-y-4">
             {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.GET.next|default:'home' }}">
 
             <!-- First & Last Name (2 columns) -->
             <div class="grid grid-cols-2 gap-3">

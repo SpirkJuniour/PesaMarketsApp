@@ -78,7 +78,7 @@
                         <input type="hidden" name="action" value="upgrade">
                         <button type="submit" class="px-4 py-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-mono font-black shadow-md shadow-amber-500/25 transition-all flex items-center gap-1.5 whitespace-nowrap">
                             <i class="fas fa-crown text-[10px]"></i>
-                            <span>UPGRADE TO PRO ($29/MO)</span>
+                            <span>UPGRADE TO PRO ($30/MO &bull; $300/YR)</span>
                         </button>
                     </form>
                     {% else %}
@@ -308,7 +308,7 @@
                         Direct Market Access (DMA) Level 2 Depth Gated
                     </h3>
                     <p class="text-xs text-slate-300 font-mono max-w-md mt-1 mb-4 leading-relaxed">
-                        8-tier Level 2 order books, real-time institutional block flow (>100k shares), and financial health models require an active Terminal Pro subscription.
+                        8-tier Level 2 order books, real-time institutional block flow (>100k shares), and financial health models require an active Terminal Pro subscription ($30/mo or $300/yr).
                     </p>
                     {% if request.user.is_authenticated %}
                     <form method="POST" action="{% url 'api_upgrade_subscription' %}">
@@ -316,7 +316,7 @@
                         <input type="hidden" name="action" value="upgrade">
                         <button type="submit" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-mono font-black text-xs shadow-xl shadow-amber-500/25 transition-all flex items-center gap-2">
                             <i class="fas fa-crown"></i>
-                            <span>UPGRADE TO TERMINAL PRO ($29/MO)</span>
+                            <span>UPGRADE TO TERMINAL PRO ($30/MO &bull; $300/YR)</span>
                         </button>
                     </form>
                     {% else %}
@@ -713,7 +713,7 @@
                     Institutional Block Tape (>100k Shares) Gated
                 </h3>
                 <p class="text-xs text-slate-300 font-mono max-w-md mt-1 mb-4 leading-relaxed">
-                    Sub-second time & sales, cumulative volume delta (CVD), and dark pool cross routes require an active Terminal Pro subscription.
+                    Sub-second time & sales, cumulative volume delta (CVD), and dark pool cross routes require an active Terminal Pro subscription ($30/mo or $300/yr).
                 </p>
                 {% if request.user.is_authenticated %}
                 <form method="POST" action="{% url 'api_upgrade_subscription' %}">
@@ -721,7 +721,7 @@
                     <input type="hidden" name="action" value="upgrade">
                     <button type="submit" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-mono font-black text-xs shadow-xl shadow-amber-500/25 transition-all flex items-center gap-2">
                         <i class="fas fa-crown"></i>
-                        <span>UPGRADE TO TERMINAL PRO ($29/MO)</span>
+                        <span>UPGRADE TO TERMINAL PRO ($30/MO &bull; $300/YR)</span>
                     </button>
                 </form>
                 {% else %}

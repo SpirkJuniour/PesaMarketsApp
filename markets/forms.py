@@ -54,6 +54,8 @@ class LoginForm(forms.Form):
             data = kwargs['data'].copy()
             if 'username_or_email' in data and 'username' not in data:
                 data['username'] = data['username_or_email']
+            if 'remember_me' not in data:
+                data['remember_me'] = True
             kwargs['data'] = data
         super().__init__(*args, **kwargs)
 
@@ -63,12 +65,15 @@ class LoginForm(forms.Form):
         password = cleaned_data.get('password', '')
 
         if identifier and password:
-            # 1. Attempt username authentication
+            # 1. Attempt standard username authentication
             user = authenticate(self.request, username=identifier, password=password)
             
-            # 2. If not authenticated, attempt email lookup
-            if user is None and '@' in identifier:
-                user_match = User.objects.filter(email__iexact=identifier).first()
+            # 2. If not authenticated, attempt case-insensitive username or email lookup
+            if user is None:
+                user_match = (
+                    User.objects.filter(username__iexact=identifier).first()
+                    or User.objects.filter(email__iexact=identifier).first()
+                )
                 if user_match and user_match.check_password(password):
                     user = user_match
 

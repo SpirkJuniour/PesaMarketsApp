@@ -102,7 +102,7 @@ class UserProfile(models.Model):
     phone_number = models.CharField(max_length=30, blank=True, default='')
     email_verified = models.BooleanField(default=False)
     phone_verified = models.BooleanField(default=False)
-    tier = models.CharField(max_length=50, default='Terminal Pro Tier')
+    tier = models.CharField(max_length=50, default='Free Tier')
     cash_balance_usd = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('5212.17'))
     avatar_url = models.CharField(max_length=255, default='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80')
     bio = models.TextField(blank=True, default='')

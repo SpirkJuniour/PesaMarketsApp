@@ -17,6 +17,16 @@
         </p>
     </div>
 
+    {% if not request.user.is_authenticated %}
+    <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-lock"></i>
+            <span>You are currently browsing as a guest. Sign in to customize your security preferences, trading balance, and notifications.</span>
+        </div>
+        <a href="{% url 'login' %}?next={% url 'settings' %}" class="px-3.5 py-1.5 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-bold transition-all shadow-xs whitespace-nowrap ml-2">Sign In</a>
+    </div>
+    {% endif %}
+
     <!-- Preferences Card -->
     <div class="bg-white dark:bg-dark-850 rounded-3xl border border-slate-200/80 dark:border-dark-750 p-6 md:p-8 shadow-xs space-y-6">
 
@@ -144,7 +154,7 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="font-black text-base text-slate-900 dark:text-white">
-                                {% if is_paid %}Terminal Pro Plan ($29/month){% else %}Standard Free Plan{% endif %}
+                                {% if is_paid %}Terminal Pro Plan ($30/month or $300/year){% else %}Standard Free Plan{% endif %}
                             </span>
                             <span class="text-xs font-mono font-semibold text-slate-400">
                                 {% if is_paid %}&bull; Renews automatically{% else %}&bull; Basic market coverage{% endif %}
@@ -154,7 +164,7 @@
                             {% if is_paid %}
                             Includes Direct Market Access (DMA) Level 2 order books, real-time institutional block trades tape, DCF models, and comparative 4-sovereign yield curves.
                             {% else %}
-                            Free plan gives delayed quotes and public filings. Upgrade to unlock Level 2 DMA order books, institutional block trade flow, and fundamental DCF valuation models.
+                            Free plan gives delayed quotes and public filings. Upgrade for $30/month or $300/year (save $60/yr) to unlock Level 2 DMA order books, institutional block trade flow, and fundamental DCF valuation models.
                             {% endif %}
                         </p>
                     </div>
@@ -172,7 +182,7 @@
                         <input type="hidden" name="action" value="upgrade_tier">
                         <button type="submit" 
                                 class="px-5 py-2.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5 whitespace-nowrap">
-                            <i class="fas fa-crown"></i> Upgrade to Terminal Pro ($29/mo)
+                            <i class="fas fa-crown"></i> Upgrade to Terminal Pro ($30/mo &bull; $300/yr)
                         </button>
                         {% endif %}
                     </form>

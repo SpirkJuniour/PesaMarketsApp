@@ -308,7 +308,7 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             remember_me = form.cleaned_data.get('remember_me', True)
-            next_url = request.POST.get('next', 'home')
+            next_url = request.POST.get('next') or request.GET.get('next') or 'home'
 
             is_demo_or_admin = (
                 user.username in ['admin', 'user', 'trader'] or 
@@ -321,6 +321,8 @@ def login_view(request):
                 auth_login(request, user)
                 if not remember_me:
                     request.session.set_expiry(0)
+                else:
+                    request.session.set_expiry(None)
                 account_type = "Administrator" if (user.is_superuser or user.is_staff or user.username == 'admin') else "Trader"
                 messages.success(request, f"Welcome back, {account_type} ({user.first_name or user.username})!")
                 if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
@@ -373,6 +375,9 @@ def login_view(request):
 
 @ensure_csrf_cookie
 def verify_otp_view(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+
     user_id = request.session.get('pre_2fa_user_id')
     if not user_id:
         messages.warning(request, "Please enter your credentials to initiate OTP verification.")
@@ -405,6 +410,8 @@ def verify_otp_view(request):
                 auth_login(request, user)
                 if not remember_me:
                     request.session.set_expiry(0)
+                else:
+                    request.session.set_expiry(None)
                 request.session.pop('pre_2fa_user_id', None)
                 request.session.pop('active_otp_code', None)
                 request.session.pop('next_url', None)
@@ -444,8 +451,12 @@ def verify_otp_view(request):
 
 
 def resend_otp_view(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+
     user_id = request.session.get('pre_2fa_user_id')
     if not user_id:
+        messages.info(request, "Please enter your username or email to sign in or receive a verification code.")
         return redirect('login')
 
     user = get_object_or_404(User, id=user_id)
@@ -487,6 +498,8 @@ def register_view(request):
                 purpose='login'
             )
             request.session['pre_2fa_user_id'] = user.id
+            request.session['next_url'] = request.POST.get('next') or request.GET.get('next') or 'home'
+            request.session['remember_me'] = True
 
             dispatch_res = dispatch_user_verification(user=user, otp_code=otp_instance.otp_code, purpose='registration')
             dest_str = user.email
@@ -1193,22 +1206,26 @@ def settings_page(request):
     user = request.user if request.user.is_authenticated else None
     
     if request.method == 'POST':
+        if not user:
+            messages.warning(request, "Please log in to manage your settings.")
+            return redirect('login')
+
         action = request.POST.get('action')
-        if action == 'toggle_otp' and user and hasattr(user, 'profile'):
+        if action == 'toggle_otp' and hasattr(user, 'profile'):
             user.profile.otp_enabled = not user.profile.otp_enabled
             user.profile.save()
             status_str = "enabled" if user.profile.otp_enabled else "disabled"
             messages.success(request, f"Two-factor authentication {status_str} successfully.")
             return redirect('settings')
-        elif action == 'upgrade_tier' and user and hasattr(user, 'profile'):
+        elif action == 'upgrade_tier' and hasattr(user, 'profile'):
             user.profile.upgrade_to_pro()
             messages.success(request, "Upgraded to Terminal Pro Tier! Institutional direct market access unlocked.")
             return redirect('settings')
-        elif action == 'downgrade_tier' and user and hasattr(user, 'profile'):
+        elif action == 'downgrade_tier' and hasattr(user, 'profile'):
             user.profile.downgrade_to_free()
             messages.info(request, "Switched to Free Tier.")
             return redirect('settings')
-        elif action == 'replenish_funds' and user:
+        elif action == 'replenish_funds':
             portfolio_obj, _ = Portfolio.objects.get_or_create(user=user)
             portfolio_obj.cash_balance_usd = Decimal('25000.00')
             portfolio_obj.save()

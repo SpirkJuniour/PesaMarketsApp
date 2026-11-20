@@ -64,7 +64,14 @@ for host in ALLOWED_HOSTS:
 
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'Lax'
+
+# Session Engine & Security Configuration
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_NAME = 'sessionid'
+SESSION_COOKIE_AGE = 1209600  # 14 days (2 weeks) in seconds
+SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_SAVE_EVERY_REQUEST = False
 
 
 # Application definition

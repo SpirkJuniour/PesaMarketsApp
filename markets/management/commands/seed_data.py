@@ -29,7 +29,7 @@ class Command(BaseCommand):
             user=user,
             defaults={
                 'phone_number': '+254 712 345 678',
-                'tier': 'Terminal Pro Tier',
+                'tier': 'Free Tier',
                 'cash_balance_usd': Decimal('5212.17'),
                 'kyc_verified': True,
                 'otp_enabled': False

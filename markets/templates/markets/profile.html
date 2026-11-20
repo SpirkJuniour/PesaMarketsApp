@@ -17,6 +17,16 @@
         </p>
     </div>
 
+    {% if not request.user.is_authenticated %}
+    <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-lock"></i>
+            <span>You are currently viewing a guest preview. Please sign in to view and manage your authenticated trader identity.</span>
+        </div>
+        <a href="{% url 'login' %}?next={% url 'profile' %}" class="px-3.5 py-1.5 rounded-full bg-[#4169E1] hover:bg-[#3457C9] text-white font-bold transition-all shadow-xs whitespace-nowrap ml-2">Sign In</a>
+    </div>
+    {% endif %}
+
     <!-- Profile Header Card -->
     <div class="bg-white dark:bg-dark-850 rounded-3xl border border-[#DDDDDD] dark:border-dark-750 p-6 md:p-8 shadow-xs flex flex-col sm:flex-row items-center sm:items-start gap-6">
         <div class="relative">
@@ -55,7 +65,7 @@
             
             <div class="mt-4 flex flex-wrap gap-2 justify-center sm:justify-start text-xs font-semibold">
                 <span class="px-3.5 py-1 rounded-full bg-neutral-100 dark:bg-dark-800 text-neutral-700 dark:text-neutral-300">
-                    <i class="fas fa-award text-amber-500 mr-1.5"></i> {{ profile.tier|default:"Terminal Pro Tier" }}
+                    <i class="fas fa-award text-amber-500 mr-1.5"></i> {{ profile.tier|default:"Free Tier" }}
                 </span>
                 <span class="px-3.5 py-1 rounded-full {% if profile.otp_enabled %}bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400{% else %}bg-neutral-100 dark:bg-dark-800 text-neutral-500{% endif %}">
                     <i class="fas fa-shield-halved mr-1.5"></i> 2FA / OTP {% if profile.otp_enabled %}Active{% else %}Inactive{% endif %}

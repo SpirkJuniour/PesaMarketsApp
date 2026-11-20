@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.core import mail
 from django.contrib.auth.models import User
+from markets.models import OTPVerification, UserProfile, Market, Asset, Portfolio, Order, Transaction
 import json
 
 class PesaMarketsTests(TestCase):
@@ -424,7 +425,8 @@ class PesaMarketsTests(TestCase):
         # Create user and verify post_save signal auto-creates Profile, Portfolio, and Watchlist
         user = User.objects.create_user(username="test_trader", email="trader@pesamarkets.com", password="password123")
         self.assertTrue(hasattr(user, 'profile'))
-        self.assertEqual(user.profile.tier, "Terminal Pro Tier")
+        self.assertEqual(user.profile.tier, "Free Tier")
+        self.assertFalse(user.profile.is_pro)
         self.assertTrue(user.profile.otp_enabled)
 
         # Verify portfolio auto-created in database
@@ -2961,7 +2963,7 @@ class ModelsFormsAuthenticationTests(TestCase):
         self.assertIn("TERMINAL PRO REQUIRED", content_free)
         self.assertIn("Direct Market Access (DMA) Level 2 Depth Gated", content_free)
         self.assertIn("Institutional Block Tape (>100k Shares) Gated", content_free)
-        self.assertIn("UPGRADE TO TERMINAL PRO ($29/MO)", content_free)
+        self.assertIn("UPGRADE TO TERMINAL PRO ($30/MO &bull; $300/YR)", content_free)
 
         # 3. Upgrade Charlie to Pro tier
         free_user.profile.upgrade_to_pro()
@@ -3604,6 +3606,268 @@ class RegistrationAndSocialAuthTests(TestCase):
             res_removed = self.client.get(reverse('oauth_callback', args=[removed]))
             self.assertEqual(res_removed.status_code, 302)
             self.assertEqual(res_removed.url, reverse('login'))
+
+
+class SessionsAndAuthenticationEvaluationTests(TestCase):
+    """
+    Comprehensive verification suite specifically evaluating session persistence,
+    multi-factor authentication, security policies, and authorization controls.
+    """
+
+    def setUp(self):
+        from markets.models import OTPVerification
+        self.client = Client()
+        self.password = "PesaTraderPass2026!"
+        self.user = User.objects.create_user(
+            username="eval_trader",
+            email="eval_trader@pesamarkets.com",
+            password=self.password,
+            first_name="Eval",
+            last_name="Trader"
+        )
+        self.profile = self.user.profile
+        self.profile.otp_enabled = True
+        self.profile.save()
+
+    def test_session_configuration_and_engine(self):
+        """Verify session engine, cookie lifetime, HTTPOnly, and SameSite policies."""
+        from django.conf import settings
+        self.assertEqual(settings.SESSION_ENGINE, 'django.contrib.sessions.backends.db')
+        self.assertEqual(settings.SESSION_COOKIE_NAME, 'sessionid')
+        self.assertEqual(settings.SESSION_COOKIE_AGE, 1209600)  # 2 weeks
+        self.assertTrue(settings.SESSION_COOKIE_HTTPONLY)
+        self.assertEqual(settings.SESSION_COOKIE_SAMESITE, 'Lax')
+        self.assertEqual(settings.LOGIN_URL, 'login')
+
+    def test_login_session_creation_and_remember_me_options(self):
+        """Verify session persistence with default remember_me (2 weeks) and remember_me=False (browser close)."""
+        # 1. Login with remember_me=True (Keep me signed in)
+        res_remember = self.client.post(reverse('login'), {
+            'username': 'eval_trader',
+            'password': self.password,
+            'remember_me': 'true'
+        })
+        self.assertEqual(res_remember.status_code, 302)
+        self.assertEqual(res_remember.url, reverse('verify_otp'))
+        self.assertEqual(self.client.session['pre_2fa_user_id'], self.user.id)
+        self.assertTrue(self.client.session.get('remember_me'))
+
+        # Complete OTP verification
+        otp_obj = OTPVerification.objects.filter(user=self.user, is_used=False).first()
+        res_otp = self.client.post(reverse('verify_otp'), {'otp_code': otp_obj.otp_code})
+        self.assertEqual(res_otp.status_code, 302)
+        self.assertEqual(int(self.client.session['_auth_user_id']), self.user.id)
+        self.assertFalse(self.client.session.get_expire_at_browser_close())
+        self.assertGreater(self.client.session.get_expiry_age(), 86400)
+
+        # 2. Logout clears session completely
+        res_logout = self.client.get(reverse('logout'))
+        self.assertEqual(res_logout.status_code, 302)
+        self.assertEqual(res_logout.url, reverse('login'))
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+        # 3. Login with remember_me=False (Session expires when browser closes)
+        self.profile.otp_enabled = False
+        self.profile.save()
+        res_session_only = self.client.post(reverse('login'), {
+            'username': 'eval_trader',
+            'password': self.password,
+            'remember_me': False
+        })
+        self.assertEqual(res_session_only.status_code, 302)
+        # For non-demo user with OTP enabled=False or demo user, let's verify session expiry
+        otp_obj2 = OTPVerification.objects.filter(user=self.user, is_used=False).first()
+        if otp_obj2:
+            self.client.post(reverse('verify_otp'), {'otp_code': otp_obj2.otp_code})
+        self.assertEqual(int(self.client.session['_auth_user_id']), self.user.id)
+        self.assertTrue(self.client.session.get_expire_at_browser_close())
+
+    def test_login_case_insensitive_username_and_email(self):
+        """Verify traders can authenticate using username or email with flexible casing."""
+        # 1. Login with uppercase username
+        res_upper_user = self.client.post(reverse('login'), {
+            'username': 'EVAL_TRADER',
+            'password': self.password
+        })
+        self.assertEqual(res_upper_user.status_code, 302)
+        self.assertEqual(res_upper_user.url, reverse('verify_otp'))
+        self.assertEqual(self.client.session['pre_2fa_user_id'], self.user.id)
+
+        # 2. Login with uppercase email
+        res_upper_email = self.client.post(reverse('login'), {
+            'username': 'EVAL_TRADER@PESAMARKETS.COM',
+            'password': self.password
+        })
+        self.assertEqual(res_upper_email.status_code, 302)
+        self.assertEqual(res_upper_email.url, reverse('verify_otp'))
+        self.assertEqual(self.client.session['pre_2fa_user_id'], self.user.id)
+
+    def test_inactive_account_blocked_from_login_and_session(self):
+        """Verify suspended/inactive accounts are denied login and cannot access session."""
+        self.user.is_active = False
+        self.user.save()
+
+        res = self.client.post(reverse('login'), {
+            'username': 'eval_trader',
+            'password': self.password
+        })
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("This user account is currently deactivated", res.content.decode('utf-8'))
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_authenticated_user_access_guards_on_auth_pages(self):
+        """Verify already logged-in users are redirected to home when visiting login, register, verify-otp, resend-otp."""
+        self.client.force_login(self.user)
+
+        for path_name in ['login', 'register', 'verify_otp', 'resend_otp']:
+            res = self.client.get(reverse(path_name))
+            self.assertEqual(res.status_code, 302, f"Failed on {path_name}")
+            self.assertEqual(res.url, reverse('home'), f"Failed on {path_name}")
+
+    def test_unauthenticated_post_to_settings_and_profile_redirects_to_login(self):
+        """Verify unauthenticated write attempts on settings and profile redirect to login."""
+        self.client.logout()
+
+        res_settings = self.client.post(reverse('settings'), {'action': 'toggle_otp'})
+        self.assertEqual(res_settings.status_code, 302)
+        self.assertEqual(res_settings.url, reverse('login'))
+
+        res_profile = self.client.post(reverse('profile'), {'first_name': 'Hacker'})
+        self.assertEqual(res_profile.status_code, 302)
+        self.assertEqual(res_profile.url, reverse('login'))
+
+    def test_password_change_preserves_active_session(self):
+        """Verify password change successfully updates credentials and keeps user session alive via update_session_auth_hash."""
+        self.client.force_login(self.user)
+        new_pass = "BrandNewSecurePass2026!"
+
+        res_change = self.client.post(reverse('password_change'), {
+            'old_password': self.password,
+            'new_password': new_pass,
+            'confirm_new_password': new_pass,
+        })
+        self.assertEqual(res_change.status_code, 302)
+        self.assertEqual(res_change.url, reverse('settings'))
+
+        # User must remain logged in immediately after changing password
+        self.assertEqual(int(self.client.session['_auth_user_id']), self.user.id)
+        res_check = self.client.get(reverse('settings'))
+        self.assertEqual(res_check.status_code, 200)
+
+        # User must be able to log in with new password
+        self.client.logout()
+        res_login_new = self.client.post(reverse('login'), {
+            'username': 'eval_trader',
+            'password': new_pass
+        })
+        self.assertEqual(res_login_new.status_code, 302)
+        self.assertEqual(res_login_new.url, reverse('verify_otp'))
+
+    def test_resend_otp_invalidates_prior_otp(self):
+        """Verify requesting a resend invalidates the previous code and generates an active new one."""
+        self.client.post(reverse('login'), {
+            'username': 'eval_trader',
+            'password': self.password
+        })
+        otp1 = OTPVerification.objects.filter(user=self.user, is_used=False).order_by('-created_at').first()
+        self.assertIsNotNone(otp1)
+
+        # Trigger resend OTP
+        res_resend = self.client.get(reverse('resend_otp'))
+        self.assertEqual(res_resend.status_code, 302)
+        self.assertEqual(res_resend.url, reverse('verify_otp'))
+
+        # Old OTP must be marked used/invalid
+        otp1.refresh_from_db()
+        self.assertTrue(otp1.is_used)
+
+        # Fresh OTP is generated and valid
+        otp2 = OTPVerification.objects.filter(user=self.user, is_used=False).order_by('-created_at').first()
+        self.assertIsNotNone(otp2)
+        self.assertNotEqual(otp1.otp_code, otp2.otp_code)
+        self.assertTrue(otp2.is_valid())
+
+        # Submitting old OTP fails
+        res_fail = self.client.post(reverse('verify_otp'), {'otp_code': otp1.otp_code})
+        self.assertEqual(res_fail.status_code, 200)
+        self.assertIn("Invalid or expired verification code", res_fail.content.decode('utf-8'))
+
+        # Submitting new OTP succeeds
+        res_ok = self.client.post(reverse('verify_otp'), {'otp_code': otp2.otp_code})
+        self.assertEqual(res_ok.status_code, 302)
+        self.assertEqual(res_ok.url, reverse('home'))
+
+    def test_open_redirect_protection_on_login_and_otp(self):
+        """Verify open redirects to external hosts are sanitized to internal root path."""
+        # Demo user login with external next URL
+        admin = User.objects.create_superuser(username="admin_openred", password="pass", email="a@p.com")
+        res = self.client.post(reverse('login'), {
+            'username': 'admin_openred',
+            'password': 'pass',
+            'next': 'https://malicious-phishing-site.com/steal'
+        })
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.url, '/')
+
+    def test_login_grants_non_pro_free_tier(self):
+        """Verify that when a user logs in, they are on the non-pro Free Tier by default."""
+        new_trader = User.objects.create_user(
+            username='standard_trader',
+            email='standard@pesamarkets.org',
+            password='testpassword123'
+        )
+        # Verify initial tier is Free Tier and not Pro
+        self.assertEqual(new_trader.profile.tier, 'Free Tier')
+        self.assertFalse(new_trader.profile.is_pro)
+        self.assertFalse(new_trader.profile.is_paid)
+
+        # Log in through the authentication flow
+        self.client.post(reverse('login'), {
+            'username': 'standard_trader',
+            'password': 'testpassword123'
+        })
+        otp = OTPVerification.objects.filter(user=new_trader, is_used=False).latest('created_at')
+        res_verify = self.client.post(reverse('verify_otp'), {'otp_code': otp.otp_code})
+        self.assertEqual(res_verify.status_code, 302)
+
+        # Check authenticated user's profile remains on Free Tier
+        new_trader.profile.refresh_from_db()
+        self.assertEqual(new_trader.profile.tier, 'Free Tier')
+        self.assertFalse(new_trader.profile.is_pro)
+
+        # Check settings page displays Standard Free Plan and subscription options
+        res_settings = self.client.get(reverse('settings'))
+        self.assertEqual(res_settings.status_code, 200)
+        settings_html = res_settings.content.decode('utf-8')
+        self.assertIn("FREE TIER", settings_html)
+        self.assertIn("Standard Free Plan", settings_html)
+        self.assertIn("$30/mo &bull; $300/yr", settings_html)
+        self.assertIn("$30/month or $300/year", settings_html)
+
+    def test_pro_tier_requires_subscription_pricing(self):
+        """Verify terminal gates pro features and offers $30/month or $300/year subscription."""
+        trader = User.objects.create_user(
+            username='subscriber_flow_user',
+            email='subflow@pesamarkets.org',
+            password='testpassword123'
+        )
+        self.client.force_login(trader)
+
+        # Visiting terminal shows gated preview and subscription options
+        res_terminal = self.client.get(reverse('terminal'))
+        self.assertEqual(res_terminal.status_code, 200)
+        terminal_html = res_terminal.content.decode('utf-8')
+        self.assertIn("TERMINAL PRO REQUIRED", terminal_html)
+        self.assertIn("UPGRADE TO TERMINAL PRO ($30/MO &bull; $300/YR)", terminal_html)
+        self.assertIn("$30/mo or $300/yr", terminal_html)
+
+        # Upgrading unlocks Pro
+        res_upgrade = self.client.post(reverse('api_upgrade_subscription'), {'action': 'upgrade'})
+        self.assertEqual(res_upgrade.status_code, 302)
+        trader.profile.refresh_from_db()
+        self.assertTrue(trader.profile.is_pro)
+        self.assertEqual(trader.profile.tier, 'Terminal Pro Tier')
+
 
 
 
